@@ -13,8 +13,6 @@ from tkinter import messagebox
 import dimension_gui as dimgui
 import boundary_gui as bdygui
 import drawing as draw 
-import triangularity as trng
-
 def run():
 	"""Runs the GPLAN program
 
@@ -79,10 +77,7 @@ def run():
 				else:
 					try: 
 						if(G.dimensioned == 0):
-							if not Check_Chordality(G.graph) and gclass.triangulation_type == "wall":
-								G.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
-							else:
-								G.create_single_dual(1,gclass.pen,gclass.textbox)
+							G.create_single_dual(1,gclass.pen,gclass.textbox)
 							draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
 						else:
 							if(not checker.rfp_checker(G.matrix)):
