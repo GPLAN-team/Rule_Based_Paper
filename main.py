@@ -19,20 +19,20 @@ def run():
 	Args:
 		None
 
-    Returns:
-        void
+	Returns:
+		void
 
-    """
+	"""
 	def printe(string):
 		"""Prints string on the console
 
 		Args:
 			string
 			
-	    Returns:
-	        void
+		Returns:
+			void
 
-	    """
+		"""
 		gclass.textbox.insert('end',string)
 		gclass.textbox.insert('end',"\n")
 
@@ -40,31 +40,17 @@ def run():
 	gclass = gui.gui_class() 
 
 	while (gclass.command!="end"):
-		G = ptpg.PTPG(gclass.value)
+		if(gclass.command=="dissection"):
+			make_dissection_corridor(gclass)
+
 		if ( gclass.command =="checker"):
-			check.checker(G,gclass.textbox)
+			check.checker(gclass.value,gclass.textbox)
 		else:
-			# printe("\nEdge Set")
-			# printe(G.graph.edges())
-			frame = tk.Frame(gclass.root)
-			frame.grid(row=2,column=1)
+			G = ptpg.PTPG(gclass.value)
+			printe("\nEdge Set")
+			printe(G.graph.edges())
 			if (gclass.command == "circulation"):
-				m =len(G.graph)
-				spanned = circulation.BFS(G.graph)
-				# plotter.plot(spanned,m)
-				colors= gclass.value[6].copy()
-				for i in range(0,100):
-					colors.append('#FF4C4C')
-				# print(colors)
-				rnames = G.room_names
-				rnames.append("Corridor")
-				for i in range(0,100):
-					rnames.append("")
-				# print(rnames)
-				
-				parameters= [len(spanned), spanned.size() , spanned.edges() , 0,0 ,rnames,colors]
-				C = ptpg.PTPG(parameters)
-				C.create_single_dual(1,gclass.pen,gclass.textbox)
+				make_graph_circulation(G, gclass)
 
 			elif(gclass.command == "single"):
 				test_result = checker.gui_checker(G)
@@ -118,6 +104,49 @@ def run():
 		# gclass.ocan.tscreen.resetscreen()
 		gclass.pen = gclass.ocan.getpen()
 		gclass.pen.speed(100000)
+
+
+
+
+def make_dissection_corridor(gclass):
+	dis =nx.Graph()
+	dis = nx.from_numpy_matrix(gclass.dclass.mat)
+	m = len(dis)
+	spanned = circulation.BFS(dis,gclass.e1.get(),gclass.e2.get())
+	gclass.cir_dim_mat = nx.to_numpy_matrix(spanned)
+	colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
+	rnames = []
+	for i in range(1,m+1):
+		rnames.append('Room' + str(i))
+	rnames.append("Corridor")
+	for i in range(1,10):
+		colors[m+i-1] = '#FF4C4C'
+		rnames.append("")
+	parameters= [len(spanned), spanned.size() , spanned.edges() , 0,0 ,rnames,colors]
+	C = ptpg.PTPG(parameters)
+	C.create_single_dual(1,gclass.pen,gclass.textbox)
+	gclass.ocan.add_cir_tab()
+	gclass.dclass.add_cir()
+
+def make_graph_circulation(G,gclass,):
+	m =len(G.graph)
+	spanned = circulation.BFS(G.graph,1,2)
+	# plotter.plot(spanned,m)
+	colors= gclass.value[6].copy()
+	for i in range(0,100):
+		colors.append('#FF4C4C')
+	# print(colors)
+	rnames = G.room_names
+	rnames.append("Corridor")
+	for i in range(0,100):
+		rnames.append("")
+	# print(rnames)
+	
+	parameters= [len(spanned), spanned.size() , spanned.edges() , 0,0 ,rnames,colors]
+	C = ptpg.PTPG(parameters)
+	# C.create_single_dual(1,gclass.pen,gclass.textbox)
+	G.create_single_dual(1,gclass.pen,gclass.textbox)
+	G.circulation(gclass.pen,gclass.ocan.canvas, C, 1, 2)
 
 if __name__ == "__main__":
 	run()
