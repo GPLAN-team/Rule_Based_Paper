@@ -36,6 +36,7 @@ class PTPG:
 		self.node_count=value[0] #Number of nodes in the graph
 		self.edge_count=value[1] #Number of edges in the graph
 		self.dimensioned = value[4] # True if dimensioned checkbox is active
+		self.triangulation_type = "wall" 	# Make option for "wall" or "space" and accordingly triangulate non-triangulated
 		self.matrix = np.zeros((self.node_count, self.node_count), int) #Adjacency matrix for the graph
 		for i in (value[2]): #Populates the adjacency matrix on basis of edge input
 			self.matrix[i[0]][i[1]] = 1
@@ -139,7 +140,7 @@ class PTPG:
 		self.original_edge_count = self.edge_count
 		self.original_node_count = self.node_count
 	
-	def create_single_dual(self,mode,pen,textbox):
+	def create_single_dual(self,mode,pen,textbox, triangulate_type="space"):
 		
 		start =time.time()
 		if (not bcn.isBiconnected(self)):
@@ -150,19 +151,27 @@ class PTPG:
 		additional_edges_for_triangulation = trng.Triangulate(self.graph)[2]
 		for edges in additional_edges_for_triangulation:
 			print(edges[0],edges[1])
-			trng.addEdges(self,edges)
+			if triangulate_type == "wall":
+				trng.addEdges(self,edges, 2)
+			else:
+				trng.addEdges(self,edges)
 		K4.find_K4(self)
 		if(len(self.k4)!=0):
 			for i in self.k4:
 				print(i.edge_to_be_removed)
 				K4.resolve_K4(self,i,i.edge_to_be_removed,self.rdg_vertices,self.rdg_vertices2,self.to_be_merged_vertices)
 		# print("Edges: ",self.edge_count)
-		for edges in additional_edges_for_triangulation:
-			self.extra_vertices.append(self.node_count)
-			transformation.transformEdges(self,edges)
-		for edges in self.final_added_edges:
-			self.extra_vertices.append(self.node_count)
-			transformation.transformEdges(self,edges)
+		if triangulate_type == "space":
+			# Triangulate with empty spaces
+			for edges in additional_edges_for_triangulation:
+				self.extra_vertices.append(self.node_count)
+				transformation.transformEdges(self,edges)
+			for edges in self.final_added_edges:
+				self.extra_vertices.append(self.node_count)
+				transformation.transformEdges(self,edges)
+		else if triangulate_type == "wall":
+			# Triangulate with walls or doors, done through drawing.py
+
 		self.graph = nx.from_numpy_matrix(self.matrix)
 		self.triangles = opr.get_all_triangles(self)
 		print("Faces: ",len(self.triangles))
