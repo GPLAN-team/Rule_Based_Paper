@@ -11,25 +11,25 @@ class plan:
     loader.state('zoomed')
     h= loader.winfo_screenheight()
     w = loader.winfo_screenwidth()
-    imname = "./wp.jpg"
+    imname = "./assets/wp.jpg"
     im1 = Image.open(imname).convert("1")
     size = (w,h )
     im2 = ImageTk.PhotoImage(Image.open(imname).resize(size))
 
-    buta="./but.png"
+    buta="./assets/but.png"
     im1 = Image.open(imname).convert("1")
     size=(im1.width//8,im1.height//12)
     size1=( int(im1.width/2.5),im1.height //10)
     but=ImageTk.PhotoImage(Image.open(buta).resize(size))
-    but1=ImageTk.PhotoImage(Image.open("./title.png").resize(size1))
+    but1=ImageTk.PhotoImage(Image.open("./assets/title.png").resize(size1))
     def __init__(self):
         self.canvas= tk.Canvas(self.loader,width=self.w,height=self.h)
-        # self.canvas.create_image(self.w/2,self.h/2,image=self.im2,anchor='center')
+        self.canvas.create_image(self.w/2,self.h/2,image=self.im2,anchor='center')
         self.canvas.pack()
-        self.canvas.create_rectangle(50,50,self.w-50,self.h-50,width=5)
+        self.canvas.create_rectangle(50,50,self.w-50,self.h-50,width=5, outline = "#FFFAFA")
         # a= self.canvas.create_image((self.w)*0.5,(self.h)*0.2,anchor='center',image=self.but1)
-        b= self.canvas.create_text((self.w)*0.5,(self.h)*0.2,anchor='center',font=("Helvetica",40,"bold"),justify='center',text="GPLAN: Computer-Generated Dimensioned \nFloorplans for given Adjacencies")
-        self.button(0.5,0.5,"Instructions",self.instructoins)
+        b= self.canvas.create_text((self.w)*0.5,(self.h)*0.2,anchor='center',font=("Helvetica",40,"bold"),fill= '#FFFAFA',justify='center',text="GPLAN: Computer-Generated Dimensioned \nFloorplans for given Adjacencies")
+        self.button(0.5,0.5,"Instructions",self.instructions)
         self.button(0.3,0.7,"Draw an Adjacency Graph",self.run_GPLAN)
         self.button(0.7,0.7,"Draw a Layout",self.run_iFP)
         self.loader.mainloop()
@@ -48,8 +48,8 @@ class plan:
         final.run()
 
 
-    def instructoins(self,event):
+    def instructions(self,event):
         tk.messagebox.showinfo("Instructions",
-            "--------User Instructrions--------\n 1. Draw the input graph. \n 2. Use right mouse click to create a new room. \n 3. left click on one node then left click on another to create an edge between them. \n 4. You can give your own room names by clicking on the room name in the graph or the table on the right. \n 5. After creating a graph you can choose one of the option to create it's corresponding RFP or multiple RFPs with or without dimension. You can also get the corridor connecting all the rooms by selecting 'circultion' or click on 'RFPchecker' to check if RFP exists for the given graph. \n 6. You can also select multiple options .You can also add rooms after creating RFP and click on RFP to re-create a new RFP. \n 7.Reset button is used to clear the input graph. \n 8. Press 'Exit' if you want to close the application or Press 'Restart' if you want to restart the application")
+            "--------User Instructions--------\n 1. Draw the input graph. \n 2. Use right mouse click to create a new room. \n 3. left click on one node then left click on another to create an edge between them. \n 4. You can give your own room names by clicking on the room name in the graph or the table on the right. \n 5. After creating a graph you can choose one of the option to create it's corresponding RFP or multiple RFPs with or without dimension. You can also get the corridor connecting all the rooms by selecting 'circultion' or click on 'RFPchecker' to check if RFP exists for the given graph. \n 6. You can also select multiple options .You can also add rooms after creating RFP and click on RFP to re-create a new RFP. \n 7.Reset button is used to clear the input graph. \n 8. Press 'Exit' if you want to close the application or Press 'Restart' if you want to restart the application")
 
 p = plan()

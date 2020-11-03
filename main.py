@@ -6,13 +6,14 @@ import warnings
 import ptpg
 import tkinter as tk
 import gui
-import check
 import circulation
 import checker
 from tkinter import messagebox
 import dimension_gui as dimgui
 import boundary_gui as bdygui
 import drawing as draw 
+import tests
+import triangularity as trng
 def run():
 	"""Runs the GPLAN program
 
@@ -44,7 +45,7 @@ def run():
 			make_dissection_corridor(gclass)
 
 		if ( gclass.command =="checker"):
-			check.checker(gclass.value,gclass.textbox)
+			tests.tester(gclass.value,gclass.textbox)
 		else:
 			G = ptpg.PTPG(gclass.value)
 			printe("\nEdge Set")
@@ -61,25 +62,44 @@ def run():
 				# elif(not test_result[2]):
 				# 	messagebox.showerror("Invalid Graph", "Graph is not biconnected")
 				else:
-					try: 
-						if(G.dimensioned == 0):
-							G.create_single_dual(1,gclass.pen,gclass.textbox)
-							draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
+					# try: 
+					if(G.dimensioned == 0):
+						G.create_single_dual(1,gclass.pen,gclass.textbox)
+						draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
+
+
+						W = ptpg.PTPG(gclass.value)
+						if not trng.Check_Chordality(W.graph, 0) and W.triangulation_type == "wall":
+							# print("wall")
+							gclass.graph_ret()
+							gclass.ocan.add_tab()
+
+							# gclass.ocan.tscreen.resetscreen()
+							gclass.pen = gclass.ocan.getpen()
+							gclass.pen.speed(100000)
+
+							W.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
+							# G.create_wall_dual()
+							draw.draw_rdg(W,1,gclass.pen,W.to_be_merged_vertices,W.rdg_vertices,1,gclass.value[6],[])
+							
+
+						# else:
+							# G.create_single_dual(1,gclass.pen,gclass.textbox)
+					else:
+						if(not checker.rfp_checker(G.matrix)):
+							G.create_single_dual(2,gclass.pen,gclass.textbox)
+							draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,2,gclass.value[6],gclass.value[5])
+							messagebox.showinfo("Orthogonal Floor Plan","The input graph has an orthogonal floorplan.Rooms with red boundary are the additional rooms which will be added but later merged.Please provide dimensions for the extra rooms as well.")
+							G.width_min,G.width_max,G.height_min,G.height_max= dimgui.gui_fnc(G.original_node_count+len(G.to_be_merged_vertices))
+							gclass.pen.clear()
+							G.create_single_floorplan(gclass.pen,gclass.textbox,1)
+							draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
 						else:
-							if(not checker.rfp_checker(G.matrix)):
-								G.create_single_dual(2,gclass.pen,gclass.textbox)
-								draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,2,gclass.value[6],gclass.value[5])
-								messagebox.showinfo("Orthogonal Floor Plan","The input graph has an orthogonal floorplan.Rooms with red boundary are the additional rooms which will be added but later merged.Please provide dimensions for the extra rooms as well.")
-								G.width_min,G.width_max,G.height_min,G.height_max= dimgui.gui_fnc(G.original_node_count+len(G.to_be_merged_vertices))
-								gclass.pen.clear()
-								G.create_single_floorplan(gclass.pen,gclass.textbox,1)
-								draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
-							else:
-								G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
-								G.create_single_floorplan(gclass.pen,gclass.textbox,0)
-								draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
-					except:
-						printe("Biconnectivity and Triangularity led to non-K4 separating triangle")
+							G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
+							G.create_single_floorplan(gclass.pen,gclass.textbox,0)
+							draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
+					# except:
+						# printe("Biconnectivity and Triangularity led to non-K4 separating triangle")
 			elif(gclass.command == "multiple"):
 				test_result = checker.gui_checker(G)
 				if(not test_result[0]):

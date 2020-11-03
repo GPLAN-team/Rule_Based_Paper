@@ -2,9 +2,9 @@ import numpy as np
 def Convert_adj_equ(DGPH,symm_rooms):
 	N=len(DGPH)
 	lineq_temp=np.zeros([N,N**2])
-	# '''sys rrooms
-	# code here
-	# symm rooms'''
+	'''sys rrooms
+	code here
+	symm rooms'''
 
 	#starting Liner equalities as a matrix
 	for i in range(0,N):
