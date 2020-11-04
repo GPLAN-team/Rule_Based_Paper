@@ -80,7 +80,7 @@ def run():
 
 							W.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
 							draw.draw_rdg(W,1,gclass.pen,W.to_be_merged_vertices,W.rdg_vertices,1,gclass.value[6],[])
-							
+							W.make_walls(gclass.ocan.canvas)
 
 						# else:
 							# G.create_single_dual(1,gclass.pen,gclass.textbox)

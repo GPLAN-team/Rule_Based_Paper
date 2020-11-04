@@ -156,16 +156,16 @@ class PTPG:
 
 	
 	def make_corridor(self,e1, e2,canvas,num):
-			self.leaves = self.nodes
-			leaves = self.leaves
-			room1 = leaves[e1]
-			room2 = leaves[e2]
-			pts = self.common_points(room1, room2,num)
-			if len(pts) != 4:
-				pts = self.common_points(room2,room1,num)
-			print(pts)
-			if len(pts) == 4:
-				canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill="white", outline = "white")
+		self.leaves = self.nodes
+		leaves = self.leaves
+		room1 = leaves[e1]
+		room2 = leaves[e2]
+		pts = self.common_points(room1, room2,num)
+		if len(pts) != 4:
+			pts = self.common_points(room2,room1,num)
+		print(pts)
+		if len(pts) == 4:
+			canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill="white", outline = "white")
 
 	def intersect(self,row1, row2, n):
 		pt = []
@@ -175,9 +175,11 @@ class PTPG:
 
 		return pt
 
+	# d1 = topx; d2 = topleft y;d3 = botrig x; d4 = botrig y
 	def common_points(self,leaf1, leaf2,num):
 		pt = []
 		if (leaf1.d1 == leaf2.d1 and leaf1.d4 == leaf2.d2):
+			print("commonpt1")
 			if num == 0:
 				pt.append(leaf2.d1)
 				pt.append(leaf2.d2-5)
@@ -192,6 +194,7 @@ class PTPG:
 				pt.append(leaf2.d2+5)
 			
 		elif (leaf1.d3 == leaf2.d1 and leaf1.d4 == leaf2.d4):
+			print("commonpt2")
 			if num == 0:
 				pt.append(leaf1.d3-5)
 				pt.append(leaf1.d4)
@@ -206,6 +209,7 @@ class PTPG:
 				pt.append(leaf2.d2-5)
 
 		elif (leaf1.d3 == leaf2.d1 and leaf1.d2 == leaf2.d2):
+			print("commonpt3")
 			if num == 0:
 				pt.append(leaf2.d1-5)
 				pt.append(leaf2.d2)
@@ -220,6 +224,7 @@ class PTPG:
 				pt.append(leaf2.d4-5)
 
 		elif (leaf1.d3 == leaf2.d3 and leaf1.d4 == leaf2.d2):
+			print("commonpt4")
 			if num ==0:
 				pt.append(leaf1.d3)
 				pt.append(leaf1.d4-5)
@@ -234,31 +239,37 @@ class PTPG:
 				pt.append(leaf2.d2+5)
 
 		elif ((leaf1.d1 < leaf2.d1 and leaf1.d3 > leaf2.d1 and leaf1.d3 < leaf2.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt5")
 			pt.append(leaf2.d1-5)
 			pt.append(leaf1.d4-5)
 			pt.append(leaf1.d3)
 			pt.append(leaf1.d4+5)
 		elif ((leaf2.d1 < leaf1.d1 and leaf2.d3 > leaf1.d1 and leaf2.d3 < leaf1.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt6")
 			pt.append(leaf1.d1-5)
 			pt.append(leaf1.d4-5)
 			pt.append(leaf2.d3)
 			pt.append(leaf1.d4+5)
 		elif ((leaf1.d2 < leaf2.d2 and leaf1.d4 < leaf2.d4 and leaf2.d2 < leaf1.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt7")
 			pt.append(leaf2.d1-5)
 			pt.append(leaf2.d2-5)
 			pt.append(leaf2.d1+5)
 			pt.append(leaf1.d4)
 		elif ((leaf2.d2 < leaf1.d2 and leaf2.d4 < leaf1.d4 and leaf1.d2 < leaf2.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt8")
 			pt.append(leaf2.d1-5)
 			pt.append(leaf1.d2-5)
 			pt.append(leaf2.d1+5)
 			pt.append(leaf2.d4)
 		elif ((leaf1.d2 < leaf2.d2 and leaf1.d4 > leaf2.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt9")
 			pt.append(leaf2.d1-5)
 			pt.append(leaf2.d2-5)
 			pt.append(leaf2.d1+5)
 			pt.append(leaf2.d4)
 		elif ((leaf1.d1 > leaf2.d1 and leaf2.d3 > leaf1.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt10")
 			pt.append(leaf1.d1-5)
 			pt.append(leaf1.d4-5)
 			pt.append(leaf1.d3)
@@ -277,7 +288,7 @@ class PTPG:
 		for room in leaves: # drawing all 
 			i+=1
 			canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i])
-			canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text=i)
+			canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text=i - 1)
 
 		num_corridors = len(mat) - len(leaves)
 		print("No of corridors are ",num_corridors)
@@ -299,6 +310,11 @@ class PTPG:
 		print("Make corrdor start")
 		num_cor = cir_class.node_count - self.node_count
 		print(num_cor)
+		self.create_treenodes(self,pen,canvas, cir_class, door1, door2)
+		
+		self.add_cir(cir_class,canvas)
+
+	def create_treenodes(self):
 		width= np.amax(self.room_width)
 		height = np.amax(self.room_height)
 		self.nodes = []
@@ -308,8 +324,26 @@ class PTPG:
 			node = gui.treenode(None, None, None, self.room_height[i], self.room_width[i], None, (self.room_x[i]) * scale + origin['x'], (self.room_y[i]+ self.room_height[i]) * scale + origin['y'], (self.room_x[i] + self.room_width[i]) * scale + origin['x'], (self.room_y[i]) * scale + origin['y'] )
 			print(node.d1, node.d2, node.d3, node.d4)
 			self.nodes.append(node)
-		
-		self.add_cir(cir_class,canvas)
+
+
+	def make_walls(self, canvas):  # additional edges , create tree nodes , pen, canvas, part of make corridor in a for loop with additional edges
+		self.create_treenodes()
+		self.leaves = self.nodes
+		leaves = self.leaves
+		i = 0
+		for room in leaves: # drawing all 
+			canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i])
+			canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text= i)
+			i+=1
+
+		for edge in self.additional_adjacencies:
+			print("make_walls")
+			print(edge)
+			
+			self.make_corridor(edge[0], edge[1], canvas, 1)
+
+
+
 
 	def create_single_dual(self,mode,pen,textbox, triangulate_type="space"):
 		
