@@ -1,3 +1,6 @@
+G.create_single_dual(1,gclass.pen,gclass.textbox)
+						draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
+
 
 						W = ptpg.PTPG(gclass.value)
 						if not trng.Check_Chordality(W.graph, 0) and W.triangulation_type == "wall":

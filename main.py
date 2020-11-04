@@ -5,6 +5,7 @@
 import warnings
 import ptpg
 import tkinter as tk
+import networkx as nx
 import gui
 import circulation
 import checker

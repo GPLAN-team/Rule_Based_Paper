@@ -19,8 +19,11 @@ import networkx as nx
 from PIL import Image, ImageTk
 import tablenoscroll
 import final
+import numpy as np
 done = True
 col = ["white","#9A8C98","light grey","white"]
+colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
+
 font={'font' : ("lato bold",10,"")}
 # reloader = Reloader()
 warnings.filterwarnings("ignore") 
@@ -40,13 +43,16 @@ class treenode:
         self.d4 = d4
 
 class gui_class:
+    
     def __init__(self):
-        border_details = {'bg': col[2], 'highlightbackground': 'black', 'highlightcolor': 'black', 'highlightthickness': 1}        
-        
         self.open = False
         self.command = "Null"
         self.value = []
         self.root =tk.Tk()
+        
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        self.root.maxsize(screen_width,screen_height)
         self.open_ret = []
         # self.root.filename = 
         self.root.config(bg=col[2])
@@ -63,9 +69,10 @@ class gui_class:
         self.tablehead.pack()
 
         self.app = self.PlotApp(self.frame2,self)
-        self.root.state('normal')
         self.root.title('Input Graph')
         self.checkvar1 = tk.IntVar()
+        self.e1 = tk.IntVar()
+        self.e2 = tk.IntVar()
 
         self.tabledata = []
         self.frame1 = tk.Frame(self.root,bg=col[2])
@@ -76,20 +83,27 @@ class gui_class:
         self.frame3.grid(row=1,column=0)
         self.Buttons(self.frame1,self)
         self.menu(self)
+        print(self.app.rnames)
         self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.tbox = self.output_text(self.frame3)
         self.ocan = self.output_canvas(self.frame2)
         self.pen = self.ocan.getpen()
+        self.dclass = None
+        self.dissecting = 1
         self.root_window = self.ocan.getroot()   
         self.root.wait_variable(self.end)
         self.graph_ret()
+
+        self.cir_graph = nx.Graph()
+        self.cir_dim_mat = []
+
         while((self.value[0] == 0) and done):
             # print(done)
             self.root.wait_variable(self.end)
             self.value=self.app.return_everything()
             tk.messagebox.showinfo("error","The graph is empty , please draw a graph")
 
-    class Nodes():
+    class Nodes:
         def __init__(self,id,x,y):
             self.circle_id=id
             self.pos_x=x
@@ -104,9 +118,12 @@ class gui_class:
             self.radius=0
             self.adj_list=[]
     
-    class PlotApp(object):
+    class PlotApp:
 
-        def __init__(self, root,master):
+        def __init__(self, toframe,master):
+            root = tk.Frame(toframe)
+            root.grid(row=0,column=0)
+            self.root = root
             self.l1 = tk.Label(root,text='Draw a test graph here',bg=col[2])
             self.l1.grid(row=0,column=0)
             self._root = root
@@ -119,8 +136,9 @@ class gui_class:
             self.table.config(bg="#F4A5AE")
             self.createCanvas()
 
-            
-        colors = ['#edf1fe','#c6e3f7','#e1eaec','#e5e8f2','#def7fe','#f1ebda','#f3e2c6','#fff2de','#ecdfd6','#f5e6d3','#e3e7c4','#efdbcd','#ebf5f0','#cae1d9','#c3ddd6','#cef0cc','#9ab8c2','#ddffdd','#fdfff5','#eae9e0','#e0dddd','#f5ece7','#f6e6c5','#f4dbdc','#f4daf1','#f7cee0','#f8d0e7','#efa6aa','#fad6e5','#f9e8e2','#c4adc9','#f6e5f6','#feedca','#f2efe1','#fff5be','#ffffdd']
+        colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']
+
+        # colors = ['#edf1fe','#c6e3f7','#e1eaec','#e5e8f2','#def7fe','#f1ebda','#f3e2c6','#fff2de','#ecdfd6','#f5e6d3','#e3e7c4','#efdbcd','#ebf5f0','#cae1d9','#c3ddd6','#cef0cc','#9ab8c2','#ddffdd','#fdfff5','#eae9e0','#e0dddd','#f5ece7','#f6e6c5','#f4dbdc','#f4daf1','#f7cee0','#f8d0e7','#efa6aa','#fad6e5','#f9e8e2','#c4adc9','#f6e5f6','#feedca','#f2efe1','#fff5be','#ffffdd']
         nodes_data=[]
         id_circle=[]
         name_circle= []
@@ -162,7 +180,7 @@ class gui_class:
             self.canvas.grid(column=0,row =1, sticky='nwes')
             self.canvas.bind("<Button-3>",self.addH)
             self.connection=[]
-            self.canvas.bind("<Button-1>",self.button_1_clicked) 
+            self.canvas.bind("<Button-1>",self.button_1_clicked)    
             self.canvas.bind("<Button-2>",self.remove_node)
             self.ButtonReset = tk.Button(self._root, text="Reset",fg='white',width=10,height=2 ,**font,relief = 'flat',bg=col[1] ,command=self.reset)
             self.ButtonReset.grid(column=0 ,row=1,sticky='n',pady=20,padx=40)
@@ -174,7 +192,7 @@ class gui_class:
             self.lay.grid(column=0 ,row=1,sticky='ne',pady=20,padx=40)
 
         def switch(self):
-            self.master.root.destroy()
+            self.master.root.quit()
             final.run()
         def instructions(self):
             tk.messagebox.showinfo("Instructions",
@@ -202,7 +220,7 @@ class gui_class:
             self.rname.set(self.name_circle[0])
             self.table.insert_row(list((id_node,self.rname.get())),self.table._number_of_rows)
             self.name_circle.pop(0)
-            # self.rframe.grid(row=0,column=1)
+            self.rframe.grid(row=0,column=1)
             self.oval.append(self.canvas.create_oval(x-self.radius_circle,y-self.radius_circle,x+self.radius_circle,y+self.radius_circle,width=3, fill=hex_number,tag=str(id_node)))
             # self.canvas.create_text(x,y-self.radius_circle-9,text=str(id_node),font=("Purisa",14))
             # self.buttonBG = self.canvas.create_rectangle(x-15,y-self.radius_circle-20, x+15,y-self.radius_circle, fill="light grey")
@@ -211,9 +229,9 @@ class gui_class:
             # self.canvas.tag_bind(self.buttonBG, "<Button-1>", self.room_name) ## when the square is clicked runs function "clicked".
             # self.canvas.tag_bind(self.buttonTXT, "<Button-1>", self.room_name) ## same, but for the text.
             # def _on_configure(self, event):
-            #     self.entry.configure(width=event.width)
+                # self.entry.configure(width=event.width)
             self.entry = tk.Entry(self.rframe,textvariable=self.table._data_vars[self.id_circle[0]-1][1],relief='flat',justify='c',width=15,bg=col[2])
-            # self.entry.bind("<Configure>", _on_configure)
+            # self.rframe.bind("<Configure>", _on_configure)
             
             # but =tk.Button(self.rframe)
             # but.grid()
@@ -410,6 +428,7 @@ class gui_class:
         def forceExit(self):
             self.root.destroy()
             self.master.root.destroy()
+            # self.master.root.quit()
             
         def changeentry(self):
             top = tk.Toplevel()
@@ -1346,8 +1365,10 @@ class gui_class:
         self.command = "end"
         self.end.set(self.end.get()+10)
         done = False
-        
-        # self.dclass.root.destory()
+        try:
+            self.dclass.root.destory()
+        except:
+            pass
         print("ending")
         # self.saver = tk.Toplevel()
         # saverlabel = tk.Label(self.saver,text="hwakeoa")
