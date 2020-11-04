@@ -1297,7 +1297,7 @@ class gui_class:
         self.app.command="single"
         self.command = "single"
         self.end.set(self.end.get()+1)
-        self.root.state('zoomed')
+        # self.root.state('zoomed')
         # root.destroy()
 
     def multiple_floorplan(self):

@@ -70,8 +70,7 @@ def run():
 
 						W = ptpg.PTPG(gclass.value)
 						if not trng.Check_Chordality(W.graph, 0) and W.triangulation_type == "wall":
-							# print("wall")
-							gclass.graph_ret()
+							# gclass.graph_ret()
 							gclass.ocan.add_tab()
 
 							# gclass.ocan.tscreen.resetscreen()
@@ -79,7 +78,6 @@ def run():
 							gclass.pen.speed(100000)
 
 							W.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
-							# G.create_wall_dual()
 							draw.draw_rdg(W,1,gclass.pen,W.to_be_merged_vertices,W.rdg_vertices,1,gclass.value[6],[])
 							
 
@@ -148,7 +146,7 @@ def make_dissection_corridor(gclass):
 	gclass.ocan.add_cir_tab()
 	gclass.dclass.add_cir()
 
-def make_graph_circulation(G,gclass,):
+def make_graph_circulation(G,gclass):
 	m =len(G.graph)
 	spanned = circulation.BFS(G.graph,1,2)
 	# plotter.plot(spanned,m)
@@ -165,7 +163,9 @@ def make_graph_circulation(G,gclass,):
 	parameters= [len(spanned), spanned.size() , spanned.edges() , 0,0 ,rnames,colors]
 	C = ptpg.PTPG(parameters)
 	# C.create_single_dual(1,gclass.pen,gclass.textbox)
-	G.create_single_dual(1,gclass.pen,gclass.textbox)
+	print(G.graph.edges())
+	G.create_circulation_dual(1,gclass.pen,gclass.textbox)
+	draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
 	G.circulation(gclass.pen,gclass.ocan.canvas, C, 1, 2)
 
 if __name__ == "__main__":
