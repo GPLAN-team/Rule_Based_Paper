@@ -310,7 +310,7 @@ class PTPG:
 		print("Make corrdor start")
 		num_cor = cir_class.node_count - self.node_count
 		print(num_cor)
-		self.create_treenodes(self,pen,canvas, cir_class, door1, door2)
+		self.create_treenodes()
 		
 		self.add_cir(cir_class,canvas)
 
