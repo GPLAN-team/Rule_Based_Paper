@@ -22,8 +22,8 @@ import final
 import numpy as np
 done = True
 col = ["white","#9A8C98","light grey","white"]
-colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
-
+# colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
+colors = ['#4BC0D9']*10
 font={'font' : ("lato bold",10,"")}
 # reloader = Reloader()
 warnings.filterwarnings("ignore") 
@@ -136,8 +136,8 @@ class gui_class:
             self.table.config(bg="#F4A5AE")
             self.createCanvas()
 
-        colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']
-
+        # colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']
+        colors = ['#4BC0D9']*1000
         # colors = ['#edf1fe','#c6e3f7','#e1eaec','#e5e8f2','#def7fe','#f1ebda','#f3e2c6','#fff2de','#ecdfd6','#f5e6d3','#e3e7c4','#efdbcd','#ebf5f0','#cae1d9','#c3ddd6','#cef0cc','#9ab8c2','#ddffdd','#fdfff5','#eae9e0','#e0dddd','#f5ece7','#f6e6c5','#f4dbdc','#f4daf1','#f7cee0','#f8d0e7','#efa6aa','#fad6e5','#f9e8e2','#c4adc9','#f6e5f6','#feedca','#f2efe1','#fff5be','#ffffdd']
         nodes_data=[]
         id_circle=[]
@@ -164,7 +164,7 @@ class gui_class:
             for i in range(0,100):
                 self.id_circle.append(i)
             for i in range(0,100):
-                self.name_circle.append("Room "+ str(i))
+                self.name_circle.append( str(i))
             self.nodes_data.clear()
             self.edges.clear()
             self.table._pop_all()
@@ -230,7 +230,7 @@ class gui_class:
             # self.canvas.tag_bind(self.buttonTXT, "<Button-1>", self.room_name) ## same, but for the text.
             # def _on_configure(self, event):
                 # self.entry.configure(width=event.width)
-            self.entry = tk.Entry(self.rframe,textvariable=self.table._data_vars[self.id_circle[0]-1][1],relief='flat',justify='c',width=15,bg=col[2])
+            self.entry = tk.Entry(self.rframe,textvariable=self.table._data_vars[self.id_circle[0]-1][1],relief='flat',justify='c',width=3,bg='white')
             # self.rframe.bind("<Configure>", _on_configure)
             
             # but =tk.Button(self.rframe)
@@ -331,7 +331,9 @@ class gui_class:
             # if self.table._on_change_data is not None: self.table._on_change_data()
         
         def hover_bright(self,event):
-            self.canvas.itemconfig(self.oval[self.xyz],outline='red')
+            # self.canvas.itemconfig(self.oval[self.xyz],outline='red')
+            self.canvas.itemconfig(self.oval[self.xyz],outline='black')
+
         
         def reset(self):
             self.canvas.destroy()
@@ -1232,20 +1234,20 @@ class gui_class:
             self.canvas.bind("<MouseWheel>",  self.do_zoom)
             self.canvas.bind('<Button-1>', lambda event: self.canvas.scan_mark(event.x, event.y))
             self.canvas.bind("<B1-Motion>", lambda event: self.canvas.scan_dragto(event.x, event.y, gain=1))
-            '''imname = "./close1.png"
+            imname = "./assets/close1.png"
             im1 = Image.open(imname).convert("1")
-            size = (im1.width // 4, im1.height // 4)
+            size = (im1.width // 24, im1.height // 24)
             # im1.resize(size)
             # # im1.show()
             # im1 = ImageTk.BitmapImage(im1.resize(size)) 
             im2 = ImageTk.PhotoImage(Image.open(imname).resize(size))
             
-            ImageTk.PhotoImage(file="./close1.png")
+            ImageTk.PhotoImage(file="./assets/close1.png")
             # flat, groove, raised, ridge, solid, or sunke
             # self.canvas.create_image(20,20,anchor='ne',image=butimg)
             self.closeb = tk.Button(self.tabs[self.tabno],relief='solid',bg=col[3],activebackground=col[2],image=im2,command=self.close)
             self.closeb.image=im2
-            self.closeb.grid(row=1,column=0,sticky='ne',pady=20,padx=70)'''
+            self.closeb.grid(row=1,column=0,sticky='ne',pady=20,padx=70)
 
         def add_cir_tab(self):
             self.tabno+=1
