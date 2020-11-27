@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from plotter import plot
+import scipy as sp
+# from plotter import plot
 def span(graph):
     n=len(graph)
     m = n
@@ -9,10 +10,10 @@ def span(graph):
     # plt.show()
     print("choose a door")
     k ,j = map(int, input().split())
-    n=adder(k,j,graph,n,-1,m)
+    n=dfs(k,j,graph,n,-1,m)
     return graph
 
-def adder(i,j,graph,n,br,m):
+def dfs(i,j,graph,n,br,m):
     
     for ne in nx.common_neighbors(graph,i,j):
         if ne < m :
@@ -24,19 +25,19 @@ def adder(i,j,graph,n,br,m):
             # plot(graph,m)                  #can remove this line if not required to plot
             n+=1
             prev=n-1
-            n=adder( ne,i,graph,n,n-1,m)
-            n=adder( ne,j,graph,n,prev,m)
+            n=dfs( ne,i,graph,n,n-1,m)
+            n=dfs( ne,j,graph,n,prev,m)
 
     return n
             
 
-def BFS(graph):
+def BFS(graph,e1,e2):
     # nx.draw_spring(graph, labels=None, font_size=12, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1.0, bbox=None, ax=None)
     # plt.show()
-
+    print(nx.to_numpy_matrix(graph))
     n = len(graph)
     m = n
-    s = (0 ,1 , -1)
+    s = (e1-1 ,e2-1 , -1)
 
     # print("choose a door")
     # i ,j = map(int, input().split())
@@ -59,6 +60,9 @@ def BFS(graph):
                 n+=1
                 queue.append((ne,s[0],n-1))
                 queue.append((ne,s[1],n-1))
+
+    A = nx.adjacency_matrix(graph)
+    print(A.todense())
     return graph
     
 

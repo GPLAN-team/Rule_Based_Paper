@@ -4,6 +4,7 @@
 """
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 import itertools as itr
 import operations as opr
 import warnings
@@ -29,6 +30,13 @@ import cip
 import boundary_select as bdyslt
 import triangularity as trng
 import transformation
+import math
+colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
+
+
+def printe(string):
+	box.insert('end',string)
+
 class PTPG:
 	
 	# Attribute Initiallization
@@ -36,7 +44,13 @@ class PTPG:
 		self.node_count=value[0] #Number of nodes in the graph
 		self.edge_count=value[1] #Number of edges in the graph
 		self.dimensioned = value[4] # True if dimensioned checkbox is active
+		self.command = value[3]
+		self.room_names = value[5]
+		self.node_color = value[6]
+		
+		self.additional_adjacencies = None
 		self.matrix = np.zeros((self.node_count, self.node_count), int) #Adjacency matrix for the graph
+		self.triangulation_type = "wall" 	# Make option for "wall" or "space" and accordingly triangulate non-triangulated
 		for i in (value[2]): #Populates the adjacency matrix on basis of edge input
 			self.matrix[i[0]][i[1]] = 1
 			self.matrix[i[1]][i[0]] = 1
@@ -139,7 +153,199 @@ class PTPG:
 		self.original_edge_count = self.edge_count
 		self.original_node_count = self.node_count
 	
-	def create_single_dual(self,mode,pen,textbox):
+
+	
+	def make_corridor(self,e1, e2,canvas,num):
+		self.leaves = self.nodes
+		leaves = self.leaves
+		room1 = leaves[e1]
+		room2 = leaves[e2]
+		pts = self.common_points(room1, room2,num)
+		if len(pts) != 4:
+			pts = self.common_points(room2,room1,num)
+		print(pts)
+		if len(pts) == 4:
+			canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill="white", outline = "white")
+
+	def intersect(self,row1, row2, n):
+		pt = []
+		for i in range(0,n):
+			if(row1[i]==1 and row2[i]==1):
+				pt.append(i)
+
+		return pt
+
+	# d1 = topx; d2 = topleft y;d3 = botrig x; d4 = botrig y
+	def common_points(self,leaf1, leaf2,num):
+		pt = []
+		if (leaf1.d1 == leaf2.d1 and leaf1.d4 == leaf2.d2):
+			print("commonpt1")
+			if num == 0:
+				pt.append(leaf2.d1)
+				pt.append(leaf2.d2-5)
+			elif num == 1:
+				pt.append(leaf2.d1-5)
+				pt.append(leaf2.d2-5)
+			if leaf1.width <= leaf2.width:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf1.d4+5)
+			else:
+				pt.append(leaf2.d3+5)
+				pt.append(leaf2.d2+5)
+			
+		elif (leaf1.d3 == leaf2.d1 and leaf1.d4 == leaf2.d4):
+			print("commonpt2")
+			if num == 0:
+				pt.append(leaf1.d3-5)
+				pt.append(leaf1.d4)
+			elif num == 1:
+				pt.append(leaf1.d3-5)
+				pt.append(leaf1.d4+5)
+			if leaf1.height <= leaf2.height:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf1.d2-5)
+			else:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf2.d2-5)
+
+		elif (leaf1.d3 == leaf2.d1 and leaf1.d2 == leaf2.d2):
+			print("commonpt3")
+			if num == 0:
+				pt.append(leaf2.d1-5)
+				pt.append(leaf2.d2)
+			elif num == 1:
+				pt.append(leaf2.d1-5)
+				pt.append(leaf2.d2+5)
+			if leaf1.height <= leaf2.height:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf1.d4-5)
+			else:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf2.d4-5)
+
+		elif (leaf1.d3 == leaf2.d3 and leaf1.d4 == leaf2.d2):
+			print("commonpt4")
+			if num ==0:
+				pt.append(leaf1.d3)
+				pt.append(leaf1.d4-5)
+			elif num == 1:
+				pt.append(leaf1.d3+5)
+				pt.append(leaf1.d4-5)
+			if leaf1.width <= leaf2.width:
+				pt.append(leaf1.d1+5)
+				pt.append(leaf1.d4+5)
+			else:
+				pt.append(leaf2.d1+5)
+				pt.append(leaf2.d2+5)
+
+		elif ((leaf1.d1 < leaf2.d1 and leaf1.d3 > leaf2.d1 and leaf1.d3 < leaf2.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt5")
+			pt.append(leaf2.d1-5)
+			pt.append(leaf1.d4-5)
+			pt.append(leaf1.d3)
+			pt.append(leaf1.d4+5)
+		elif ((leaf2.d1 < leaf1.d1 and leaf2.d3 > leaf1.d1 and leaf2.d3 < leaf1.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt6")
+			pt.append(leaf1.d1-5)
+			pt.append(leaf1.d4-5)
+			pt.append(leaf2.d3)
+			pt.append(leaf1.d4+5)
+		elif ((leaf1.d2 < leaf2.d2 and leaf1.d4 < leaf2.d4 and leaf2.d2 < leaf1.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt7")
+			pt.append(leaf2.d1-5)
+			pt.append(leaf2.d2-5)
+			pt.append(leaf2.d1+5)
+			pt.append(leaf1.d4)
+		elif ((leaf2.d2 < leaf1.d2 and leaf2.d4 < leaf1.d4 and leaf1.d2 < leaf2.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt8")
+			pt.append(leaf2.d1-5)
+			pt.append(leaf1.d2-5)
+			pt.append(leaf2.d1+5)
+			pt.append(leaf2.d4)
+		elif ((leaf1.d2 < leaf2.d2 and leaf1.d4 > leaf2.d4) and leaf1.d3 == leaf2.d1):
+			print("commonpt9")
+			pt.append(leaf2.d1-5)
+			pt.append(leaf2.d2-5)
+			pt.append(leaf2.d1+5)
+			pt.append(leaf2.d4)
+		elif ((leaf1.d1 > leaf2.d1 and leaf2.d3 > leaf1.d3) and leaf1.d4 == leaf2.d2):
+			print("commonpt10")
+			pt.append(leaf1.d1-5)
+			pt.append(leaf1.d4-5)
+			pt.append(leaf1.d3)
+			pt.append(leaf1.d4+5)
+		return pt
+
+	def add_cir(self,cir_class,canvas):
+		mat = cir_class.matrix
+		e1 = 1
+		e2 = 2
+		print(e1,e2)
+		print("hi")
+		i = 0
+		self.leaves = self.nodes
+		leaves = self.leaves
+		for room in leaves: # drawing all 
+			i+=1
+			canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i])
+			canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text=i - 1)
+
+		num_corridors = len(mat) - len(leaves)
+		print("No of corridors are ",num_corridors)
+		n = len(leaves)
+		self.make_corridor(e1 - 1 ,e2 - 1,canvas,0)
+		mat = np.squeeze(np.asarray(mat))
+
+		for cor in range(n+1,len(mat)):
+			print(cor, "row", len(mat[cor]), "sz")
+			for itr in range(n,cor):
+				print(itr,"col")
+				if( mat[cor][itr] == 1):
+					rms = self.intersect(mat[cor], mat[itr], n)
+					print(rms , "rms")
+					self.make_corridor(rms[0] , rms[1], canvas,1)
+					break
+
+	def circulation(self,pen,canvas, cir_class, door1, door2):
+		print("Make corrdor start")
+		num_cor = cir_class.node_count - self.node_count
+		print(num_cor)
+		self.create_treenodes()
+		
+		self.add_cir(cir_class,canvas)
+
+	def create_treenodes(self):
+		width= np.amax(self.room_width)
+		height = np.amax(self.room_height)
+		self.nodes = []
+		origin = {'x': self.origin - 200, 'y': -50}
+		scale = 100*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
+		for i in range(self.room_x.shape[0]):
+			node = gui.treenode(None, None, None, self.room_height[i], self.room_width[i], None, (self.room_x[i]) * scale + origin['x'], (self.room_y[i]+ self.room_height[i]) * scale + origin['y'], (self.room_x[i] + self.room_width[i]) * scale + origin['x'], (self.room_y[i]) * scale + origin['y'] )
+			print(node.d1, node.d2, node.d3, node.d4)
+			self.nodes.append(node)
+
+
+	def make_walls(self, canvas):  # additional edges , create tree nodes , pen, canvas, part of make corridor in a for loop with additional edges
+		self.create_treenodes()
+		self.leaves = self.nodes
+		leaves = self.leaves
+		i = 0
+		for room in leaves: # drawing all 
+			canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i])
+			canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text= i)
+			i+=1
+
+		for edge in self.additional_adjacencies:
+			print("make_walls")
+			print(edge)
+			
+			self.make_corridor(edge[0], edge[1], canvas, 1)
+
+
+
+
+	def create_single_dual(self,mode,pen,textbox, triangulate_type="space"):
 		
 		start =time.time()
 		if (not bcn.isBiconnected(self)):
@@ -148,23 +354,38 @@ class PTPG:
 			bcn.make_biconnected(self)	
 		self.edge_count += len(self.final_added_edges)
 		additional_edges_for_triangulation = trng.Triangulate(self.graph)[2]
+		self.additional_adjacencies = additional_edges_for_triangulation
+		print(additional_edges_for_triangulation)
+		print(self.edge_count)
+
 		for edges in additional_edges_for_triangulation:
 			print(edges[0],edges[1])
-			trng.addEdges(self,edges)
+			if triangulate_type == "wall":
+				trng.addEdges(self,edges, 1)
+			else:
+				trng.addEdges(self,edges,1)
 		K4.find_K4(self)
 		if(len(self.k4)!=0):
 			for i in self.k4:
 				print(i.edge_to_be_removed)
 				K4.resolve_K4(self,i,i.edge_to_be_removed,self.rdg_vertices,self.rdg_vertices2,self.to_be_merged_vertices)
 		# print("Edges: ",self.edge_count)
-		for edges in additional_edges_for_triangulation:
-			self.extra_vertices.append(self.node_count)
-			transformation.transformEdges(self,edges)
-		for edges in self.final_added_edges:
-			self.extra_vertices.append(self.node_count)
-			transformation.transformEdges(self,edges)
+		if triangulate_type == "space":
+			# Triangulate with empty spaces
+			for edges in additional_edges_for_triangulation:
+				self.extra_vertices.append(self.node_count)
+				transformation.transformEdges(self,edges)
+			for edges in self.final_added_edges:
+				self.extra_vertices.append(self.node_count)
+				transformation.transformEdges(self,edges)
+		elif triangulate_type == "wall":
+			for edges in self.final_added_edges:
+				self.extra_vertices.append(self.node_count)
+				transformation.transformEdges(self,edges)
+			# Triangulate with walls or doors, done through drawing.py
 		self.graph = nx.from_numpy_matrix(self.matrix)
 		self.triangles = opr.get_all_triangles(self)
+		print(self.graph.edges())
 		print("Faces: ",len(self.triangles))
 		print("Edges: ",self.edge_count)
 		print("Vertices: ",self.node_count)
@@ -185,9 +406,9 @@ class PTPG:
 			else:
 				shortcut = sr.get_shortcut(self)
 				while(len(shortcut)>4):
-				    index = randint(0,len(shortcut)-1)
-				    sr.remove_shortcut(shortcut[index],self,self.rdg_vertices,self.rdg_vertices2,self.to_be_merged_vertices)
-				    shortcut.pop(index)
+					index = randint(0,len(shortcut)-1)
+					sr.remove_shortcut(shortcut[index],self,self.rdg_vertices,self.rdg_vertices2,self.to_be_merged_vertices)
+					shortcut.pop(index)
 				cips = cip.find_cip(self)
 				self.cip = news.boundary_path_single(news.find_boundary_single(cips),opr.ordered_outer_boundary(self))
 		news.add_news_vertices(self)
@@ -208,7 +429,6 @@ class PTPG:
 		end= time.time()
 		textbox.insert('end',f"Time taken: {round(end-start,5)} seconds")
 		textbox.insert('end',"\n")
-
 	
 	def create_single_floorplan(self,pen,textbox,mode):
 		if(mode == 0):
@@ -560,7 +780,47 @@ class PTPG:
 					draw.draw_rdg(self,origin_count,pen,self.to_be_merged_vertices,self.rdg_vertices,mode,self.colors,self.names)
 					origin_count +=1
 
-
+	def create_circulation_dual(self,mode,pen,textbox):
+		global box
+		box = textbox
+		self.original_edge_count = self.edge_count
+		self.original_node_count = self.node_count
+		self.triangles = opr.get_all_triangles(self)
+		K4.find_K4(self)
+		for i in self.k4:
+			K4.resolve_K4(self,i,i.edge_to_be_removed,self.rdg_vertices,self.rdg_vertices2,self.to_be_merged_vertices)
+		self.directed = opr.get_directed(self)
+		self.triangles = opr.get_all_triangles(self)
+		self.outer_vertices = opr.get_outer_boundary_vertices(self)[0]
+		self.outer_boundary = opr.get_outer_boundary_vertices(self)[1]
+		self.shortcuts = sr.get_shortcut(self)
+		self.cip = news.find_cip_single(self)
+		# self.cip =[ [0,1,2,3,4,5,6],[6,7,8,9,10,11,12],[12,13,14,15],[15,16,17,18,19,0]]
+		news.add_news_vertices(self)
+		print("North Boundary: ", self.cip[0])
+		print("East Boundary: ", self.cip[1])
+		print("South Boundary: ", self.cip[2])
+		print("West Boundary: ",self.cip[3])
+		for i in range(0,len(self.to_be_merged_vertices)):
+			self.node_color.append(self.node_color[self.rdg_vertices[i]])
+		self.node_position = nx.planar_layout(nx.from_numpy_matrix(self.matrix))
+		cntr.initialize_degrees(self)
+		cntr.initialize_good_vertices(self)
+		v, u = cntr.contract(self)
+		while v != -1:
+			v, u = cntr.contract(self)
+			# draw.draw_undirected_graph(self,pen)
+			# input()
+		# print(self.contractions)
+		exp.get_trivial_rel(self)
+		while len(self.contractions) != 0:
+			exp.expand(self)
+		draw.construct_rdg(self,self.to_be_merged_vertices,self.rdg_vertices)
+		# for i  in range(0,len(self.to_be_merged_vertices)):
+		#   print(self.room_x[self.to_be_merged_vertices[i]],self.room_y[self.to_be_merged_vertices[i]],self.room_width[self.to_be_merged_vertices[i]],self.room_height[self.to_be_merged_vertices[i]],self.room_x_top_left[self.to_be_merged_vertices[i]],self.room_x_top_right[self.to_be_merged_vertices[i]],self.room_y_left_top[self.to_be_merged_vertices[i]],self.room_y_left_bottom[self.to_be_merged_vertices[i]],self.room_x_bottom_left[self.to_be_merged_vertices[i]],self.room_x_bottom_right[self.to_be_merged_vertices[i]],self.room_y_right_top[self.to_be_merged_vertices[i]],self.room_y_right_bottom[self.to_be_merged_vertices[i]])
+		#   print(self.room_x[self.rdg_vertices[i]],self.room_y[self.rdg_vertices[i]],self.room_width[self.rdg_vertices[i]],self.room_height[self.rdg_vertices[i]],self.room_x_top_left[self.rdg_vertices[i]],self.room_x_top_right[self.rdg_vertices[i]],self.room_y_left_top[self.rdg_vertices[i]],self.room_y_left_bottom[self.rdg_vertices[i]],self.room_x_bottom_left[self.rdg_vertices[i]],self.room_x_bottom_right[self.rdg_vertices[i]],self.room_y_right_top[self.rdg_vertices[i]],self.room_y_right_bottom[self.rdg_vertices[i]]) 
+		# print(self.room_x,self.room_y,self.room_width,self.room_height,self.room_x_top_left,self.room_x_top_right,self.room_y_left_top,self.room_y_left_bottom,self.room_x_bottom_left,self.room_x_bottom_right,self.room_y_right_top,self.room_y_right_bottom)
+		
 
 	def create_multiple_floorplan(self,pen,textbox,mode):
 		global box

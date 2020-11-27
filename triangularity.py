@@ -88,15 +88,10 @@ def Triangulate(G):
         G_triangulated,Elim_order, new_edges= make_chordal_graph(G)
         return G_triangulated,Elim_order, new_edges
 
-def addEdges(graph,edge_to_be_added):
+def addEdges(graph,edge_to_be_added, edge_val=1):
     graph.edge_count +=1
-    new_adjacency_matrix = np.zeros([graph.node_count, graph.node_count], int)
-    for i in range(len(graph.matrix)):
-        for j in range(len(graph.matrix)):
-            new_adjacency_matrix[i][j] = graph.matrix[i][j]
-    new_adjacency_matrix[edge_to_be_added[0]][edge_to_be_added[1]] = 1
-    new_adjacency_matrix[edge_to_be_added[1]][edge_to_be_added[0]] = 1
-    graph.matrix = new_adjacency_matrix
+    graph.matrix[edge_to_be_added[0]][edge_to_be_added[1]] = edge_val
+    graph.matrix[edge_to_be_added[1]][edge_to_be_added[0]] = edge_val
 
 def main():
     G = nx.Graph()
