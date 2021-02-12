@@ -275,7 +275,7 @@ def get_rectangle_coordinates(graph,to_be_merged_vertices,rdg_vertices):
 
 
 def get_direction(graph,vertices):
-    if(graph.room_y[vertices[0]] + graph.room_height[vertices[0]] - graph.room_y[vertices[1]] < 0.000001):
+    if(graph.room_y[vertices[0]] + graph.room_height[vertices[0]] == graph.room_y[vertices[1]]):
         if graph.room_x[vertices[0]]>graph.room_x[vertices[1]]:
             graph.room_x_top_left[vertices[0]]= graph.room_x[vertices[0]]
             graph.room_x_bottom_left[vertices[1]]= graph.room_x[vertices[0]]
@@ -288,7 +288,7 @@ def get_direction(graph,vertices):
         else:
             graph.room_x_top_right[vertices[0]] = graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
             graph.room_x_bottom_right[vertices[1]]=graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-    elif(graph.room_y[vertices[0]] - graph.room_y[vertices[1]] - graph.room_height[vertices[1]] < 0.000001):
+    elif(graph.room_y[vertices[0]] == graph.room_y[vertices[1]] + graph.room_height[vertices[1]]):
         if graph.room_x[vertices[0]]>graph.room_x[vertices[1]]:
             graph.room_x_bottom_left[vertices[0]]= graph.room_x[vertices[0]]
             graph.room_x_top_left[vertices[1]] = graph.room_x[vertices[0]]
@@ -301,7 +301,7 @@ def get_direction(graph,vertices):
         else:
             graph.room_x_bottom_right[vertices[0]]= graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
             graph.room_x_top_right[vertices[1]] = graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-    elif(graph.room_x[vertices[0]] + graph.room_width[vertices[0]] - graph.room_x[vertices[1]]<  0.000001):
+    elif(graph.room_x[vertices[0]] + graph.room_width[vertices[0]] == graph.room_x[vertices[1]]):
         if graph.room_y[vertices[0]]>graph.room_y[vertices[1]]:
             graph.room_y_right_bottom[vertices[0]]=graph.room_y[vertices[0]]
             graph.room_y_left_bottom[vertices[1]]=graph.room_y[vertices[0]]
@@ -314,7 +314,7 @@ def get_direction(graph,vertices):
         else:
             graph.room_y_right_top[vertices[0]]=graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
             graph.room_y_left_top[vertices[1]]= graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
-    elif(graph.room_x[vertices[0]] - graph.room_x[vertices[1]] - graph.room_width[vertices[1]]< 0.000001):
+    elif(graph.room_x[vertices[0]]==graph.room_x[vertices[1]] + graph.room_width[vertices[1]]):
         if graph.room_y[vertices[0]]>graph.room_y[vertices[1]]:
             graph.room_y_left_bottom[vertices[0]]= graph.room_y[vertices[0]]
             graph.room_y_right_bottom[vertices[1]]= graph.room_y[vertices[0]]
