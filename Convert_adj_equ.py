@@ -44,8 +44,11 @@ def Convert_adj_equ(DGPH,symm_rooms):
 	for i in range(0,N):
 		A.append(ismember(LINEQ[i],-1))
 	A = np.array(A)
-	A = np.dot(A,-1)
-	A = np.delete(A,0,0)
+	A_min = np.dot(A,-1)
+	A_max = A
+	A_min = np.delete(A_min,0,0)
+	A_max = np.delete(A_max, 0, 0)
+	A = np.vstack((A_min,A_max))
 	Aeq = []
 	# print(LINEQ)
 	

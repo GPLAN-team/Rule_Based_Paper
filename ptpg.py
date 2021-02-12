@@ -423,7 +423,7 @@ class PTPG:
         print("Vertices: ",self.node_count)
         print("Value: ",len(self.triangles)+self.node_count-self.edge_count)
         if not nx.check_planarity(self.graph) or (len(self.triangles)+self.node_count-self.edge_count)!=1:
-            raise Exception("Error")
+            raise Exception("Error caused due to triangularity function. Work under progress.")
         self.directed = opr.get_directed(self)
         self.outer_vertices = opr.get_outer_boundary_vertices(self)[0]
         self.outer_boundary = opr.get_outer_boundary_vertices(self)[1]
@@ -459,7 +459,7 @@ class PTPG:
             exp.expand(self)
         draw.construct_rdg(self,self.to_be_merged_vertices,self.rdg_vertices)
         end= time.time()
-        textbox.insert('end',"Time taken: {round(end-start,5)} seconds")
+        textbox.insert('end',"Time taken: "+ str(round(end-start,5))+" seconds")
         textbox.insert('end',"\n")
     
     def create_single_floorplan(self,pen,textbox,mode):
@@ -472,7 +472,9 @@ class PTPG:
         for i in range(0,len(self.extra_vertices)+len(self.rdg_vertices)):
             self.width_min.append(0)
             self.height_min.append(0)
-        [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min)
+            self.width_max.append(0)
+            self.height_max.append(0)
+        [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
         A=B
         # print(A)
         width = np.transpose(width)
@@ -640,14 +642,14 @@ class PTPG:
                         self.rel_matrix.append(i)
                     print("Number of different floor plans: ",len(rel_matrix))
                     print("\n")
-            textbox.insert('end',"\n Total number of different floor plans: {len(self.rel_matrix)}")
+            textbox.insert('end',"\n Total number of different floor plans: " + str(len(self.rel_matrix)))
             textbox.insert('end',"\n")
-            textbox.insert('end',"Total boundaries used:{no_of_boundaries}")
+            textbox.insert('end',"Total boundaries used: " + str(no_of_boundaries))
             textbox.insert('end',"\n")
             end = time.time()
-            textbox.insert('end',"Time taken per floorlan : {round((end-start)/len(self.rel_matrix),6)*1000} ms")
+            textbox.insert('end',"Time taken per floorlan : " + str(round((end-start)/len(self.rel_matrix),6)*1000)+ " ms")
             textbox.insert('end',"\n")
-            print("Runtime of the program is {end - start}")
+            print("Runtime of the program is" +  str(end - start))
 
         else:
             start = time.time()

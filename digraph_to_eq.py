@@ -5,7 +5,7 @@ from solve_linear import solve_linear
 
 # global N,f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, ar_max, ar_min
 
-def digraph_to_eq(VER,HOR,inp_min,inp_height):
+def digraph_to_eq(VER,HOR,min_width,min_height,max_width,max_height):
 		
 	#VER=[[0,1,1,0,0,0,1,0,0,1,1,0,0,0],[0,0,0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
@@ -39,11 +39,15 @@ def digraph_to_eq(VER,HOR,inp_min,inp_height):
 	#print(inp_height)
 	#size_inp_min=len(inp_min)
 
-	b_VER=np.dot(np.array(inp_min),-1)
+	b_VER=np.dot(np.array(min_width),-1)
+	b_MAX_VER = np.array(max_width)
 	b_VER = np.transpose(b_VER)
+	b_MAX_VER = np.transpose(b_MAX_VER)
 	b_VER = b_VER.astype(float)
+	b_MAX_VER = b_MAX_VER.astype(float)
+	b_VER = np.hstack((b_VER,b_MAX_VER))
 
-	dimensions = solve_linear(N,f_VER, A_VER, b_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, inp_height)
+	dimensions = solve_linear(N,f_VER, A_VER, b_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, min_height,max_height)
 
 	# print('Height = ',dimensions[1])
 	# print('\n Width = ',dimensions[0])
