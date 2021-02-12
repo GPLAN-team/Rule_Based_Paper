@@ -459,7 +459,7 @@ class PTPG:
             exp.expand(self)
         draw.construct_rdg(self,self.to_be_merged_vertices,self.rdg_vertices)
         end= time.time()
-        textbox.insert('end',f"Time taken: {round(end-start,5)} seconds")
+        textbox.insert('end',"Time taken: {round(end-start,5)} seconds")
         textbox.insert('end',"\n")
     
     def create_single_floorplan(self,pen,textbox,mode):
@@ -469,7 +469,7 @@ class PTPG:
         B = copy.deepcopy(self.encoded_matrix)
         A = copy.deepcopy(self.encoded_matrix)
         # minimum_width = min(self.inp_min)
-        for i in range(0,len(self.extra_vertices)):
+        for i in range(0,len(self.extra_vertices)+len(self.rdg_vertices)):
             self.width_min.append(0)
             self.height_min.append(0)
         [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min)
@@ -640,14 +640,14 @@ class PTPG:
                         self.rel_matrix.append(i)
                     print("Number of different floor plans: ",len(rel_matrix))
                     print("\n")
-            textbox.insert('end',f"\n Total number of different floor plans: {len(self.rel_matrix)}")
+            textbox.insert('end',"\n Total number of different floor plans: {len(self.rel_matrix)}")
             textbox.insert('end',"\n")
-            textbox.insert('end',f"Total boundaries used:{no_of_boundaries}")
+            textbox.insert('end',"Total boundaries used:{no_of_boundaries}")
             textbox.insert('end',"\n")
             end = time.time()
-            textbox.insert('end',f"Time taken per floorlan : {round((end-start)/len(self.rel_matrix),6)*1000} ms")
+            textbox.insert('end',"Time taken per floorlan : {round((end-start)/len(self.rel_matrix),6)*1000} ms")
             textbox.insert('end',"\n")
-            print(f"Runtime of the program is {end - start}")
+            print("Runtime of the program is {end - start}")
 
         else:
             start = time.time()
