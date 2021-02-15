@@ -423,7 +423,7 @@ class PTPG:
         print("Vertices: ",self.node_count)
         print("Value: ",len(self.triangles)+self.node_count-self.edge_count)
         if not nx.check_planarity(self.graph) or (len(self.triangles)+self.node_count-self.edge_count)!=1:
-            raise Exception("Error caused due to triangularity function. Work under progress.")
+            raise Exception("Error")
         self.directed = opr.get_directed(self)
         self.outer_vertices = opr.get_outer_boundary_vertices(self)[0]
         self.outer_boundary = opr.get_outer_boundary_vertices(self)[1]
@@ -459,7 +459,7 @@ class PTPG:
             exp.expand(self)
         draw.construct_rdg(self,self.to_be_merged_vertices,self.rdg_vertices)
         end= time.time()
-        textbox.insert('end',"Time taken: "+ str(round(end-start,5))+" seconds")
+        textbox.insert('end',f"Time taken: {round(end-start,5)} seconds")
         textbox.insert('end',"\n")
     
     def create_single_floorplan(self,pen,textbox,mode):
@@ -469,12 +469,10 @@ class PTPG:
         B = copy.deepcopy(self.encoded_matrix)
         A = copy.deepcopy(self.encoded_matrix)
         # minimum_width = min(self.inp_min)
-        for i in range(0,len(self.extra_vertices)+len(self.rdg_vertices)):
+        for i in range(0,len(self.extra_vertices)):
             self.width_min.append(0)
             self.height_min.append(0)
-            self.width_max.append(0)
-            self.height_max.append(0)
-        [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
+        [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
         A=B
         # print(A)
         width = np.transpose(width)
@@ -642,14 +640,14 @@ class PTPG:
                         self.rel_matrix.append(i)
                     print("Number of different floor plans: ",len(rel_matrix))
                     print("\n")
-            textbox.insert('end',"\n Total number of different floor plans: " + str(len(self.rel_matrix)))
+            textbox.insert('end',f"\n Total number of different floor plans: {len(self.rel_matrix)}")
             textbox.insert('end',"\n")
-            textbox.insert('end',"Total boundaries used: " + str(no_of_boundaries))
+            textbox.insert('end',f"Total boundaries used:{no_of_boundaries}")
             textbox.insert('end',"\n")
             end = time.time()
-            textbox.insert('end',"Time taken per floorlan : " + str(round((end-start)/len(self.rel_matrix),6)*1000)+ " ms")
+            textbox.insert('end',f"Time taken per floorlan : {round((end-start)/len(self.rel_matrix),6)*1000} ms")
             textbox.insert('end',"\n")
-            print("Runtime of the program is" +  str(end - start))
+            print(f"Runtime of the program is {end - start}")
 
         else:
             start = time.time()
@@ -878,7 +876,7 @@ class PTPG:
                 self.encoded_matrix = opr.get_encoded_matrix(self)
                 B = copy.deepcopy(self.encoded_matrix)
                 A = copy.deepcopy(self.encoded_matrix)
-                [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min)
+                [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
                 A=B
                 width = np.transpose(width)
                 height = np.transpose(height)
@@ -915,7 +913,7 @@ class PTPG:
                 self.encoded_matrix = opr.get_encoded_matrix(self)
                 B = copy.deepcopy(self.encoded_matrix)
                 A = copy.deepcopy(self.encoded_matrix)
-                [width,height,hor_dgph] = floorplan_to_st(A,self.width_min,self.height_min)
+                [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
                 A=B
                 # print(A)
                 width = np.transpose(width)

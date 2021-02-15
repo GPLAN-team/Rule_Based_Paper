@@ -58,7 +58,6 @@ def floorplan_to_st(A,min_width,min_height,max_width,max_height):
 
 	HOR = np.insert(HOR,0,[0],axis=1)
 	# print(HOR)
+	[width,height,status] = digraph_to_eq(VER,HOR,min_width,min_height,max_width,max_height)
 
-	[width,height] = digraph_to_eq(VER,HOR,min_width,min_height,max_width,max_height)
-
-	return [(-1)*width,(-1)*height,hor_dgph]
+	return [(-1)*width,(-1)*height,hor_dgph,status]
