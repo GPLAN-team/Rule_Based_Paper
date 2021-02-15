@@ -52,4 +52,4 @@ def digraph_to_eq(VER,HOR,min_width,min_height,max_width,max_height):
 	# print('Height = ',dimensions[1])
 	# print('\n Width = ',dimensions[0])
 
-	return [dimensions[0],dimensions[1]]
+	return [dimensions[0],dimensions[1],dimensions[2]]

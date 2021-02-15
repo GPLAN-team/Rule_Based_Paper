@@ -98,7 +98,7 @@ def run():
                         G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
                         G.create_single_floorplan(gclass.pen,gclass.textbox,0)
                         draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
-                    # except:
+                # except:
                         # printe("Biconnectivity and Triangularity led to non-K4 separating triangle")
             elif(gclass.command == "multiple"):
                 test_result = checker.gui_checker(G)

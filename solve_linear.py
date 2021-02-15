@@ -1,13 +1,14 @@
 import numpy as np
 import scipy.optimize
-
+from con_fes import con_fes
 # global N,f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, ar_max, ar_min
 
 def solve_linear(N,f_VER, A_VER, b_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, min_height,max_height):
 
+	var = con_fes(A_VER,b_VER,Aeq_VER,Beq_VER)
+
 	# print(Aeq_VER)
 	value_opti_ver = scipy.optimize.linprog(f_VER,A_ub=A_VER,b_ub=b_VER,A_eq=Aeq_VER,b_eq=Beq_VER, bounds=(1,None), method='interior-point', callback=None, options=None, x0=None)
-
 
 	# b_HOR=np.zeros([N-1,1],dtype=float)
 	X1=value_opti_ver['x']
@@ -32,4 +33,4 @@ def solve_linear(N,f_VER, A_VER, b_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR,
 	W=np.dot(A_VER,X1)
 	H=np.dot(A_HOR,X2)
 	
-	return [W, H]
+	return [W, H,value_opti_ver.success and value_opti_hor.success]
