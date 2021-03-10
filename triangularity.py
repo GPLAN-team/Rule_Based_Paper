@@ -67,6 +67,10 @@ def Check_Chordality(G, print_op):
             print("Graph is Chordal")
         return True
     else:
+        all_cliques= nx.enumerate_all_cliques(G)
+        triad_cliques=[x for x in all_cliques if len(x)==3]
+        if (len(triad_cliques)+len(G.nodes())-len(G.edges())==1):
+            return True
         if (print_op == 1):
             print("Graph is NOT Chordal")
         return False
