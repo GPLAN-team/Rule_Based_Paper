@@ -1,298 +1,596 @@
+"""Expansion Module
+
+This module allows user to perform expansion on a trivial 
+Regular Edge Labelling (REL) to transform it into a
+complete Regular Edge Labelling (REL).
+
+This module contains the following functions:
+
+    * basecase - obtains the base case of the expansion step.
+    * expand - performs the expansion step.
+    * get_case - returns the case of expansion.
+    * handle_orig_nbrs - handles the original neighbours.
+    * case_a - handles case A of expansion.
+    * case_b - handles case B of expansion.
+    * case_c - handles case C of expansion.
+    * case_d - handles case D of expansion.
+    * case_e - handles case E of expansion.
+    * case_f - handles case F of expansion.
+    * case_g - handles case G of expansion.
+    * case_h - handles case H of expansion.
+    * case_i - handles case I of expansion.
+    * case_j - handles case J of expansion.
+
+"""
+
 import networkx as nx 
 import numpy as np
 import operations as opr 
 
-def get_trivial_rel(graph):
+def basecase(graph):
+    """Obtains the base case of expansion step.
+
+    Args:
+        graph: An instance of InputGraph object.
+
+    Returns:
+        None
+    """
     for node in range(graph.matrix.shape[0]):
-        if graph.matrix[graph.north][node] == 1 and node not in [graph.east, graph.west]:
+        if graph.matrix[graph.north][node] == 1\
+         and node not in [graph.east,graph.west]:
             graph.matrix[node][graph.north] = 2
             graph.matrix[graph.north][node] = 0
-
             graph.matrix[graph.south][node] = 2
             graph.matrix[node][graph.south] = 0
-
             graph.matrix[node][graph.east] = 3
             graph.matrix[graph.east][node] = 0
-
             graph.matrix[graph.west][node] = 3
             graph.matrix[node][graph.west] = 0
 
 def expand(graph):
-    contraction = graph.contractions.pop()
-    case = get_case(graph,contraction)
-    o = contraction['u']
-    v = contraction['v']
-    case(graph,o, v, contraction['y_and_z'][0], contraction['y_and_z'][1], contraction['v_nbr'])
-    # graph.node_position[o][0] = 2 * graph.node_position[o][0] - graph.node_position[v][0]
-    # graph.node_position[o][1] = 2 * graph.node_position[o][1] - graph.node_position[v][1]
+    """Performs the process of expansion.
 
-def get_case(graph, contraction):
-    o = contraction['u']
-    y_and_z = contraction['y_and_z']
-    y = y_and_z[0]
-    z = y_and_z[1]
-    if graph.matrix[o][y] == 2:
-        if graph.matrix[o][z] == 3:
-            # print("o->y : T1, o->z : T2, caseA")
-            return caseA
-        elif graph.matrix[o][z] == 2:
-            temp = y
-            while(temp!=z):
-                label = opr.get_ordered_neighbour_label(graph,o, temp, clockwise=False)
-                temp = opr.get_ordered_neighbour(graph,o,temp,False)
+    Args:
+        graph: An instance of InputGraph object.
+
+    Returns:
+        None
+    """
+    cntr = graph.cntrs.pop()
+    case = get_case(graph,cntr)
+    nbr = cntr['nbr']
+    node = cntr['node']
+    case(graph
+        ,nbr
+        ,node
+        ,cntr['mut_nbrs'][0]
+        ,cntr['mut_nbrs'][1]
+        ,cntr['node_nbrs'])
+
+def get_case(graph,cntr):
+    """Identifies the case of expansion (Refer documentation).
+
+    Args:
+        graph: An instance of InputGraph object.
+        cntr: A dict representing contraction to be expanded.
+
+    Returns:
+        None
+    """
+    nbr = cntr['nbr']
+    mut_nbrs = cntr['mut_nbrs']
+    mut_nbr1 = mut_nbrs[0]
+    mut_nbr2 = mut_nbrs[1]
+    if graph.matrix[nbr][mut_nbr1] == 2:
+        if graph.matrix[nbr][mut_nbr2] == 3:
+            return case_a
+        elif graph.matrix[nbr][mut_nbr2] == 2:
+            vertex = mut_nbr1
+            while(vertex!=mut_nbr2):
+                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
+                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
                 if(label == 3):
-                    y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
+                    mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
-            # print("o->y : T1, o->z : T1, caseB")
-            return caseB
-        elif graph.matrix[z][o] == 3:
-            # print("o->y : T1, z->o : T2, caseD")
-            return caseD
-        elif graph.matrix[z][o] == 2:
-            # print("o->y : T1, z->o : T1, caseF")
-            return caseF
+            return case_b
+        elif graph.matrix[mut_nbr2][nbr] == 3:
+            return case_d
+        elif graph.matrix[mut_nbr2][nbr] == 2:
+            return case_f
         else:
             print("ERROR")
 
-    if graph.matrix[y][o] == 2:
-        if graph.matrix[o][z] == 3:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("y->o : T1, o->z : T2, caseE")
-            return caseE
-        elif graph.matrix[o][z] == 2:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("y->o : T1, o->z : T1, caseF")
-            return caseF
-        elif graph.matrix[z][o] == 3:
-            # print("y->o : T1, z->0 : T2, caseH")
-            return caseH
-        elif graph.matrix[z][o] == 2:
-            temp = y
-            while(temp!=z):
-                label = opr.get_ordered_neighbour_label(graph,o, temp, clockwise=False)
-                temp = opr.get_ordered_neighbour(graph,o,temp,False)
+    if graph.matrix[mut_nbr1][nbr] == 2:
+        if graph.matrix[nbr][mut_nbr2] == 3:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_e
+        elif graph.matrix[nbr][mut_nbr2] == 2:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_f
+        elif graph.matrix[mut_nbr2][nbr] == 3:
+            return case_h
+        elif graph.matrix[mut_nbr2][nbr] == 2:
+            vertex = mut_nbr1
+            while(vertex!=mut_nbr2):
+                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
+                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
                 if(label == 3):
-                    y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
+                    mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
-            # print("y->o : T1, z->o : T1, caseI")
-            return caseI
+            return case_i
         else:
             print("ERROR")
             
-    if graph.matrix[o][y] == 3:
-        if graph.matrix[o][z] == 3:
-            temp = y
-            while(temp!=z):
-                label = opr.get_ordered_neighbour_label(graph,o, temp, clockwise=False)
-                temp = opr.get_ordered_neighbour(graph,o,temp,False)
+    if graph.matrix[nbr][mut_nbr1] == 3:
+        if graph.matrix[nbr][mut_nbr2] == 3:
+            vertex = mut_nbr1
+            while(vertex!=mut_nbr2):
+                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
+                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
                 if(label == 2):
-                    y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
+                    mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
-            # print("o->y : T2, o->z : T2, caseC")
-            return caseC
-        elif graph.matrix[o][z] == 2:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("o->y : T2,  o->z : T1, caseA swapped")
-            return caseA
-        elif graph.matrix[z][o] == 3:
-            # print("o->y : T2, z->o : T2, caseG")
-            return caseG
-        elif graph.matrix[z][o] == 2:
-            # print("o->y : T2, z->o : T1, caseE")
-            return caseE
+            return case_c
+        elif graph.matrix[nbr][mut_nbr2] == 2:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_a
+        elif graph.matrix[mut_nbr2][nbr] == 3:
+            return case_g
+        elif graph.matrix[mut_nbr2][nbr] == 2:
+            return case_e
         else:
             print("ERROR")
 
-    if graph.matrix[y][o] == 3:
-        if graph.matrix[o][z] == 3:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("y->o : T2, o->z : T2, caseG")
-            return caseG
-        elif graph.matrix[o][z] == 2:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("y->o : T2,  o->z : T1, caseD")
-            return caseD
-        elif graph.matrix[z][o] == 3:
-            temp = y
-            while(temp!=z):
-                label = opr.get_ordered_neighbour_label(graph,o, temp, clockwise=False)
-                temp = opr.get_ordered_neighbour(graph,o,temp,False)
+    if graph.matrix[mut_nbr1][nbr] == 3:
+        if graph.matrix[nbr][mut_nbr2] == 3:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_g
+        elif graph.matrix[nbr][mut_nbr2] == 2:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_d
+        elif graph.matrix[mut_nbr2][nbr] == 3:
+            vertex = mut_nbr1
+            while(vertex!=mut_nbr2):
+                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
+                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
                 if(label == 2):
-                    y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
+                    mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
-            # print("y->o : T2,  z->o : T2, caseJ")
-            return caseJ
-        elif graph.matrix[z][o] == 2:
-            y_and_z[0], y_and_z[1] = y_and_z[1], y_and_z[0]
-            # print("y->o : T2,  z->o : T1, caseH")
-            return caseH
+            return case_j
+        elif graph.matrix[mut_nbr2][nbr] == 2:
+            mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
+            return case_h
         else:
             print("ERROR")
 
-def handle_original_u_nbrs(graph, o, v, y, z, v_nbr):
-    for alpha in v_nbr:
-        if alpha != y and alpha != z and alpha != o:
-            if graph.matrix[o][alpha] != 0:
-                graph.matrix[v][alpha] = graph.matrix[o][alpha]
-                graph.matrix[o][alpha] = 0
-            if graph.matrix[alpha][o] != 0:
-                graph.matrix[alpha][v] = graph.matrix[alpha][o]
-                graph.matrix[alpha][o] = 0
+def handle_orig_nbrs(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Handles original neighbours in contraction.
 
-def caseA(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour_label(graph,o, y, clockwise=True) == 2:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[y][v] = 3
-            graph.matrix[v][z] = 3
-            graph.matrix[o][v] = 2
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    for alpha in node_nbrs:
+        if alpha != mut_nbr1 and alpha != mut_nbr2 and alpha != nbr:
+            if graph.matrix[nbr][alpha] != 0:
+                graph.matrix[node][alpha] = graph.matrix[nbr][alpha]
+                graph.matrix[nbr][alpha] = 0
+            if graph.matrix[alpha][nbr] != 0:
+                graph.matrix[alpha][node] = graph.matrix[alpha][nbr]
+                graph.matrix[alpha][nbr] = 0
+
+def case_a(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case A of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr1][node] = 3
+            graph.matrix[node][mut_nbr2] = 3
+            graph.matrix[nbr][node] = 2
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)     
-            graph.matrix[v][y] = 2
-            graph.matrix[v][z] = 3
-            graph.matrix[v][o] = 2
-            graph.matrix[o][y] = 0
-            graph.matrix[y][o] = 3
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)     
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[node][mut_nbr2] = 3
+            graph.matrix[node][nbr] = 2
+            graph.matrix[nbr][mut_nbr1] = 0
+            graph.matrix[mut_nbr1][nbr] = 3
     else:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 2
-            graph.matrix[z][v] = 2
-            graph.matrix[o][v] = 3
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[mut_nbr2][node] = 2
+            graph.matrix[nbr][node] = 3
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr) 
-            graph.matrix[o][z] = 0
-            graph.matrix[z][o] = 2
-            graph.matrix[v][o] = 3
-            graph.matrix[v][y] = 2
-            graph.matrix[v][z] = 3
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs) 
+            graph.matrix[nbr][mut_nbr2] = 0
+            graph.matrix[mut_nbr2][nbr] = 2
+            graph.matrix[node][nbr] = 3
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[node][mut_nbr2] = 3
 
-def caseB(graph, o, v, y, z, v_nbr):
-    handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-    graph.matrix[z][v] = 3
-    graph.matrix[v][y] = 3
-    graph.matrix[o][v] = 2 
+def case_b(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case B of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    handle_orig_nbrs(graph
+        ,nbr
+        ,node
+        ,mut_nbr1
+        ,mut_nbr2
+        ,node_nbrs)
+    graph.matrix[mut_nbr2][node] = 3
+    graph.matrix[node][mut_nbr1] = 3
+    graph.matrix[nbr][node] = 2 
     
 
-def caseC(graph, o, v, y, z, v_nbr):
-    handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-    graph.matrix[y][v] = 2
-    graph.matrix[v][z] = 2
-    graph.matrix[o][v] = 3
+def case_c(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case C of expansion.
 
-def caseD(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour_label(graph,o, y, clockwise=False) == 2:
-        if opr.get_ordered_neighbour(graph,o, y, False) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 3
-            graph.matrix[z][v] = 3
-            graph.matrix[o][v] = 2
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    handle_orig_nbrs(graph
+        ,nbr
+        ,node
+        ,mut_nbr1
+        ,mut_nbr2
+        ,node_nbrs)
+    graph.matrix[mut_nbr1][node] = 2
+    graph.matrix[node][mut_nbr2] = 2
+    graph.matrix[nbr][node] = 3
+
+def case_d(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case D of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=False) == 2:
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,False) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 3
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[nbr][node] = 2
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[o][y] = 3
-            graph.matrix[v][y] = 2
-            graph.matrix[z][v] = 3
-            graph.matrix[v][o] = 2
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[nbr][mut_nbr1] = 3
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[node][nbr] = 2
     else:
-        if opr.get_ordered_neighbour(graph,o, y, False) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 2
-            graph.matrix[z][v] = 2
-            graph.matrix[v][o] = 3
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,False) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[mut_nbr2][node] = 2
+            graph.matrix[node][nbr] = 3
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[z][o] = 2
-            graph.matrix[z][v] = 3
-            graph.matrix[v][y] = 2
-            graph.matrix[o][v] = 3
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr2][nbr] = 2
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[nbr][node] = 3
 
-def caseE(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour_label(graph,o, y, clockwise=True) == 2:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 3
-            graph.matrix[z][v] = 3
-            graph.matrix[v][o] = 2
+def case_e(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case E of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 3
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[node][nbr] = 2
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[z][o] = 3
-            graph.matrix[z][v] = 2
-            graph.matrix[v][y] = 3
-            graph.matrix[o][v] = 2
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr2][nbr] = 3
+            graph.matrix[mut_nbr2][node] = 2
+            graph.matrix[node][mut_nbr1] = 3
+            graph.matrix[nbr][node] = 2
 
     else:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 2
-            graph.matrix[z][v] = 2
-            graph.matrix[o][v] = 3
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 2
+            graph.matrix[mut_nbr2][node] = 2
+            graph.matrix[nbr][node] = 3
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[o][y] = 2
-            graph.matrix[v][o] = 3
-            graph.matrix[v][y] = 3
-            graph.matrix[z][v] = 2
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[nbr][mut_nbr1] = 2
+            graph.matrix[node][nbr] = 3
+            graph.matrix[node][mut_nbr1] = 3
+            graph.matrix[mut_nbr2][node] = 2
 
-def caseF(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-        handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-        graph.matrix[v][y] = 2
-        graph.matrix[z][v] = 2
-        graph.matrix[o][v] = 3
+def case_f(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case F of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+        handle_orig_nbrs(graph
+            ,nbr
+            ,node
+            ,mut_nbr1
+            ,mut_nbr2
+            ,node_nbrs)
+        graph.matrix[node][mut_nbr1] = 2
+        graph.matrix[mut_nbr2][node] = 2
+        graph.matrix[nbr][node] = 3
     else:
-        handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-        graph.matrix[v][y] = 2
-        graph.matrix[z][v] = 2
-        graph.matrix[v][o] = 3
+        handle_orig_nbrs(graph
+            ,nbr
+            ,node
+            ,mut_nbr1
+            ,mut_nbr2
+            ,node_nbrs)
+        graph.matrix[node][mut_nbr1] = 2
+        graph.matrix[mut_nbr2][node] = 2
+        graph.matrix[node][nbr] = 3
 
-def caseG(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-        handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-        graph.matrix[v][y] = 3
-        graph.matrix[z][v] = 3
-        graph.matrix[v][o] = 2
+def case_g(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case G of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+        handle_orig_nbrs(graph
+            ,nbr
+            ,node
+            ,mut_nbr1
+            ,mut_nbr2
+            ,node_nbrs)
+        graph.matrix[node][mut_nbr1] = 3
+        graph.matrix[mut_nbr2][node] = 3
+        graph.matrix[node][nbr] = 2
     else:
-        handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-        graph.matrix[v][y] = 3
-        graph.matrix[z][v] = 3
-        graph.matrix[o][v] = 2
+        handle_orig_nbrs(graph
+            ,nbr
+            ,node
+            ,mut_nbr1
+            ,mut_nbr2
+            ,node_nbrs)
+        graph.matrix[node][mut_nbr1] = 3
+        graph.matrix[mut_nbr2][node] = 3
+        graph.matrix[nbr][node] = 2
 
-def caseH(graph, o, v, y, z, v_nbr):
-    if opr.get_ordered_neighbour_label(graph,o, y, clockwise=True) == 2:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[v][y] = 3
-            graph.matrix[z][v] = 3
-            graph.matrix[v][o] = 2
+def case_h(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case H of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[node][mut_nbr1] = 3
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[node][nbr] = 2
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[y][o] = 0
-            graph.matrix[o][y] = 3
-            graph.matrix[y][v] = 2
-            graph.matrix[z][v] = 3
-            graph.matrix[o][v] = 2
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr1][nbr] = 0
+            graph.matrix[nbr][mut_nbr1] = 3
+            graph.matrix[mut_nbr1][node] = 2
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[nbr][node] = 2
     else:
-        if opr.get_ordered_neighbour(graph,o, y, True) in v_nbr:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[y][v] = 2
-            graph.matrix[v][z] = 2
-            graph.matrix[v][o] = 3
+        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr1][node] = 2
+            graph.matrix[node][mut_nbr2] = 2
+            graph.matrix[node][nbr] = 3
         else:
-            handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-            graph.matrix[z][o] = 0
-            graph.matrix[o][z] = 2
-            graph.matrix[y][v] = 2
-            graph.matrix[z][v] = 3
-            graph.matrix[o][v] = 3 
+            handle_orig_nbrs(graph
+                ,nbr
+                ,node
+                ,mut_nbr1
+                ,mut_nbr2
+                ,node_nbrs)
+            graph.matrix[mut_nbr2][nbr] = 0
+            graph.matrix[nbr][mut_nbr2] = 2
+            graph.matrix[mut_nbr1][node] = 2
+            graph.matrix[mut_nbr2][node] = 3
+            graph.matrix[nbr][node] = 3 
 
-def caseI(graph, o, v, y, z, v_nbr):
-    handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-    graph.matrix[y][v] = 3
-    graph.matrix[v][z] = 3
-    graph.matrix[v][o] = 2
+def case_i(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case I of expansion.
 
-def caseJ(graph, o, v, y, z, v_nbr):
-    handle_original_u_nbrs(graph,o, v, y, z, v_nbr)
-    graph.matrix[v][y] = 2
-    graph.matrix[z][v] = 2
-    graph.matrix[v][o] = 3
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    handle_orig_nbrs(graph
+        ,nbr
+        ,node
+        ,mut_nbr1
+        ,mut_nbr2
+        ,node_nbrs)
+    graph.matrix[mut_nbr1][node] = 3
+    graph.matrix[node][mut_nbr2] = 3
+    graph.matrix[node][nbr] = 2
+
+def case_j(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+    """Resolves Case J of expansion.
+
+    Args:
+        graph: An instance of InputGraph object.
+        nbr: An integer representing neighbour in contraction.
+        node: An integer representing node in contraction.
+        mut_nbr1: An integer representing mut_nbr1 in contraction.
+        mut_nbr2: An integer representing mut_nbr2 in contraction.
+        node_nbrs: A list representing node_nbrs in contraction
+
+    Returns:
+        None
+    """
+    handle_orig_nbrs(graph
+        ,nbr
+        ,node
+        ,mut_nbr1
+        ,mut_nbr2
+        ,node_nbrs)
+    graph.matrix[node][mut_nbr1] = 2
+    graph.matrix[mut_nbr2][node] = 2
+    graph.matrix[node][nbr] = 3

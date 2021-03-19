@@ -1,81 +1,33 @@
+"""Drawing Module
+
+This module allows user to perform contraction on a Proper Triangulated
+Planar Graph (PTPG) to transform it into a trivial Regular Edge
+Labelling (REL).
+
+This module contains the following functions:
+
+    * init_degrees - finds degree of each node in the graph.
+    * init_goodnodes - finds good vertices in the graph.
+    * is_goodvertex - finds if a vertex is a good vertex.
+    * cntr_nbr - finds contractible neighbour of given vertex.
+    * update_adjmat - updates adjacency matrix post contraction.
+    * update_goodnodes - updates good vertices post contraction.
+    * check - checks if a vertex is god vertex post contraction.
+    * contract - performs contraction on the graph.
+
+"""
 import networkx as nx 
 import numpy as np 
 import turtle
-import ptpg
+# import ptpg
 import dual
 import math
 
 scale = 300
 origin = {'x': 300, 'y': -150}
 
-#Draw undirected graph 
-def draw_undirected_graph(graph,pen):
-    pen.clear()
-    pen.pencolor('black')
-    pen.penup()
-    for from_node in range(graph.matrix.shape[0]):
-        pen.setposition(graph.node_position[from_node][0] * scale + origin['x'],
-                        graph.node_position[from_node][1] * scale + origin['y'])
-        if from_node == graph.north:
-            pen.write("N")
-        elif from_node == graph.south:
-            pen.write("S")
-        elif from_node == graph.east:
-            pen.write("E")
-        elif from_node == graph.west:
-            pen.write("W")
-        else:
-            pen.write(from_node)
-        for to_node in range(from_node):
-            if graph.matrix[from_node][to_node] == 1:
-                pen.setposition(graph.node_position[from_node][0] * scale + origin['x'],
-                                graph.node_position[from_node][1] * scale + origin['y'])
-                pen.pendown()
-                pen.setposition(graph.node_position[to_node][0] * scale + origin['x'],
-                                graph.node_position[to_node][1] * scale + origin['y'])
-                pen.penup()
-
-#Draw directed graph
-def draw_directed_graph(graph,pen):
-    pen.clear()
-    pen.width(1)
-    pen.penup()
-    for from_node in range(graph.matrix.shape[0]):
-        pen.setposition(graph.node_position[from_node][0] * scale + origin['x'],
-                        graph.node_position[from_node][1] * scale + origin['y'])
-        if from_node == graph.north:
-            pen.write("N")
-        elif from_node == graph.south:
-            pen.write("S")
-        elif from_node == graph.east:
-            pen.write("E")
-        elif from_node == graph.west:
-            pen.write("W")
-        else:
-            pen.write(from_node)
-        for to_node in range(graph.matrix.shape[0]):
-            if graph.matrix[from_node][to_node] == 0:
-                continue
-            else:
-                if graph.matrix[from_node][to_node] == 2:
-                    pen.color('blue')
-                elif graph.matrix[from_node][to_node] == 3:
-                    pen.color('red')
-                pen.setposition(graph.node_position[from_node][0] * scale + origin['x'],
-                                graph.node_position[from_node][1] * scale + origin['y'])
-                pen.pendown()
-                pen.setposition(((graph.node_position[from_node][0] + graph.node_position[to_node][0]) * scale / 2) + origin['x'],
-                                ((graph.node_position[from_node][1] + graph.node_position[to_node][1]) * scale / 2) + origin['y'])
-                if graph.matrix[from_node][to_node] != 1:
-                    pen.width(2)
-                pen.setposition(graph.node_position[to_node][0] * scale + origin['x'],
-                                graph.node_position[to_node][1] * scale + origin['y'])
-                pen.penup()
-                pen.color('black')
-                pen.width(1)
-
 # Draw rectangular dual of graph
-def draw_rdg(graph,count,pen,to_be_merged_vertices,rdg_vertices,mode,color_list,room_names):
+def draw_rdg(graph,count,pen,mergednodes,irreg_nodes1,mode,color_list,room_names,origin):
     pen.width(1.5)
     pen.color('black')
     pen.hideturtle()
@@ -94,12 +46,12 @@ def draw_rdg(graph,count,pen,to_be_merged_vertices,rdg_vertices,mode,color_list,
     print(scale)
     # origin = {'x': graph.origin, 'y': -550}
     dim =[0,0]
-    origin = {'x': graph.origin - 400, 'y': -100}
+    origin = {'x': origin - 400, 'y': -100}
     for i in range(graph.room_x.shape[0]):
-        if graph.room_width[i] == 0 or i in graph.biconnected_vertices or i in graph.extra_vertices:
+        if graph.room_width[i] == 0 or i in graph.extranodes:
             continue
-        if i in to_be_merged_vertices:
-            pen.fillcolor(color_list[rdg_vertices[to_be_merged_vertices.index(i)]])
+        if i in mergednodes:
+            pen.fillcolor(color_list[irreg_nodes1[mergednodes.index(i)]])
         else:
             pen.fillcolor(color_list[i])
         pen.begin_fill()
@@ -167,7 +119,6 @@ def draw_rdg(graph,count,pen,to_be_merged_vertices,rdg_vertices,mode,color_list,
             dim[0] = graph.room_x[i] + graph.room_width[i]
         if(graph.room_y[i] + graph.room_height[i]> dim[1] ):
             dim[1] = graph.room_y[i] + graph.room_height[i]
-        graph.origin+= np.amax(graph.room_width)
     
     # pen.setposition(0* scale + origin['x'], 0 * scale + origin['y'])
     # pen.pendown()
@@ -176,50 +127,50 @@ def draw_rdg(graph,count,pen,to_be_merged_vertices,rdg_vertices,mode,color_list,
     # pen.setposition(0* scale + origin['x'], dim[1]* scale + origin['y'])
     # pen.setposition(0* scale + origin['x'], 0 * scale + origin['y'])
     # pen.penup()
-    if mode == 2:
-        for i in to_be_merged_vertices:
-            pen.color('red')
-            pen.setposition(graph.room_x[i] * scale + origin['x'], graph.room_y[i] * scale + origin['y'])
+    # if mode == 2:
+    #     for i in mergednodes:
+    #         pen.color('red')
+    #         pen.setposition(graph.room_x[i] * scale + origin['x'], graph.room_y[i] * scale + origin['y'])
 
-            pen.pendown()
-            pen.setposition((graph.room_x[i] + graph.room_width[i]) * scale + origin['x'],
-                                (graph.room_y[i]) * scale + origin['y'])
-            pen.setposition((graph.room_x[i] + graph.room_width[i]) * scale + origin['x'],
-                                (graph.room_y[i]+ graph.room_height[i]) * scale + origin['y'])
-            pen.setposition((graph.room_x[i]) * scale + origin['x'],
-                                (graph.room_y[i]+ graph.room_height[i]) * scale + origin['y'])
-            pen.setposition((graph.room_x[i]) * scale + origin['x'],
-                                (graph.room_y_left_top[i]) * scale + origin['y'])
-            pen.setposition(graph.room_x[i] * scale + origin['x'], graph.room_y[i] * scale + origin['y'])
-            pen.penup()
+    #         pen.pendown()
+    #         pen.setposition((graph.room_x[i] + graph.room_width[i]) * scale + origin['x'],
+    #                             (graph.room_y[i]) * scale + origin['y'])
+    #         pen.setposition((graph.room_x[i] + graph.room_width[i]) * scale + origin['x'],
+    #                             (graph.room_y[i]+ graph.room_height[i]) * scale + origin['y'])
+    #         pen.setposition((graph.room_x[i]) * scale + origin['x'],
+    #                             (graph.room_y[i]+ graph.room_height[i]) * scale + origin['y'])
+    #         pen.setposition((graph.room_x[i]) * scale + origin['x'],
+    #                             (graph.room_y_left_top[i]) * scale + origin['y'])
+    #         pen.setposition(graph.room_x[i] * scale + origin['x'], graph.room_y[i] * scale + origin['y'])
+    #         pen.penup()
     for i in range(graph.room_x.shape[0]):
         print(i)
-        if i in graph.biconnected_vertices or i in graph.extra_vertices:
+        if i in graph.extranodes:
             continue
         pen.color('black')
-        if(i not in to_be_merged_vertices):
+        if(i not in mergednodes):
             pen.setposition(((2 * graph.room_x[i] ) * scale / 2) + origin['x'] + 5,
                             ((2 * graph.room_y[i] + graph.room_height[i]) * scale / 2) + origin['y'])
             pen.write(i)
             pen.penup()
-        if(i in to_be_merged_vertices and mode == 2):
+        if(i in mergednodes and mode == 2):
             pen.setposition(((2 * graph.room_x[i] ) * scale / 2) + origin['x'] + 5,
                             ((2 * graph.room_y[i] + graph.room_height[i]) * scale / 2) + origin['y'])
             pen.write(i)
             pen.penup()
             
     value = 1
-    if(len(graph.area) != 0):
+    # if(len(graph.area) != 0):
 
-        pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30)
-        pen.write('Area of Each Room' ,font=("Arial", 20, "normal"))
-        for i in range(0,len(graph.area)):
-            if i in graph.biconnected_vertices or i in graph.extra_vertices:
-                continue
-            pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30-value*30)
-            pen.write(room_names[i] + ': '+ str(graph.area[i]),font=("Arial", 15, "normal"))
-            pen.penup()
-            value+=1
+    #     pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30)
+    #     pen.write('Area of Each Room' ,font=("Arial", 20, "normal"))
+    #     for i in range(0,len(graph.area)):
+    #         if i in graph.biconnected_vertices or i in graph.extra_vertices:
+    #             continue
+    #         pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30-value*30)
+    #         pen.write(room_names[i] + ': '+ str(graph.area[i]),font=("Arial", 15, "normal"))
+    #         pen.penup()
+    #         value+=1
 
 
 def draw_rfp(graph,pen,count):
@@ -258,142 +209,7 @@ def draw_rfp(graph,pen,count):
         pen.write(count,font=("Arial", 20, "normal"))
         pen.penup() 
 
-def get_rectangle_coordinates(graph,to_be_merged_vertices,rdg_vertices):
-    for i in range(0,graph.north):
-        graph.room_x_bottom_left[i] = graph.room_x[i]
-        graph.room_x_bottom_right[i] = graph.room_x[i]
-        graph.room_x_top_left[i] = graph.room_x[i]+graph.room_width[i]
-        graph.room_x_top_right[i] = graph.room_x[i]+graph.room_width[i]
-        graph.room_y_right_bottom[i] = graph.room_y[i]
-        graph.room_y_right_top[i] = graph.room_y[i]
-        graph.room_y_left_bottom[i] = graph.room_y[i] + graph.room_height[i]
-        graph.room_y_left_top[i] = graph.room_y[i] + graph.room_height[i]
-    
-    for i in range(0,len(to_be_merged_vertices)):
-        vertices = [rdg_vertices[i],to_be_merged_vertices[i]]
-        get_direction(graph,vertices)
 
-
-def get_direction(graph,vertices):
-    if(graph.room_y[vertices[0]] + graph.room_height[vertices[0]] - graph.room_y[vertices[1]] < 0.000001):
-        if graph.room_x[vertices[0]]>graph.room_x[vertices[1]]:
-            graph.room_x_top_left[vertices[0]]= graph.room_x[vertices[0]]
-            graph.room_x_bottom_left[vertices[1]]= graph.room_x[vertices[0]]
-        else:
-            graph.room_x_top_left[vertices[0]] = graph.room_x[vertices[1]]
-            graph.room_x_bottom_left[vertices[1]]=graph.room_x[vertices[1]]
-        if graph.room_x[vertices[0]]+graph.room_width[vertices[0]]<graph.room_x[vertices[1]]+graph.room_width[vertices[1]]:
-            graph.room_x_top_right[vertices[0]] = graph.room_x[vertices[0]] + graph.room_width[vertices[0]]
-            graph.room_x_bottom_right[vertices[1]] = graph.room_x[vertices[0]] + graph.room_width[vertices[0]]
-        else:
-            graph.room_x_top_right[vertices[0]] = graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-            graph.room_x_bottom_right[vertices[1]]=graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-    elif(graph.room_y[vertices[0]] - graph.room_y[vertices[1]] - graph.room_height[vertices[1]] < 0.000001):
-        if graph.room_x[vertices[0]]>graph.room_x[vertices[1]]:
-            graph.room_x_bottom_left[vertices[0]]= graph.room_x[vertices[0]]
-            graph.room_x_top_left[vertices[1]] = graph.room_x[vertices[0]]
-        else:
-            graph.room_x_bottom_left[vertices[0]]= graph.room_x[vertices[1]]
-            graph.room_x_top_left[vertices[1]] = graph.room_x[vertices[1]]
-        if graph.room_x[vertices[0]]+graph.room_width[vertices[0]]<graph.room_x[vertices[1]]+graph.room_width[vertices[1]]:
-            graph.room_x_bottom_right[vertices[0]]= graph.room_x[vertices[0]] + graph.room_width[vertices[0]]
-            graph.room_x_top_right[vertices[1]] = graph.room_x[vertices[0]] + graph.room_width[vertices[0]]
-        else:
-            graph.room_x_bottom_right[vertices[0]]= graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-            graph.room_x_top_right[vertices[1]] = graph.room_x[vertices[1]]+ graph.room_width[vertices[1]]
-    elif(graph.room_x[vertices[0]] + graph.room_width[vertices[0]] - graph.room_x[vertices[1]]<  0.000001):
-        if graph.room_y[vertices[0]]>graph.room_y[vertices[1]]:
-            graph.room_y_right_bottom[vertices[0]]=graph.room_y[vertices[0]]
-            graph.room_y_left_bottom[vertices[1]]=graph.room_y[vertices[0]]
-        else:
-            graph.room_y_right_bottom[vertices[0]]= graph.room_y[vertices[1]]
-            graph.room_y_left_bottom[vertices[1]]= graph.room_y[vertices[1]]
-        if graph.room_y[vertices[0]]+graph.room_height[vertices[0]]<graph.room_y[vertices[1]]+graph.room_height[vertices[1]]:
-            graph.room_y_right_top[vertices[0]]=graph.room_y[vertices[0]] + graph.room_height[vertices[0]]
-            graph.room_y_left_top[vertices[1]]=graph.room_y[vertices[0]] + graph.room_height[vertices[0]]
-        else:
-            graph.room_y_right_top[vertices[0]]=graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
-            graph.room_y_left_top[vertices[1]]= graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
-    elif(graph.room_x[vertices[0]] - graph.room_x[vertices[1]] - graph.room_width[vertices[1]]< 0.000001):
-        if graph.room_y[vertices[0]]>graph.room_y[vertices[1]]:
-            graph.room_y_left_bottom[vertices[0]]= graph.room_y[vertices[0]]
-            graph.room_y_right_bottom[vertices[1]]= graph.room_y[vertices[0]]
-        else:
-            graph.room_y_left_bottom[vertices[0]]=graph.room_y[vertices[1]]
-            graph.room_y_right_bottom[vertices[1]]=graph.room_y[vertices[1]]
-        if graph.room_y[vertices[0]]+graph.room_height[vertices[0]]<graph.room_y[vertices[1]]+graph.room_height[vertices[1]]:
-            graph.room_y_left_top[vertices[0]]=graph.room_y[vertices[0]] + graph.room_height[vertices[0]]
-            graph.room_y_right_top[vertices[1]]=graph.room_y[vertices[0]] + graph.room_height[vertices[0]]
-        else:
-            graph.room_y_left_top[vertices[0]]=graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
-            graph.room_y_right_top[vertices[1]]=graph.room_y[vertices[1]]+ graph.room_height[vertices[1]]
-
-def construct_rdg(graph,to_be_merged_vertices,rdg_vertices):
-    graph.t1_matrix = None
-    graph.t2_matrix = None
-    graph.t1_longest_distance = [-1] * (graph.west + 1)
-    graph.t2_longest_distance = [-1] * (graph.west + 1)
-    graph.t1_longest_distance_value = -1
-    graph.t2_longest_distance_value = -1
-    graph.n_s_paths = []
-    graph.w_e_paths = []
-
-    graph.room_x = np.zeros(graph.west - 3)
-    graph.room_y = np.zeros(graph.west - 3)
-    graph.room_height = np.zeros(graph.west - 3)
-    graph.room_width = np.zeros(graph.west - 3)
-    graph.room_x_bottom_right = np.zeros(graph.west - 3)
-    graph.room_x_bottom_left = np.zeros(graph.west - 3)
-    graph.room_x_top_right = np.zeros(graph.west - 3)
-    graph.room_x_top_left = np.zeros(graph.west - 3)
-    graph.room_y_right_top = np.zeros(graph.west - 3)
-    graph.room_y_left_top = np.zeros(graph.west - 3)
-    graph.room_y_right_bottom = np.zeros(graph.west - 3)
-    graph.room_y_left_bottom = np.zeros(graph.west - 3)
-    dual.populate_t1_matrix(graph)
-    dual.populate_t2_matrix(graph)
-    get_dimensions(graph)
-    get_rectangle_coordinates(graph,to_be_merged_vertices,rdg_vertices)
-
-def construct_rfp(G,hor_dgph,to_be_merged_vertices,rdg_vertices):
-    G.t1_matrix = None
-    G.t2_matrix = None
-    G.t1_longest_distance = [-1] * (G.west + 1)
-    G.t2_longest_distance = [-1] * (G.west + 1)
-    G.t1_longest_distance_value = -1
-    G.t2_longest_distance_value = -1
-    G.n_s_paths = []
-    G.w_e_paths = []
-
-    G.room_x = np.zeros(G.west - 3)
-    G.room_y = np.zeros(G.west - 3)
-    # G.room_height = np.zeros(G.west - 3)
-    # G.room_width = np.zeros(G.west - 3)
-    dual.populate_t1_matrix(G)
-    dual.populate_t2_matrix(G)
-    dual.get_coordinates(G,hor_dgph)
-    get_rectangle_coordinates(G,to_be_merged_vertices,rdg_vertices)
-
-def get_dimensions(graph):
-    for node in range(graph.matrix.shape[0]):
-        if node in [graph.north, graph.east, graph.south, graph.west]:
-            continue
-        row, col = np.where(graph.t1_matrix[1:-1] == node)
-        if row.shape[0] == 0:#remove this later
-            continue
-        counts = np.bincount(row)
-        max_row = np.argmax(counts)
-        indexes, = np.where(row == max_row)
-        graph.room_x[node] = col[indexes[0]]
-        graph.room_width[node] = col[indexes[-1]] - col[indexes[0]] + 1
-
-
-        row, col = np.where(graph.t2_matrix[:, 1:-1] == node)
-        counts = np.bincount(col)
-        max_col = np.argmax(counts)
-        indexes, = np.where(col == max_col)
-        graph.room_y[node] = row[indexes[0]]
-        graph.room_height[node] = row[indexes[-1]] - row[indexes[0]] + 1
 
 def draw_rdg_circulation(graph,count,pen,to_be_merged_vertices,orig):
     pen.width(1.5)

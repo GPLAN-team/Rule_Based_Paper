@@ -1,176 +1,207 @@
-"""Performs contraction on 4-connected Proper Triangulated Planar Graph (PTPG) to transform into a trivial Regular Edge Labelling (REL)
+"""Contraction Module
+
+This module allows user to perform contraction on a Proper Triangulated
+Planar Graph (PTPG) to transform it into a trivial Regular Edge
+Labelling (REL).
+
+This module contains the following functions:
+
+    * init_degrees - finds degree of each node in the graph.
+    * init_goodnodes - finds good vertices in the graph.
+    * is_goodvertex - finds if a vertex is a good vertex.
+    * cntr_nbr - finds contractible neighbour of given vertex.
+    * update_adjmat - updates adjacency matrix post contraction.
+    * update_goodnodes - updates good vertices post contraction.
+    * check - checks if a vertex is god vertex post contraction.
+    * contract - performs contraction on the graph.
 
 """
+
 import networkx as nx 
 import numpy as np 
 
-def initialize_degrees(graph):
-    """Finds the degree of each vertex in the graph and populates the degreees atribute of PTPG object.
+def init_degrees(graph):
+    """Populates degrees attributes of InputGraph object.
 
     Args:
-        graph: an instance of PTPG object
+        graph: An instance of InputGraph object.
 
     Returns:
-        void
-
+        None
     """
-    graph.degrees = [np.count_nonzero(graph.matrix[node]) for node in range(graph.node_count)]
+    graph.degrees = [np.count_nonzero(graph.matrix[node])
+     for node in range(graph.nodecnt)]
 
-def initialize_good_vertices(graph):
-    """Finds the good vertices of the graph and populates the good_vertices attribute in the PTPG object.
+def init_goodnodes(graph):
+    """Finds good vertces of the graph.
 
     Args:
-        graph: an instance of PTPG object
+        graph: An instance of InputGraph object.
 
     Returns:
-        void
-
-
+        None
     """
-    graph.good_vertices = []
+    graph.goodnodes = []
     for node in range(graph.matrix.shape[0]):
-        if is_good_vertex(graph,node):
-            graph.good_vertices.append(node)
+        if is_goodvertex(graph,node):
+            graph.goodnodes.append(node)
 
-"""
-    Definitions:
-    1) Light vertex: vertex whose degree <= 19
-    2) Heavy vertex: vertex whose degree >= 20
-    3) Degree 5 good vertex: (vertex who has degree 5) and (has 0 or 1  heavy neighbours)
-    4) Degree 4 good vertex: (vertex who has degree 4) and
-                             ((has 0 or 1 heavy neighbour) or (has 2 heavy neighbours which are not adjacent))
-    5) Good vertex: Degree 4 good vertex or Degree 5 good vertex
-    Note: We do not want any of the 4 boundary NESW vertices to be a good vertex since we never want to contract
-        any edge connected to these vertices. LookUp: Assusmption 1 for detailed reason
-"""
-def is_good_vertex(graph, node):
-    
-    """Checks if the given vertex is a good vertex or not.
+def is_goodvertex(graph, node):
+    """Checks if the given vertex is a good vertex.
 
     Args:
-        graph: an instance of PTPG object
-        node: vertex
+        graph: An instance of InputGraph object.
+        node: An integer representing vertex to be checked.
 
     Returns:
-        boolean: representing if vertex is good vertex or not
-
-
+        boolean: A boolean indicating if given vertex is a good vertex.
     """
-
     if node not in [graph.north, graph.east, graph.south, graph.west]:
         if graph.degrees[node] == 5:
-            heavy_neighbour_count = 0
-            neighbours, = np.where(graph.matrix[node] == 1)
-            for neighbour in neighbours:  # iterating over neighbours and checking if any of them is heavy vertex
-                if graph.degrees[neighbour] >= 20:
-                    heavy_neighbour_count += 1
-            if heavy_neighbour_count <= 1:
-                return True  # satisfies all conditions for degree 5 good vertex
+            heavy_nbrcnt = 0
+            nbrs, = np.where(graph.matrix[node] == 1)
+            for nbr in nbrs:  
+                if graph.degrees[nbr] >= 20:
+                    heavy_nbrcnt += 1
+            if heavy_nbrcnt <= 1:
+                return True
 
         elif graph.degrees[node] == 4:
-            heavy_neighbours = []
-            neighbours, = np.where(graph.matrix[node] == 1)
-            for neighbour in neighbours:  # iterating over neighbours and checking if any of them is heavy vertex
-                if graph.degrees[neighbour] >= 20:
-                    heavy_neighbours.append(neighbour)
-            if (len(heavy_neighbours) <= 1) or (
-                    len(heavy_neighbours) == 2 and graph.matrix[heavy_neighbours[0]][heavy_neighbours[1]] != 1):
-                return True  # satisfies all conditions for degree 4 good ertex
+            heavynbr = []
+            nbrs, = np.where(graph.matrix[node] == 1)
+            for nbr in nbrs: 
+                if graph.degrees[nbr] >= 20:
+                    heavynbr.append(nbr)
+            if (len(heavynbr) <= 1) \
+            or (len(heavynbr) == 2 
+                and graph.matrix[heavynbr[0]][heavynbr[1]] != 1):
+                return True
     return False
 
-def get_contractible_neighbour(graph, v):
-
-    """Finds the contractible neighbour for a given vertex along with common neighbours 
+def cntr_nbr(graph, node):
+    """Finds contractible neghbour of given vertex
 
     Args:
-        graph: an instance of PTPG object
-        v: vertex
+        graph: An instance of InputGraph object.
+        node: An integer representing vertex.
 
     Returns:
-        u: contractible neighbour of vertex v; -1 in case of no contractible neighbour
-        y_and_z: list containing common neighbours for vertex v and u; empty list in case of no contractib;e neighbour
-
-    Raises:
-        Error: A complex triangle exists in the graph
+        nbr: An integer representing contractibl neighbour of vertex.
+        mut_nbrs: A list containiing mutual neighbours of node and nbr.
     """
-
-    v_nbr, = np.where(graph.matrix[v] == 1)
-    # checking if any of neighbors of the good vertex v is contractible
-    # by lemma we will find one but it can be one of nesw so we need to ignore this v
-    for u in v_nbr:
-        if u in [graph.north, graph.east, graph.south, graph.west]:
+    nbrs, = np.where(graph.matrix[node] == 1)
+    for nbr in nbrs:
+        if nbr in [graph.north, graph.east, graph.south, graph.west]:
             continue
         contractible = True
-        u_nbr, = np.where(graph.matrix[u] == 1)
-        y_and_z = np.intersect1d(v_nbr, u_nbr, assume_unique=True)
-        if len(y_and_z) != 2:
-            print("Input graph might contain a complex triangle")
-        for x in v_nbr:
-            if x in y_and_z or x == u:
+        node_nbrs, = np.where(graph.matrix[nbr] == 1)
+        mut_nbrs = np.intersect1d(nbrs
+            , node_nbrs
+            , assume_unique=True)
+        if len(mut_nbrs) != 2:
+            print("Input graph might contain a complex triangle.")
+        for vertex in nbrs:
+            if vertex in mut_nbrs or vertex == nbr:
                 continue
-            x_nbr, = np.where(graph.matrix[x] == 1)
-            intersection = np.intersect1d(x_nbr, u_nbr, assume_unique=True)
-            for node in intersection:
-                if node not in y_and_z and node != v:
+            vertex_nbr, = np.where(graph.matrix[vertex] == 1)
+            intersection = np.intersect1d(vertex_nbr
+                , node_nbrs
+                , assume_unique=True)
+            for vertex_int in intersection:
+                if vertex_int not in mut_nbrs\
+                 and vertex_int != node:
                     contractible = False
                     break
             if not contractible:
                 break
         if contractible:
-            return u, y_and_z
+            return nbr, mut_nbrs
     return -1, []
 
-def update_adjacency_matrix(graph, v, u):
-    """Removes the vertex v from the graph and connect its adjacencies to vertex u (Base of contraction)
+def update_adjmat(graph,node,nbr):
+    """Updates adjacency matrix post contraction.
 
     Args:
-        graph: an instance of PTPG object
-        v: vertex to be removed
-        u: contractible neighbour vertex of v
+        graph: An instance of InputGraph object.
+        node: An integer representing vertex.
+        nbr: An integer representing contractible neighbour of node.
 
     Returns:
-        void
-
+        None
     """
-    v_nbr, = np.where(graph.matrix[v] == 1)
-    for node in v_nbr:
-        graph.matrix[v][node] = 0
-        graph.matrix[node][v] = 0
-        if node != u:
-            graph.matrix[node][u] = 1
-            graph.matrix[u][node] = 1
+    node_nbrs, = np.where(graph.matrix[node] == 1)
+    for vertex in node_nbrs:
+        graph.matrix[node][vertex] = 0
+        graph.matrix[vertex][node] = 0
+        if vertex != nbr:
+            graph.matrix[vertex][nbr] = 1
+            graph.matrix[nbr][vertex] = 1
 
-def update_good_vertices(graph, v, u, y_and_z):
-    graph.degrees[u] += graph.degrees[v] - 4
-    graph.degrees[y_and_z[0]] -= 1
-    graph.degrees[y_and_z[1]] -= 1
-    graph.degrees[v] = 0
-    check(graph,u)
-    check(graph,y_and_z[0])
-    check(graph,y_and_z[1])
+def update_goodnodes(graph,node,nbr,mut_nbrs):
+    """Updates list of good nodes post contraction.
+
+    Args:
+        graph: An instance of InputGraph object.
+        node: An integer representing vertex.
+        nbr: An integer representing contractible neighbour of node.
+        mut_nbrs: A list containing mutual neighbours of node and nbr.
+
+    Returns:
+        None
+    """
+    graph.degrees[nbr] += graph.degrees[node] - 4
+    graph.degrees[mut_nbrs[0]] -= 1
+    graph.degrees[mut_nbrs[1]] -= 1
+    graph.degrees[node] = 0
+    check(graph,nbr)
+    check(graph,mut_nbrs[0])
+    check(graph,mut_nbrs[1])
 
 def check(graph,node):
-    if is_good_vertex(graph,node) and (node not in graph.good_vertices):
-        graph.good_vertices.append(node)
-    elif (not is_good_vertex(graph,node)) and (node in graph.good_vertices):
-        graph.good_vertices.remove(node)
+    """Checks if given node is good vertex post contraction.
+
+    Args:
+        graph: An instance of InputGraph object.
+        node: An integer representing vertex.
+
+    Returns:
+        None
+    """
+    if is_goodvertex(graph,node)\
+     and (node not in graph.goodnodes):
+        graph.goodnodes.append(node)
+    elif (not is_goodvertex(graph,node))\
+     and (node in graph.goodnodes):
+        graph.goodnodes.remove(node)
     
 
 def contract(graph):
-    attempts = len(graph.good_vertices)
+    """Performs contractio on the graph.
+
+    Args:
+        graph: An instance of InputGraph object.
+
+    Returns:
+        node: An integer representing good vertex for contraction.
+        nbr: An integer representing contractible neighbour of node.
+    """
+    attempts = len(graph.goodnodes)
     while attempts > 0:
-        v = graph.good_vertices.pop(0)
-        u, y_and_z = get_contractible_neighbour(graph,v)
-        if u == -1:
-            graph.good_vertices.append(v)
+        node = graph.goodnodes.pop(0)
+        nbr, mut_nbrs = cntr_nbr(graph,node)
+        if nbr == -1:
+            graph.goodnodes.append(node)
             attempts -= 1
             continue
-        graph.contractions.append({'v': v, 'u': u, 'y_and_z': y_and_z, 'v_nbr': np.where(graph.matrix[v] == 1)[0]})
-        update_adjacency_matrix(graph,v, u)
-        update_good_vertices(graph,v, u, y_and_z)
-        graph.node_count -= 1
-        graph.edge_count -= 3
-        return v, u
+        graph.cntrs.append({'node': node
+            , 'nbr': nbr
+            , 'mut_nbrs': mut_nbrs
+            , 'node_nbrs': np.where(graph.matrix[node] == 1)[0]})
+        update_adjmat(graph,node,nbr)
+        update_goodnodes(graph,node,nbr,mut_nbrs)
+        graph.nodecnt -= 1
+        graph.edgecnt -= 3
+        return node, nbr
     return -1, -1
 
 

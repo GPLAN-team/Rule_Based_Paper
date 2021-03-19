@@ -1,121 +1,129 @@
-"""Main program file of the project.
-
+"""Main file of the projrct
 
 """
+
 import warnings
-import ptpg
+import time
 import tkinter as tk
 import networkx as nx
 import gui
-import circulation
-import checker
-from tkinter import messagebox
-import dimension_gui as dimgui
-import boundary_gui as bdygui
-import drawing as draw 
-import tests
-import triangularity as trng
+import inputgraph
+import drawing as draw
+# import circulation
+# import checker
+# from tkinter import messagebox
+# import dimension_gui as dimgui
+# import boundary_gui as bdygui
+
+# import tests
+# import triangularity as trng
+origin = 50
 def run():
-    """Runs the GPLAN program
+    """Runs the GPLAN program.
 
     Args:
         None
 
     Returns:
-        void
-
+        None
     """
     def printe(string):
-        """Prints string on the console
+        """Prints string on GUI console.
 
         Args:
-            string
-            
-        Returns:
-            void
+            None
 
+        Returns:
+            None
         """
         gclass.textbox.insert('end',string)
         gclass.textbox.insert('end',"\n")
 
-    warnings.filterwarnings("ignore") #Remove warnings that appear on the terminal
+    warnings.filterwarnings("ignore")
     gclass = gui.gui_class() 
 
     while (gclass.command!="end"):
         if(gclass.command=="dissection"):
             make_dissection_corridor(gclass)
-
-        if ( gclass.command =="checker"):
-            tests.tester(gclass.value,gclass.textbox)
+        # if ( gclass.command =="checker"):
+        #     tests.tester(gclass.value,gclass.textbox)
         else:
-            G = ptpg.PTPG(gclass.value)
-            printe("\nEdge Set")
-            printe(G.graph.edges())
-            if (gclass.command == "circulation"):
-                gclass.pen.ht()
-                make_graph_circulation(G, gclass)
+            graph = inputgraph.InputGraph(gclass.value[0]
+                ,gclass.value[1]
+                ,gclass.value[2])
+            # if (gclass.command == "circulation"):
+            #     gclass.pen.ht()
+            #     make_graph_circulation(G, gclass)
+            if(gclass.command == "single"):
+                # test_result = checker.gui_checker(G)
+                start = time.time()
+                graph.single_dual()
+                end = time.time()
+                printe("Time taken: " + str((end-start)*1000) + " ms")
+                draw.draw_rdg(graph
+                    ,1
+                    ,gclass.pen
+                    ,graph.mergednodes
+                    ,graph.irreg_nodes1
+                    ,1
+                    ,gclass.value[6]
+                    ,[]
+                    ,origin)
+            #     if(not test_result[0]):
+            #         messagebox.showerror("Invalid Graph", "Graph is not planar")
+            #     # elif(not test_result[1]):
+            #     #     messagebox.showerror("Invalid Graph", "Graph is not triangular")
+            #     # elif(not test_result[2]):
+            #     #     messagebox.showerror("Invalid Graph", "Graph is not biconnected")
+            #     else:
+            #         # try: 
+            #         if(G.dimensioned == 0):
+            #             G.create_single_dual(1,gclass.pen,gclass.textbox)
+            #             draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
+            #             W = ptpg.PTPG(gclass.value)
+            #             if not trng.Check_Chordality(W.graph, 0) and W.triangulation_type == "wall":
+            #                 # gclass.graph_ret()
+            #                 gclass.ocan.add_tab()
+            #                 # gclass.ocan.tscreen.resetscreen()
+            #                 gclass.pen = gclass.ocan.getpen()
+            #                 gclass.pen.speed(100000)
 
-            elif(gclass.command == "single"):
-                test_result = checker.gui_checker(G)
-                if(not test_result[0]):
-                    messagebox.showerror("Invalid Graph", "Graph is not planar")
-                # elif(not test_result[1]):
-                # 	messagebox.showerror("Invalid Graph", "Graph is not triangular")
-                # elif(not test_result[2]):
-                # 	messagebox.showerror("Invalid Graph", "Graph is not biconnected")
-                else:
-                    # try: 
-                    if(G.dimensioned == 0):
-                        G.create_single_dual(1,gclass.pen,gclass.textbox)
-                        draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,1,gclass.value[6],[])
-
-
-                        W = ptpg.PTPG(gclass.value)
-                        if not trng.Check_Chordality(W.graph, 0) and W.triangulation_type == "wall":
-                            # gclass.graph_ret()
-                            gclass.ocan.add_tab()
-
-                            # gclass.ocan.tscreen.resetscreen()
-                            gclass.pen = gclass.ocan.getpen()
-                            gclass.pen.speed(100000)
-
-                            W.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
-                            # draw.draw_rdg(W,1,gclass.pen,W.to_be_merged_vertices,W.rdg_vertices,1,gclass.value[6],[])
-                            W.make_walls(gclass.ocan.canvas)
-
-                        # else:
-                            # G.create_single_dual(1,gclass.pen,gclass.textbox)
-                    else:
-                        # if(not checker.rfp_checker(G.matrix)):
-                        #     G.create_single_dual(2,gclass.pen,gclass.textbox)
-                        #     draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,2,gclass.value[6],gclass.value[5])
-                        #     messagebox.showinfo("Orthogonal Floor Plan","The input graph has an orthogonal floorplan.Rooms with red boundary are the additional rooms which will be added but later merged.Please provide dimensions for the extra rooms as well.")
-                        #     G.width_min,G.width_max,G.height_min,G.height_max= dimgui.gui_fnc(G.original_node_count+len(G.to_be_merged_vertices))
-                        #     gclass.pen.clear()
-                        #     G.create_single_floorplan(gclass.pen,gclass.textbox,1)
-                        #     draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
-                        # else:
-                        G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
-                        G.create_single_floorplan(gclass.pen,gclass.textbox,0)
-                        draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
-                # except:
-                        # printe("Biconnectivity and Triangularity led to non-K4 separating triangle")
-            elif(gclass.command == "multiple"):
-                test_result = checker.gui_checker(G)
-                if(not test_result[0]):
-                    messagebox.showerror("Invalid Graph", "Graph is not planar")
-                # elif(not test_result[1]):
-                # 	messagebox.showerror("Invalid Graph", "Graph is not triangular")
-                # elif(not test_result[2]):
-                # 	messagebox.showerror("Invalid Graph", "Graph is not biconnected")
-                else:
-            # 		print(G.original_node_count)
-            # 		G.user_boundary_constraint,G.user_corner_constraint = bdygui.gui_fnc(G.node_count)
-                    if(G.dimensioned == 0):
-                        G.create_multiple_dual(1,gclass.pen,gclass.textbox)
-                    else:
-                        G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
-                        G.create_multiple_floorplan(gclass.pen,gclass.textbox,0)
+            #                 W.create_single_dual(1,gclass.pen,gclass.textbox, "wall")
+            #                 # draw.draw_rdg(W,1,gclass.pen,W.to_be_merged_vertices,W.rdg_vertices,1,gclass.value[6],[])
+            #                 W.make_walls(gclass.ocan.canvas)
+            #             # else:
+            #                 # G.create_single_dual(1,gclass.pen,gclass.textbox)
+            #         else:
+            #             # if(not checker.rfp_checker(G.matrix)):
+            #             #     G.create_single_dual(2,gclass.pen,gclass.textbox)
+            #             #     draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,2,gclass.value[6],gclass.value[5])
+            #             #     messagebox.showinfo("Orthogonal Floor Plan","The input graph has an orthogonal floorplan.Rooms with red boundary are the additional rooms which will be added but later merged.Please provide dimensions for the extra rooms as well.")
+            #             #     G.width_min,G.width_max,G.height_min,G.height_max= dimgui.gui_fnc(G.original_node_count+len(G.to_be_merged_vertices))
+            #             #     gclass.pen.clear()
+            #             #     G.create_single_floorplan(gclass.pen,gclass.textbox,1)
+            #             #     draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
+            #             # else:
+            #             G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
+            #             G.create_single_floorplan(gclass.pen,gclass.textbox,0)
+            #             draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
+            #     # except:
+            #             # printe("Biconnectivity and Triangularity led to non-K4 separating triangle")
+            # elif(gclass.command == "multiple"):
+            #     test_result = checker.gui_checker(G)
+            #     if(not test_result[0]):
+            #         messagebox.showerror("Invalid Graph", "Graph is not planar")
+            #     # elif(not test_result[1]):
+            #     #     messagebox.showerror("Invalid Graph", "Graph is not triangular")
+            #     # elif(not test_result[2]):
+            #     #     messagebox.showerror("Invalid Graph", "Graph is not biconnected")
+            #     else:
+            # #         print(G.original_node_count)
+            # #         G.user_boundary_constraint,G.user_corner_constraint = bdygui.gui_fnc(G.node_count)
+            #         if(G.dimensioned == 0):
+            #             G.create_multiple_dual(1,gclass.pen,gclass.textbox)
+            #         else:
+            #             G.width_min,G.width_max,G.height_min,G.height_max = dimgui.gui_fnc(G.node_count)
+            #             G.create_multiple_floorplan(gclass.pen,gclass.textbox,0)
 
         gclass.root.wait_variable(gclass.end)
         gclass.graph_ret()

@@ -1,0 +1,59 @@
+Rules:
+
+> camelCasing for module name
+> camelCasing for variable name
+> function name separated by UNDERSCORE
+> spaces used for indentation
+> limit line length to 72 characters
+> line break before binary operator
+Surround top-level function and class definitions with two blank lines.
+
+Method definitions inside a class are surrounded by a single blank line.
+
+Imports should usually be on separate lines:
+
+Imports should be grouped in the following order:
+
+Standard library imports.
+Related third party imports.
+Local application/library specific imports.
+
+Avoid extraneous whitespace in the following situations:
+
+Immediately inside parentheses, brackets or braces:
+Between a trailing comma and a following close parenthesis:
+Immediately before a comma, semicolon, or colon:
+Immediately before the open parenthesis that starts the argument list of a function call:
+Immediately before the open parenthesis that starts an indexing or slicing:
+More than one space around an assignment (or other) operator to align it with another:
+
+If operators with different priorities are used, consider adding whitespace around the operators with the lowest priority(ies
+
+Comments:
+Comments should be complete sentences. The first word should be capitalized, unless it is an identifier that begins with a lower case letter (never alter the case of identifiers!).
+
+Use inline comments sparingly.
+
+Write docstrings for all public modules, functions, classes, and methods. Docstrings are not necessary for non-public methods, but you should have a comment that describes what the method does. This comment should appear after the def line.
+
+"""Return a foobang
+
+Optional plotz says to frobnicate the bizbaz first.
+"""
+
+"""Return an ex-parrot."""
+
+Modules should have short, all-lowercase names. underscores for readability
+
+Class names should normally use the CapWords convention.(CamelCase)
+
+Names of type variables introduced in PEP 484 should normally use CapWords preferring short names: T, AnyStr, Num. 
+
+Function names should be lowercase, with words separated by underscores as necessary to improve readability.
+
+Use the function naming rules: lowercase with words separated by underscores as necessary to improve readability.
+
+Constants are usually defined on a module level and written in all capital letters with underscores separating words.
+
+https://realpython.com/documenting-python-code/#docstrings-background
+https://www.python.org/dev/peps/pep-0008/#code-lay-out

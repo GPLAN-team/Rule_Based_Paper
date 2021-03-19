@@ -1,125 +1,196 @@
+"""Graph Theoretical Operations Module
+
+This module allows user to perform different graph theoretical operations
+on InputGraph class object.
+
+This module contains the following functions:
+    * list_comparer - checks if there exists an element in list 2
+                      whose intersection with list 2 is of given 
+                      size.
+    * get_directed - returns a directed graph.
+    * get_trngls - returns all triangles in the graph.
+    * get_bdy - returns outer boundary of the graph.
+    * ordered_nbr_label - returns label of ordered 
+                          neighbour of the vertex.
+    * ordered_nbr - returns ordered neighbour 
+                    of the vertex.
+    * order_nbrs - returns ordered neighbours around
+                   a given vertex.
+"""
 import numpy as np
 import networkx as nx 
 
-#Returns intersection between two lists as a new list
+
 def intersection(lst1, lst2): 
     lst3 = [value for value in lst1 if value in lst2] 
     return lst3
  
-# Checks if there exist an element in 'cln' whose intersection with 'lst1' is of length 'size'
-def list_comparer(lst1,cln,size):
-    for temp in cln:
-        if(len(intersection(lst1,temp)) == size):
+def list_comparer(lst1,lst2,size):
+    """Checks if there exists an element in liat 2
+       whoae intersectioj with list 1 is of given size. 
+
+    Args:
+        lst1: A list containing elements of list 1.
+        lst2: A list containing elements of list 2.
+        size: An integer representing size to be compared.
+
+    Returns:
+        boolena: A boolean representing if such an element exists.
+    """
+    for elem in lst2:
+        if(len(intersection(lst1,elem)) == size):
             return True
     return False
 
-#Returns directed graph of a given graph
 def get_directed(graph):
-	H = nx.from_numpy_matrix(graph.matrix,create_using=nx.DiGraph)
-	return H
+    """Returns a directed graph of the input graph.
 
-# Returns all triangles of the input graph
+    Args:
+        graph: An instance of InputGraph class.
 
-def get_all_triangles(graph):
-    graph1 = nx.from_numpy_matrix(graph.matrix)
-    all_cliques= nx.enumerate_all_cliques(graph1)
-    triad_cliques=[x for x in all_cliques if len(x)==3 ]
-    return triad_cliques
+    Returns:
+        digraph: A networkx directed graph of the input graph.
+    """
+    digraph = nx.from_numpy_matrix(graph.matrix,create_using=nx.DiGraph)
+    return digraph
 
-#Returns outer boundary and outer vertices of a graph
-def get_outer_boundary_vertices(graph):
-    
-    all_triangles = graph.triangles
-    H = get_directed(graph)         
-    # H = graph.directed.copy()
-    outer_boundary = []
-    for edge in H.edges:
+
+def get_trngls(graph):
+    """Returns all triangular cycles in a graph.
+
+    Args:
+        graph: An instance of InputGraph class.
+
+    Returns:
+        trngles: A list containing all triangular cycles in the graph.
+    """
+    nxgraph = nx.from_numpy_matrix(graph.matrix)
+    all_cliques= nx.enumerate_all_cliques(nxgraph)
+    trngles=[x for x in all_cliques if len(x)==3 ]
+    return trngles
+
+def get_bdy(graph):
+    """Returns outer boundary of the graph.
+
+    Args:
+        graph: An instance of InputGraph class.
+
+    Returns:
+        bdy_nodes: A list containing nodes on the outer boundary.
+        bdy_edges: A list containing edges on the outer boundary.
+    """
+    trngls = graph.trngls
+    digraph = get_directed(graph)
+    bdy_edges = []
+    for edge in digraph.edges:
         count = 0
-        for triangle in all_triangles:
-            if edge[0] in triangle and edge[1] in triangle:
+        for trngl in trngls:
+            if edge[0] in trngl and edge[1] in trngl:
                 count += 1
         if count == 1:
-            outer_boundary.append(edge)
-    outer_vertices = []
-    for edge in outer_boundary:
-        if edge[0] not in outer_vertices:
-            outer_vertices.append(edge[0])
-        if edge[1] not in outer_vertices:
-            outer_vertices.append(edge[1])
-    return outer_vertices,outer_boundary
+            bdy_edges.append(edge)
+    bdy_nodes = []
+    for edge in bdy_edges:
+        if edge[0] not in bdy_nodes:
+            bdy_nodes.append(edge[0])
+        if edge[1] not in bdy_nodes:
+            bdy_nodes.append(edge[1])
+    return bdy_nodes,bdy_edges
 
 
 
 
-def get_ordered_neighbour_label(graph, centre, y, clockwise=False):
-    next = get_ordered_neighbour(graph,centre, y, clockwise)
+def ordered_nbr_label(graph, centre, nbr, cw=False):
+    """Returns label of ordered neighbour of the vertex.
+
+    Args:
+        graph: An instance of InputGraph class.
+        centre: An integer indicating representing the vertex.
+        nbr: An integer represening neighbour of the vertex.
+        cw: A boolean representing direction to move.
+
+    Returns:
+        integer: An integer representing label (2 or 3).
+    """
+    next = ordered_nbr(graph,centre, nbr, cw)
     if graph.matrix[centre][next] == 2 or graph.matrix[next][centre] == 2:
         return 2
     else:
         return 3
 
-def get_ordered_neighbour(graph, centre, y, clockwise=False):
-    ordered_neighbours = order_neighbours(graph,centre, clockwise)
-    return ordered_neighbours[(ordered_neighbours.index(y) + 1) % len(ordered_neighbours)]
+def ordered_nbr(graph, centre, nbr, cw=False):
+    """Returns ordered neighbour of the vertex.
 
-def order_neighbours(graph, centre, clockwise=False):
-    vertex_set = np.concatenate([np.where(np.logical_or(graph.matrix[centre] == 2, graph.matrix[centre] == 3))[0],
-                                     np.where(np.logical_or(graph.matrix[:, centre] == 2, graph.matrix[:, centre] == 3))[0]]).tolist()
-    ordered_set = [vertex_set.pop(0)]
+    Args:
+        graph: An instance of InputGraph class.
+        centre: An integer indicating representing the vertex.
+        nbr: An integer represening neighbour of the vertex.
+        cw: A boolean representing direction to move.
+
+    Returns:
+        integer: An integer representing ordered neighbour.
+    """
+    ordered_nbrs = order_nbrs(graph,centre, cw)
+    return ordered_nbrs[(ordered_nbrs.index(nbr) + 1) % len(ordered_nbrs)]
+
+def order_nbrs(graph, centre, cw=False):
+    """Returns neighbour of the vertex in ordered fashion.
+
+    Args:
+        graph: An instance of InputGraph class.
+        centre: An integer indicating representing the vertex.
+        cw: A boolean representing direction to move.
+
+    Returns:
+        ord_set: A list representing ordered neighbours of the vertex.
+    """  
+    vertex_set = np.concatenate([np.where(np.logical_or(graph.matrix[centre] == 2
+        ,graph.matrix[centre] == 3))[0]
+        ,np.where(np.logical_or(graph.matrix[:, centre] == 2
+        ,graph.matrix[:, centre] == 3))[0]]).tolist()
+    ord_set = [vertex_set.pop(0)]
     while len(vertex_set) != 0:
         for i in vertex_set:
-            if graph.matrix[ordered_set[len(ordered_set) - 1]][i] != 0 \
-                    or graph.matrix[i][ordered_set[len(ordered_set) - 1]] != 0:
-                ordered_set.append(i)
+            if graph.matrix[ord_set[len(ord_set) - 1]][i] != 0 \
+                    or graph.matrix[i][ord_set[len(ord_set) - 1]] != 0:
+                ord_set.append(i)
                 vertex_set.remove(i)
                 break
-            elif graph.matrix[ordered_set[0]][i] != 0 or graph.matrix[i][ordered_set[0]] != 0:
-                ordered_set.insert(0, i)
+            elif graph.matrix[ord_set[0]][i] != 0 \
+            or graph.matrix[i][ord_set[0]] != 0:
+                ord_set.insert(0, i)
                 vertex_set.remove(i)
                 break
-
     current = 0
-    # case: centre is the South vertex
     if centre == graph.south:
-        if graph.matrix[graph.west][ordered_set[0]] != 0:
-            ordered_set.reverse()
-
-    # case: centre is the West vertex
+        if graph.matrix[graph.west][ord_set[0]] != 0:
+            ord_set.reverse()
     elif centre == graph.west:
-        if graph.matrix[ordered_set[0]][graph.north] != 0:
-            ordered_set.reverse()
-
-    # case: first vertex is in t1_leaving
-    elif graph.matrix[centre][ordered_set[0]] == 2:
-        while graph.matrix[centre][ordered_set[current]] == 2:
+        if graph.matrix[ord_set[0]][graph.north] != 0:
+            ord_set.reverse()
+    elif graph.matrix[centre][ord_set[0]] == 2:
+        while graph.matrix[centre][ord_set[current]] == 2:
             current += 1
-        if graph.matrix[centre][ordered_set[current]] == 3:
-            ordered_set.reverse()
-
-    # case: first vertex is in t2_entering
-    elif graph.matrix[ordered_set[0]][centre] == 3:
-        while graph.matrix[ordered_set[current]][centre] == 3:
+        if graph.matrix[centre][ord_set[current]] == 3:
+            ord_set.reverse()
+    elif graph.matrix[ord_set[0]][centre] == 3:
+        while graph.matrix[ord_set[current]][centre] == 3:
             current += 1
-        if graph.matrix[centre][ordered_set[current]] == 2:
-            ordered_set.reverse()
-
-    # case: first vertex is in t1_entering
-    elif graph.matrix[ordered_set[0]][centre] == 2:
-        while graph.matrix[ordered_set[current]][centre] == 2:
+        if graph.matrix[centre][ord_set[current]] == 2:
+            ord_set.reverse()
+    elif graph.matrix[ord_set[0]][centre] == 2:
+        while graph.matrix[ord_set[current]][centre] == 2:
             current += 1
-        if graph.matrix[ordered_set[current]][centre] == 3:
-            ordered_set.reverse()
-
-    # case: first vertex is in t2_leaving
-    elif graph.matrix[centre][ordered_set[0]] == 3:
-        while graph.matrix[centre][ordered_set[current]] == 3:
+        if graph.matrix[ord_set[current]][centre] == 3:
+            ord_set.reverse()
+    elif graph.matrix[centre][ord_set[0]] == 3:
+        while graph.matrix[centre][ord_set[current]] == 3:
             current += 1
-        if graph.matrix[ordered_set[current]][centre] == 2:
-            ordered_set.reverse()
-
-    if clockwise:
-        ordered_set.reverse()
-    return ordered_set
+        if graph.matrix[ord_set[current]][centre] == 2:
+            ord_set.reverse()
+    if cw:
+        ord_set.reverse()
+    return ord_set
 
 
 def get_encoded_matrix(graph):
@@ -152,24 +223,26 @@ def is_complex_triangle(graph):
     else:
         return True
 
-def ordered_outer_boundary(graph):
-    vertices = get_outer_boundary_vertices(graph)[0]
-    edges = get_outer_boundary_vertices(graph)[1]
+def ordered_bdy(graph):
+    """Returns ordered boundary of the input graph.
 
-    # print(vertices,edges)
-    ordered_vertices = [vertices[0]]
-    while(len(ordered_vertices) != len(vertices)):
-        temp = ordered_vertices[len(ordered_vertices)-1]
-        # print(temp)
-        for vertex in vertices:
-            # print(vertex)
-            if((temp,vertex) in edges and vertex not in ordered_vertices):
-                ordered_vertices.append(vertex)
+    Args:
+        graph: An instance of InputGraph class.
+
+    Returns:
+        ordered_bdy: A list containing boundary nodes in circular order.
+    """
+    bdy_nodes = get_bdy(graph)[0]
+    bdy_edges = get_bdy(graph)[1]
+    ordered_bdy = [bdy_nodes[0]]
+    while(len(ordered_bdy) != len(bdy_nodes)):
+        temp = ordered_bdy[len(ordered_bdy)-1]
+        for vertex in bdy_nodes:
+            if((temp,vertex) in bdy_edges
+             and vertex not in ordered_bdy):
+                ordered_bdy.append(vertex)
                 break
-        # if(len(ordered_vertices) > 2):
-        #     break
-    # print(ordered_vertices)
-    return ordered_vertices
+    return ordered_bdy
 
 def find_possible_boundary(boundary):
     list_of_boundaries = []

@@ -1,0 +1,13 @@
+1. difference between cip and cip paths is the inclusion/excusion of end points
+
+"""
+    Definitions:
+    1) Light vertex: vertex whose degree <= 19
+    2) Heavy vertex: vertex whose degree >= 20
+    3) Degree 5 good vertex: (vertex who has degree 5) and (has 0 or 1  heavy neighbours)
+    4) Degree 4 good vertex: (vertex who has degree 4) and
+                             ((has 0 or 1 heavy neighbour) or (has 2 heavy neighbours which are not adjacent))
+    5) Good vertex: Degree 4 good vertex or Degree 5 good vertex
+    Note: We do not want any of the 4 boundary NESW vertices to be a good vertex since we never want to contract
+        any edge connected to these vertices. LookUp: Assusmption 1 for detailed reason
+"""

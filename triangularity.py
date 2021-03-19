@@ -1,3 +1,17 @@
+"""Triangularity Module
+
+This module allows user to triangulate a given biconnected
+planar graph.
+
+This module contains the following functions:
+
+    * make_chordal - finds edges to be added to
+                     make graph triangulated.
+    * chk_chordality - checks if the graph is chordal.
+    * triangulate - triangulates a given graph.
+    * addedges - adds given edge to the graph.
+"""   
+
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,107 +19,88 @@ from networkx.algorithms.components import connected_components
 from networkx.utils import arbitrary_element, not_implemented_for
 
 
-def make_chordal_graph(G):
+def make_chordal(nxgraph):
+    """Finds edges to be added to make graph triangulated.
+
+    Args:
+        graph: An instance of InputGraph object.
+
+    Returns:
+        edges: A list representing edges to be added.
     """
-    :param G: NetworkX graph
-    :return: H : NetworkX graph (The chordal enhancement of G)
-            alpha : Dictionary (The elimination ordering of nodes of G)
-            added_edges: Edges added to G to make H
-    ALGORITHM: MCS-M
-    """
-    H = G.copy()
-    alpha = {node: 0 for node in H}
-    if nx.is_chordal(H):
-        return H, alpha
+    nxgraphcopy = nxgraph.copy()
+    alpha = {node: 0 for node in nxgraphcopy}
+    if nx.is_chordal(nxgraphcopy):
+        return []
     chords = set()
-    weight = {node: 0 for node in H.nodes()}
-    unnumbered_nodes = list(H.nodes())
-    for i in range(len(H.nodes()), 0, -1):
-        # get the node in unnumbered_nodes with the maximum weight
+    weight = {node: 0 for node in nxgraphcopy.nodes()}
+    unnumbered_nodes = list(nxgraphcopy.nodes())
+    for i in range(len(nxgraphcopy.nodes()), 0, -1):
         z = max(unnumbered_nodes, key=lambda node: weight[node])
         unnumbered_nodes.remove(z)
         alpha[z] = i
         update_nodes = []
         for y in unnumbered_nodes:
-            if G.has_edge(y, z):
+            if nxgraph.has_edge(y, z):
                 update_nodes.append(y)
             else:
-                # y_weight will be bigger than node weights between y and z
                 y_weight = weight[y]
                 lower_nodes = [
                     node for node in unnumbered_nodes if weight[node] < y_weight
                 ]
-                if nx.has_path(H.subgraph(lower_nodes + [z, y]), y, z):
+                if nx.has_path(nxgraphcopy.subgraph(lower_nodes + [z, y]), y, z):
                     update_nodes.append(y)
                     chords.add((z, y))
-        # during calculation of paths the weights should not be updated
         for node in update_nodes:
             weight[node] += 1
-    H.add_edges_from(chords)
-    edges_added=chords
-    return H, alpha,edges_added
+    nxgraphcopy.add_edges_from(chords)
+    edges=chords
+    return edges
 
+def chk_chordality(nxgraph):
+    """Checks chordality of a given graph.
 
-def make_graph(G):
-    vertex_count = int(input("Enter the number of vertices in the graph: "))
-    edge_count = int(input("Enter the number of edges in the graph: "))
-    print("Enter each edge in new line(0-based index)")
-    for i in range(edge_count):
-        line = input()
-        node1 = int(line.split()[0])
-        node2 = int(line.split()[1])
-        G.add_edge(node1, node2)
+    Args:
+        graph: An instance of InputGraph object.
 
-
-def Check_Chordality(G, print_op):
+    Returns:
+        boolean: A boolean representing if graph
+                 requires triangulation.
     """
-    :param G: G is a networkx graph
-    :return: Checks if G is Chordal
-    """
-    if nx.is_chordal(G):
-        if (print_op == 1):
-            print("Graph is Chordal")
+    if nx.is_chordal(nxgraph):
         return True
     else:
-        if (print_op == 1):
-            print("Graph is NOT Chordal")
+        triad_cliques=[x for x in nx.enumerate_all_cliques(nxgraph) if len(x)==3]
+        if (len(triad_cliques)+len(nxgraph.nodes())-len(nxgraph.edges())==1):
+            return True
         return False
 
 
-def Triangulate(G):
+def triangulate(graph):
+    """Triangulates a given input graph.
+
+    Args:
+        graph: An instance of InputGraph object.
+
+    Returns:
+        None
     """
-    :param G: G is a networkx graph 
-    :return: Triangulation of G
-    """
-    # G_triangulated = nx.Graph(G)
-    alpha = {node: 0 for node in G}
+    nxgraph = nx.from_numpy_matrix(graph.matrix)
+    alpha = {node: 0 for node in nxgraph}
     list=[]
-    if Check_Chordality(G, 0):
-        print("Graph is already Triangulated")
-        return G,alpha,list
-    else:
-        print("Triangulating...")
-        G_triangulated,Elim_order, new_edges= make_chordal_graph(G)
-        return G_triangulated,Elim_order, new_edges
+    if not chk_chordality(nxgraph):
+        graph.trng_edges= make_chordal(nxgraph)
 
-def addEdges(graph,edge_to_be_added, edge_val=1):
-    graph.edge_count +=1
-    graph.matrix[edge_to_be_added[0]][edge_to_be_added[1]] = edge_val
-    graph.matrix[edge_to_be_added[1]][edge_to_be_added[0]] = edge_val
+def addedge(graph,edge):
+    """Adds extra edges to the graph.
 
-def main():
-    G = nx.Graph()
-    make_graph(G)
-    G_triangulated, Elim_order, new_edges = Triangulate(G)
-    # plt.subplot(2, 1, 1)
-    nx.draw(G,with_labels=True)
-    plt.show()
-    print("Elimination Ordering is:",Elim_order)
-    print("Edges added:", new_edges)
-    # plt.subplot(2,1,2)
-    nx.draw(G_triangulated,with_labels=True)
-    plt.show()
+    Args:
+        graph: An instance of InputGraph object.
+        edge: A list representing the edge to be added.
 
-
-if __name__ == '__main__':
-    main()
+    Returns:
+        None
+    """
+    graph.edgecnt +=1
+    graph.matrix[edge[0]][edge[1]] = 1
+    graph.matrix[edge[1]][edge[0]] = 1

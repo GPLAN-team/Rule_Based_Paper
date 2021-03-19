@@ -20,6 +20,7 @@ from PIL import Image, ImageTk
 import tablenoscroll
 import final
 import numpy as np
+import datetime
 done = True
 col = ["white","#9A8C98","light grey","white"]
 # colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']*10
@@ -50,6 +51,15 @@ class gui_class:
         self.value = []
         self.root =tk.Tk()
         
+        self.l = tk.IntVar(None)
+        self.l.set(0)
+        self.r = tk.IntVar(None)
+        self.r.set(1)
+        self.left = 0
+        self.right = 1
+
+        self.output_found = False
+        self.json_data = {}
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         self.root.maxsize(screen_width,screen_height)
@@ -65,8 +75,8 @@ class gui_class:
         self.frame2.grid(row=0,column=1,rowspan=6,sticky='news')
         self.frame5 = tk.Frame(self.root,bg=col[2])
         self.frame5.grid(row=0,column=2,rowspan=3,sticky='news',padx=10)
-        self.tablehead = tk.Label(self.frame5,text='Room Info',bg =col[2])
-        self.tablehead.pack()
+        # self.tablehead = tk.Label(self.frame5,text='Room Info',bg =col[2])
+        # self.tablehead.pack()
 
         self.app = self.PlotApp(self.frame2,self)
         self.root.title('Input Graph')
@@ -96,6 +106,7 @@ class gui_class:
 
         self.cir_graph = nx.Graph()
         self.cir_dim_mat = []
+        
 
         while((self.value[0] == 0) and done):
             # print(done)
@@ -134,7 +145,9 @@ class gui_class:
             self.table = tablenoscroll.Table(self.master.frame5,["Index", "Room Name"], column_minwidths=[None, None])
             self.table.pack(padx=10,pady=10)
             self.table.config(bg="#F4A5AE")
+            self.table.pack_forget()
             self.createCanvas()
+            self.nodes_data = []
 
         # colors = ['#4BC0D9','#76E5FC','#6457A6','#5C2751','#7D8491','#BBBE64','#64F58D','#9DFFF9','#AB4E68','#C4A287','#6F9283','#696D7D','#1B1F3B','#454ADE','#FB6376','#6C969D','#519872','#3B5249','#A4B494','#CCFF66','#FFC800','#FF8427','#0F7173','#EF8354','#795663','#AF5B5B','#667761','#CF5C36','#F0BCD4','#ADB2D3','#FF1B1C','#6A994E','#386641','#8B2635','#2E3532','#124E78']
         colors = ['#4BC0D9']*1000
@@ -154,6 +167,7 @@ class gui_class:
         abc = 0
         xyz = 0
         elines = []
+        connectivity = []
 
         def return_everything(self):
             return [len(self.nodes_data),self.edge_count,self.edges,self.command,self.master.checkvar1.get(),list(filter(None, [row[1].get() for row in self.table._data_vars])),self.hex_list]
@@ -185,11 +199,17 @@ class gui_class:
             self.ButtonReset = tk.Button(self._root, text="Reset",fg='white',width=10,height=2 ,**font,relief = 'flat',bg=col[1] ,command=self.reset)
             self.ButtonReset.grid(column=0 ,row=1,sticky='n',pady=20,padx=40)
             
-            self.instru = tk.Button(self._root, text="Instructions",fg='white',height=2 , **font ,relief = 'flat', bg=col[1] ,command=self.instructions)
-            self.instru.grid(column=0 ,row=1,sticky='wn',pady=22,padx=40)
+            self.ButtonPrev = tk.Button(self._root, text="Previous ",fg='white',width=10,height=2 ,**font,relief = 'flat',bg=col[1] ,command=self.open_recent)
+            self.ButtonPrev.grid(column=0 ,row=1,sticky='ne',pady=20,padx=40)
+            
+            # self.instru = tk.Button(self._root, text="Instructions",fg='white',height=2 , **font ,relief = 'flat', bg=col[1] ,command=self.instructions)
+            # self.instru.grid(column=0 ,row=1,sticky='wn',pady=22,padx=40)
 
-            self.lay = tk.Button(self._root, text="Switch to Layout",fg='white',height=2 ,**font,relief = 'flat',bg=col[1] ,command=self.switch)
-            self.lay.grid(column=0 ,row=1,sticky='ne',pady=20,padx=40)
+            # self.lay = tk.Button(self._root, text="Switch to Layout",fg='white',height=2 ,**font,relief = 'flat',bg=col[1] ,command=self.switch)
+            # self.lay.grid(column=0 ,row=1,sticky='ne',pady=20,padx=40)
+        
+        def open_recent(self):
+            self.master.open_file("./saved_files/RFP_latest.txt")
 
         def switch(self):
             self.master.root.quit()
@@ -199,45 +219,13 @@ class gui_class:
             "--------User Instructrions--------\n 1. Draw the input graph. \n 2. Use right mouse click to create a new room. \n 3. left click on one node then left click on another to create an edge between them. \n 4. You can give your own room names by clicking on the room name in the graph or the table on the right. \n 5. After creating a graph you can choose one of the option to create it's corresponding RFP or multiple RFPs with or without dimension. You can also get the corridor connecting all the rooms by selecting 'circultion' or click on 'RFPchecker' to check if RFP exists for the given graph. \n 6. You can also select multiple options .You can also add rooms after creating RFP and click on RFP to re-create a new RFP. \n 7.Reset button is used to clear the input graph. \n 8. Press 'Exit' if you want to close the application or Press 'Restart' if you want to restart the application")
 
         def addH(self, event):
-            random_number = random.randint(0,35)
-            while(random_number in self.random_list):
-                random_number = random.randint(0,35)
-            self.random_list.append(random_number)
-            hex_number = self.colors[random_number]
-            # print(random_number)
-            # print(hex_number)
-            self.hex_list.append(hex_number)
-            if(len(self.random_list) == 36):
-                self.random_list = []
             x, y = event.x, event.y
             id_node=self.id_circle[0]
             self.id_circle.pop(0)
-            node=self.master.Nodes(id_node,x,y)
-            self.nodes_data.append(node)
-            self.rframe = tk.Frame(self._root,width=20,height=20)
-            self.rname= tk.StringVar(self._root)
-            self.rnames.append(self.rname)
-            self.rname.set(self.name_circle[0])
-            self.table.insert_row(list((id_node,self.rname.get())),self.table._number_of_rows)
-            self.name_circle.pop(0)
-            self.rframe.grid(row=0,column=1)
-            self.oval.append(self.canvas.create_oval(x-self.radius_circle,y-self.radius_circle,x+self.radius_circle,y+self.radius_circle,width=3, fill=hex_number,tag=str(id_node)))
-            # self.canvas.create_text(x,y-self.radius_circle-9,text=str(id_node),font=("Purisa",14))
-            # self.buttonBG = self.canvas.create_rectangle(x-15,y-self.radius_circle-20, x+15,y-self.radius_circle, fill="light grey")
-            # self.buttonTXT = self.canvas.create_text(x,y-self.radius_circle-9, text="click")
-            self.rcanframe.append(self.canvas.create_window(x,y-self.radius_circle-12, window=self.rframe))
-            # self.canvas.tag_bind(self.buttonBG, "<Button-1>", self.room_name) ## when the square is clicked runs function "clicked".
-            # self.canvas.tag_bind(self.buttonTXT, "<Button-1>", self.room_name) ## same, but for the text.
-            # def _on_configure(self, event):
-                # self.entry.configure(width=event.width)
-            self.entry = tk.Entry(self.rframe,textvariable=self.table._data_vars[self.id_circle[0]-1][1],relief='flat',justify='c',width=3,bg='white')
-            # self.rframe.bind("<Configure>", _on_configure)
-            
-            # but =tk.Button(self.rframe)
-            # but.grid()
-            self.entry.grid()
-            # print(self.rname.get())
+            self.create_new_node(x, y, id_node)
+
         def button_1_clicked(self,event):
+
             if len(self.connection)==2:
                 self.canvas.itemconfig(self.oval[self.xyz],outline='black')
                 self.canvas.itemconfig(self.oval[self.abc],outline='black')
@@ -251,6 +239,13 @@ class gui_class:
             self.xyz= self.nodes_data[value].circle_id
             self.hover_bright(event)
             if value == -1:
+                evalue = self.get_edge(x,y)
+                if evalue == -1:
+                    return 
+                
+                else:
+                    print("evalue=",evalue)
+                    self.toggle_edge_connectivity(evalue)
                 return
             else:
                 if value in self.connection:
@@ -271,9 +266,9 @@ class gui_class:
                 self.connect_circles(self.connection)
 
             # for i in self.nodes_data:
-            # 	print("id: ",i.circle_id)
-            # 	print("x,y: ",i.pos_x,i.pos_y)
-            # 	print("adj list: ",i.adj_list)
+            #   print("id: ",i.circle_id)
+            #   print("x,y: ",i.pos_x,i.pos_y)
+            #   print("adj list: ",i.adj_list)
             
         def connect_circles(self,connections):
             node1_id=connections[0]
@@ -282,14 +277,110 @@ class gui_class:
             node1_y=self.nodes_data[node1_id].pos_y
             node2_x=self.nodes_data[node2_id].pos_x
             node2_y=self.nodes_data[node2_id].pos_y
-            self.elines.append([self.canvas.create_line(node1_x,node1_y,node2_x,node2_y,width=3),connections])
+            edge = self.canvas.create_line(node1_x,node1_y,node2_x,node2_y,width=3)
+            self.elines.append([edge,connections])
+            print("edges",type(self.elines[0][0]))
+
+        def toggle_edge_connectivity(self,evalue):
+            for node1_id, node2_id in evalue:
+                for eid, connection in self.elines:
+                    if (connection[0] == node1_id and connection[1] == node2_id) or (connection[0] == node2_id and connection[1] == node1_id):
+                        if self.canvas.itemcget(eid, "fill") == 'black':
+                            self.canvas.itemconfig(eid, fill = 'red')
+                            self.connectivity.append(connection)
+                        else:
+                            self.canvas.itemconfig(eid, fill = 'black')
+                            try:
+                                self.connectivity.remove(connection)
+                            except:
+                                pass
+                        return 
+
+
+        def create_new_node(self, x, y ,id_node):
+            self.random_list.append(0)
+            hex_number = self.colors[0]
+            self.hex_list.append(hex_number)
+            node=self.master.Nodes(id_node,x,y)
+            self.nodes_data.append(node)
+            # print("names", self.name_circle)
+            self.rframe = tk.Frame(self._root,width=20,height=20)
+            self.rname= tk.StringVar(self._root)
+            self.rnames.append(self.rname)
+            self.rname.set(self.name_circle[0])
+            self.table.insert_row(list((id_node,self.rname.get())),self.table._number_of_rows)
+            self.name_circle.pop(0)
+            self.rframe.grid(row=0,column=1)
+            self.oval.append(self.canvas.create_oval(x-self.radius_circle,y-self.radius_circle,x+self.radius_circle,y+self.radius_circle,width=3, fill=hex_number,tag=str(id_node)))
+            self.rcanframe.append(self.canvas.create_window(x,y-self.radius_circle-12, window=self.rframe))
+            self.entry = tk.Entry(self.rframe,textvariable=self.table._data_vars[self.id_circle[0]-1][1],relief='flat',justify='c',width=3,bg='white')
+            self.entry.grid()
+
+
+        def retreive_graph(self,node_data,edge_data,con_data):
+            
+            print("retrieve graph func")
+            print(self.nodes_data)
+            for node in node_data:
+                print(node)
+                x = node[0]
+                y = node[1]
+                id_node = node[2]
+                self.create_new_node(x, y, id_node)
+            
+            self.edges = edge_data
+            for edge in self.edges:
+                self.connect_circles(edge)
+
+            self.connectivity = con_data
+
+            for eid, connection in self.elines:
+                revcon = []
+                revcon.append(connection[1])
+                revcon.append(connection[0])
+
+                if connection in con_data or revcon in con_data:
+                    self.canvas.itemconfig(eid, fill = 'red')
+            
+            self.edge_count = len(self.edges)
+            
+            self.id_circle.clear()
+            self.name_circle.clear()
+            for i in range(len(self.nodes_data),100):
+                self.id_circle.append(i)
+            for i in range(len(self.nodes_data),100):
+                self.name_circle.append( str(i))
+
+            print("names", self.name_circle)
+            print("retrieved value",len(self.nodes_data),self.edge_count,self.edges,self.command,self.master.checkvar1.get(),list(filter(None, [row[1].get() for row in self.table._data_vars])),self.hex_list)
+
+
+
+
+        def get_edge(self,x,y):
+            ans = []
+            for i_no,i in enumerate(self.nodes_data):
+                for j_no, j in enumerate(self.nodes_data):
+                    if i_no == j_no:
+                        continue
+                    epsi = (x - i.pos_x ) * ( i.pos_y - j.pos_y) / (i.pos_x - j.pos_x) + i.pos_y - y
+                    print( "epsis", i_no, j_no, epsi)
+                    print("---------")
+                    if ((x <= j.pos_x and x >= i.pos_x) or (x >= i.pos_x and x <= i.pos_x)) and ((y <= i.pos_y and y >= j.pos_y) or (y >= i.pos_y and y <= j.pos_y)) and epsi < 10 and epsi > -10:
+                        ans.append((i_no,j_no))
+            if not ans:
+                tk.messagebox.showinfo("Connect Nodes","You have clicked outside all the circles and edges. Please try again")
+                return -1
+            else:
+                return ans
+                        
 
         def get_id(self,x,y):
             for j,i in enumerate(self.nodes_data):
                 distance=((i.pos_x-x)**2 + (i.pos_y-y)**2)**(1/2)
                 if distance<=self.radius_circle:
                     return j
-            tk.messagebox.showinfo("Connect Nodes","You have clicked outside all the circles. Please try again")
+            # tk.messagebox.showinfo("Connect Nodes","You have clicked outside all the circles. Please try again")
             return -1
         
         def remove_node(self,event):
@@ -1151,14 +1242,18 @@ class gui_class:
             c1 = tk.Checkbutton(master.frame1, text = "Dimensioned",relief='flat',**button_details,selectcolor='#4A4E69',width=13 ,variable = master.checkvar1,onvalue = 1, offvalue = 0)
             c1.grid(row=3,column=0,padx=5,pady=5)
            
-            b3 = tk.Button(master.frame1,width=15, text='Circulation',relief='flat',**button_details,command=master.circulation)
+            b3 = tk.Button(master.frame1,width=15, text='Circulation',relief='flat',**button_details,command=master.change_entry_gui)
             b3.grid(row=4,column=0,padx=5,pady=5)
+
+            # b32 = tk.Button(master.frame1,width=15, text='Change entry',relief='flat',**button_details,command=master.change_entry_gui)
+            # b32.grid(row=5,column=0,padx=5,pady=5)
+
             
             b4 = tk.Button(master.frame1,width=15, text='RFPchecker' ,relief='flat',**button_details,command=master.checker)
-            b4.grid(row=5,column=0,padx=5,pady=5)
+            b4.grid(row=6,column=0,padx=5,pady=5)
 
             b7 = tk.Button(master.frame1,width=15, text='Dissection' ,relief='flat',**button_details,command=master.dissection)
-            b7.grid(row=5,column=0,padx=5,pady=5)
+            b7.grid(row=7,column=0,padx=5,pady=5)
             
             # b6 = tk.Button(master.frame1,width=15, text='Restart',relief='flat', **button_details,command=master.restart)
             # b6.grid(row=6,column=0,padx=5,pady=5)
@@ -1175,7 +1270,7 @@ class gui_class:
             filemenu.add_command(label="New",command=master.restart)
             filemenu.add_command(label="Open",command=master.open_file)
             filemenu.add_command(label="Save",command=master.save_file)
-            filemenu.add_command(label="Save as...",command=master.save_file)
+            filemenu.add_command(label="Save as JSON",command=master.save_JSON)
             filemenu.add_command(label="Close",command=master.exit)
 
             filemenu.add_separator()
@@ -1307,12 +1402,9 @@ class gui_class:
    
 
     def graph_ret(self):
-        if not self.open:
-            self.value = self.app.return_everything()
-            self.textbox = self.tbox.gettext()
-        else:
-            self.value = self.open_ret.copy()
-            self.textbox = self.tbox.gettext()
+        
+        self.value = self.app.return_everything()
+        self.textbox = self.tbox.gettext()
 
     def single_floorplan(self):
         self.app.command="single"
@@ -1367,6 +1459,11 @@ class gui_class:
         self.command = "end"
         self.end.set(self.end.get()+10)
         done = False
+        current_time = datetime.datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+        if not os.path.exists('saved_files'):
+            os.makedirs('saved_files')
+        self.save_file(".\saved_files\RFP_"+str(current_time)+".txt")
+        
         try:
             self.dclass.root.destory()
         except:
@@ -1388,8 +1485,13 @@ class gui_class:
         
         # return self.value , self.root , self.textbox , self.pen ,self.end
 
-    def open_file(self):
-        self.file = filedialog.askopenfile(mode='r',defaultextension=".txt",title = "Select file",filetypes = (("text files","*.txt"),("all files","*.*")))
+    def open_file(self,filename = None):
+        self.app.reset()
+        if filename == None:
+
+            self.file = filedialog.askopenfile(mode='r',defaultextension=".txt",title = "Select file",filetypes = (("text files","*.txt"),("all files","*.*")))
+        else:
+            self.file = open(filename,'r')
         f = self.file.read()
         print(f)
         # print("hjio")
@@ -1399,52 +1501,88 @@ class gui_class:
         fname+="png"
         print(fname)
         self.open_ret = ast.literal_eval(f)
-        print(self.open_ret)
-        self.graph = nx.Graph()
-        self.graph.add_edges_from(self.open_ret[2])
-        nx.draw_planar(self.graph)
-        # plt.show()
-
-        plt.savefig(fname)
-        img = Image.open(fname)
-        img = img.convert("RGBA")
-        datas = img.getdata()
-
-        newData = []
-        for item in datas:
-            if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                newData.append((255, 255, 255, 0))
-            else:
-                newData.append(item)
-
-        img.putdata(newData)
-
-        render = ImageTk.PhotoImage(img)
-        load = tk.Label(self.frame2, image=render)
-        load.image = render
-        load.grid(row=1,column=0,sticky='news')
-        self.root.state('zoomed')
-        img.save("img2.png", "PNG")
+        i = 0
+        for val in self.open_ret:
+            print("val",i,"- ", val)
+            i+=1
+        value = self.open_ret[0]
+        node_data = self.open_ret[1]
+        edge_data = self.open_ret[2]
+        con_data = self.open_ret[3]
+        self.app.retreive_graph(node_data,edge_data,con_data)
         self.open = True
 
-        # with open('config.dictionary', 'rb') as config_dictionary_file:
-        #     cself = pickle.load(config_dictionary_file)
-        # # After config_dictionary is read from file
-        # print(cself.value)
+    def save_JSON(self):
+        if not self.output_found:
+            tk.messagebox.showinfo("error","Output not yet found")
 
-    def save_file(self):
+        else:
+            # self.end.set(self.end.get()+1)
+            self.json_data = self.ptpg.return_data()
+            f = filedialog.asksaveasfile( defaultextension=".JSON",title = "Select location to Save file as JSON",filetypes = (("JSON files","*.JSON"),("all files","*.*")),initialfile="_latest_JSON.JSON")
+            f.write(json.dumps(self.json_data))
+            fauto = open(".\saved_files\RFP_latest.txt", "w")
+            jstr = json.dumps(self.json_data,indent=4)
+            print(jstr)
+            fauto.write(jstr)
+            fauto.close()
+            f.close()
+
+    def change_entry_gui(self):
+        self.top = tk.Toplevel(self.root, width = 300, height = 300)
+        root = self.top
+        root.title('Circulation Entry Changer')
+        main_text = tk.Label(root, text="Enter the two rooms adjacent to the new entry door")
+        main_text.grid(row = 0, column = 0)
+        l_val = tk.Entry(root, textvariable = self.l)
+        l_val.grid(row  = 1, column = 0)
+        r_val = tk.Entry(root, textvariable = self.r)
+        r_val.grid(row = 1, column = 1)
+        ex = tk.Button(root,text = "Submit",command = self.entry_ender)
+        ex.grid(row = 3)
+        
+    def entry_ender(self):
+        self.left = self.l.get() + 1
+        self.right = self.r.get() + 1
+        self.end.set(self.end.get()+1)
+        self.top.destroy()
+        
+        self.app.command="circulation"
+        self.command = "circulation"
+        self.end.set(self.end.get()+1)
+        print("are you here atleast?")
+
+
+
+    def save_file(self,filename = "Rectangular Dual Graph.txt"):
         # self.root.filename = self.value
-        f = filedialog.asksaveasfile( defaultextension=".txt",title = "Select file",filetypes = (("text files","*.txt"),("all files","*.*")),initialfile="Rectangular Dual Graph.txt")
+        if filename == "Rectangular Dual Graph.txt":
+            f = filedialog.asksaveasfile( defaultextension=".txt",title = "Select file",filetypes = (("text files","*.txt"),("all files","*.*")),initialfile=filename)
+        else :
+            f = open(filename, "w")
         if f is None:
             return
 
+        saved_data = []
+        saved_data.append(self.value)
+        
+        node_data = []
+        for node in self.app.nodes_data:
+            ndata = []
+            ndata.append(node.pos_x)
+            ndata.append(node.pos_y)
+            ndata.append(node.circle_id)
+            node_data.append(ndata)
 
-        f.write(str(self.value))
+        saved_data.append(node_data)
+        saved_data.append(self.app.edges)
+        saved_data.append(self.app.connectivity)
+        f.write(str(saved_data))
+        # f.write(str(node_data))
+        l = open(".\saved_files\RFP_latest.txt", "w")
+        l.write(str(saved_data))
+        l.close()
         f.close()
-
-        # with open('config.dictionary', 'wb') as config_dictionary_file:
-        #     pickle.dump(self.app, config_dictionary_file)
-    # def copy_to_file(self):
 
         
 
