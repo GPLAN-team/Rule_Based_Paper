@@ -6,9 +6,9 @@ import warnings
 import time
 import tkinter as tk
 import networkx as nx
-import gui
-import inputgraph
-import drawing as draw
+import pythongui.gui as gui
+import source.inputgraph as inputgraph
+import pythongui.drawing as draw
 # import circulation
 # import checker
 # from tkinter import messagebox
