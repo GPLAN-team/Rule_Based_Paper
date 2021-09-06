@@ -10,20 +10,16 @@ This module contains the following functions:
     * chk_chordality - checks if the graph is chordal.
     * triangulate - triangulates a given graph.
     * addedges - adds given edge to the graph.
-"""   
+"""
 
 import networkx as nx
-import numpy as np
-import matplotlib.pyplot as plt
-from networkx.algorithms.components import connected_components
-from networkx.utils import arbitrary_element, not_implemented_for
 
 
 def make_chordal(nxgraph):
     """Finds edges to be added to make graph triangulated.
 
     Args:
-        graph: An instance of InputGraph object.
+        nxgraph: An instance of InputGraph object.
 
     Returns:
         edges: A list representing edges to be added.
@@ -53,15 +49,15 @@ def make_chordal(nxgraph):
                     chords.add((z, y))
         for node in update_nodes:
             weight[node] += 1
-    nxgraphcopy.add_edges_from(chords)
-    edges=chords
+    edges = chords
     return edges
+
 
 def chk_chordality(nxgraph):
     """Checks chordality of a given graph.
 
     Args:
-        graph: An instance of InputGraph object.
+        nxgraph: An instance of InputGraph object.
 
     Returns:
         boolean: A boolean representing if graph
@@ -70,8 +66,8 @@ def chk_chordality(nxgraph):
     if nx.is_chordal(nxgraph):
         return True
     else:
-        triad_cliques=[x for x in nx.enumerate_all_cliques(nxgraph) if len(x)==3]
-        if (len(triad_cliques)+len(nxgraph.nodes())-len(nxgraph.edges())==1):
+        triad_cliques = [x for x in nx.enumerate_all_cliques(nxgraph) if len(x) == 3]
+        if len(triad_cliques) + len(nxgraph.nodes()) - len(nxgraph.edges()) == 1:
             return True
         return False
 
@@ -86,12 +82,11 @@ def triangulate(graph):
         None
     """
     nxgraph = nx.from_numpy_matrix(graph.matrix)
-    alpha = {node: 0 for node in nxgraph}
-    list=[]
     if not chk_chordality(nxgraph):
-        graph.trng_edges= make_chordal(nxgraph)
+        graph.trng_edges = make_chordal(nxgraph)
 
-def addedge(graph,edge):
+
+def add_edge(graph, edge):
     """Adds extra edges to the graph.
 
     Args:
@@ -101,6 +96,6 @@ def addedge(graph,edge):
     Returns:
         None
     """
-    graph.edgecnt +=1
+    graph.edgecnt += 1
     graph.matrix[edge[0]][edge[1]] = 1
     graph.matrix[edge[1]][edge[0]] = 1
