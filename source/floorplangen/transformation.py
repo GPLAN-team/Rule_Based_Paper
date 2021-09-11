@@ -10,7 +10,7 @@ This module contains the following functions:
 """
 import numpy as np
 
-def transform(graph,edge):
+def transform(matrix,edge):
     """Transforms edge into vertex.
 
     Args:
@@ -20,32 +20,26 @@ def transform(graph,edge):
     Returns:
         None
     """
-    nbd1= find_nbr(graph,edge[0])
-    nbd2 = find_nbr(graph,edge[1])
+    nbd1= find_nbr(matrix,edge[0])
+    nbd2 = find_nbr(matrix,edge[1])
     common_nbrs = nbd1.intersection(nbd2)
-    graph.nodecnt +=1
-    adjmatrix = np.zeros([graph.nodecnt, graph.nodecnt], int)
-    adjmatrix[0:graph.matrix.shape[0],0:graph.matrix.shape[1]] = graph.matrix
+    adjmatrix = np.zeros([matrix.shape[0]+1, matrix.shape[0]+1], int)
+    adjmatrix[0:matrix.shape[0],0:matrix.shape[1]] = matrix
     adjmatrix[edge[0]][edge[1]] = 0
     adjmatrix[edge[1]][edge[0]] = 0
-    adjmatrix[graph.nodecnt-1][edge[0]] = 1
-    adjmatrix[graph.nodecnt-1][edge[1]] = 1
-    adjmatrix[edge[0]][graph.nodecnt-1] = 1
-    adjmatrix[edge[1]][graph.nodecnt-1] = 1
+    adjmatrix[matrix.shape[0]][edge[0]] = 1
+    adjmatrix[matrix.shape[0]][edge[1]] = 1
+    adjmatrix[edge[0]][matrix.shape[0]] = 1
+    adjmatrix[edge[1]][matrix.shape[0]] = 1
     for vertex in common_nbrs:
-        adjmatrix[vertex][graph.nodecnt-1]=1
-        adjmatrix[graph.nodecnt-1][vertex]=1
+        adjmatrix[vertex][matrix.shape[0]]=1
+        adjmatrix[matrix.shape[0]][vertex]=1
     if(len(common_nbrs)==1):
-        graph.edgecnt+=2
+        return adjmatrix,2
     else:
-        graph.edgecnt+=3
-    graph.matrix = adjmatrix
-    graph.north +=1
-    graph.east +=1
-    graph.west +=1
-    graph.south +=1 
+        return adjmatrix,3
 
-def find_nbr(graph,vertex):
+def find_nbr(matrix,vertex):
     """Finds neighbour of the given vertex.
 
     Args:
@@ -56,7 +50,7 @@ def find_nbr(graph,vertex):
         nbr: A set representing neighbours of vertex.
     """
     nbr = set()
-    for i in range(0,graph.nodecnt):
-        if(graph.matrix[vertex][i]==1):
+    for i in range(0,matrix.shape[0]):
+        if(matrix[vertex][i]==1):
             nbr.add(i)
     return nbr

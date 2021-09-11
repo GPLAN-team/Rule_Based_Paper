@@ -20,19 +20,19 @@ This module contains the following functions:
 import networkx as nx 
 import numpy as np 
 
-def init_degrees(graph):
+def degrees(matrix):
     """Populates degrees attributes of InputGraph object.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
         None
     """
-    graph.degrees = [np.count_nonzero(graph.matrix[node])
-     for node in range(graph.nodecnt)]
+    return [np.count_nonzero(matrix[node])
+     for node in range(matrix.shape[0])]
 
-def init_goodnodes(graph):
+def goodnodes(matrix,degrees):
     """Finds good vertces of the graph.
 
     Args:
@@ -41,12 +41,14 @@ def init_goodnodes(graph):
     Returns:
         None
     """
-    graph.goodnodes = []
-    for node in range(graph.matrix.shape[0]):
-        if is_goodvertex(graph,node):
-            graph.goodnodes.append(node)
+    goodnodes = []
+    #Considering interior vertex only
+    for node in range(matrix.shape[0]-4): 
+        if is_goodvertex(matrix, degrees, node):
+            goodnodes.append(node)
+    return goodnodes
 
-def is_goodvertex(graph, node):
+def is_goodvertex(matrix, degrees, node):
     """Checks if the given vertex is a good vertex.
 
     Args:
@@ -56,29 +58,28 @@ def is_goodvertex(graph, node):
     Returns:
         boolean: A boolean indicating if given vertex is a good vertex.
     """
-    if node not in [graph.north, graph.east, graph.south, graph.west]:
-        if graph.degrees[node] == 5:
+    if node < matrix.shape[0]-4:
+        if degrees[node] == 5:
             heavy_nbrcnt = 0
-            nbrs, = np.where(graph.matrix[node] == 1)
+            nbrs, = np.where(matrix[node] == 1)
             for nbr in nbrs:  
-                if graph.degrees[nbr] >= 20:
+                if degrees[nbr] >= 20:
                     heavy_nbrcnt += 1
             if heavy_nbrcnt <= 1:
                 return True
-
-        elif graph.degrees[node] == 4:
+        elif degrees[node] == 4:
             heavynbr = []
-            nbrs, = np.where(graph.matrix[node] == 1)
+            nbrs, = np.where(matrix[node] == 1)
             for nbr in nbrs: 
-                if graph.degrees[nbr] >= 20:
+                if degrees[nbr] >= 20:
                     heavynbr.append(nbr)
             if (len(heavynbr) <= 1) \
             or (len(heavynbr) == 2 
-                and graph.matrix[heavynbr[0]][heavynbr[1]] != 1):
+                and matrix[heavynbr[0]][heavynbr[1]] != 1):
                 return True
     return False
 
-def cntr_nbr(graph, node):
+def cntr_nbr(matrix, node):
     """Finds contractible neghbour of given vertex
 
     Args:
@@ -89,12 +90,12 @@ def cntr_nbr(graph, node):
         nbr: An integer representing contractibl neighbour of vertex.
         mut_nbrs: A list containiing mutual neighbours of node and nbr.
     """
-    nbrs, = np.where(graph.matrix[node] == 1)
+    nbrs, = np.where(matrix[node] == 1)
     for nbr in nbrs:
-        if nbr in [graph.north, graph.east, graph.south, graph.west]:
+        if nbr > matrix.shape[0]-5:
             continue
         contractible = True
-        node_nbrs, = np.where(graph.matrix[nbr] == 1)
+        node_nbrs, = np.where(matrix[nbr] == 1)
         mut_nbrs = np.intersect1d(nbrs
             , node_nbrs
             , assume_unique=True)
@@ -103,7 +104,7 @@ def cntr_nbr(graph, node):
         for vertex in nbrs:
             if vertex in mut_nbrs or vertex == nbr:
                 continue
-            vertex_nbr, = np.where(graph.matrix[vertex] == 1)
+            vertex_nbr, = np.where(matrix[vertex] == 1)
             intersection = np.intersect1d(vertex_nbr
                 , node_nbrs
                 , assume_unique=True)
@@ -118,7 +119,7 @@ def cntr_nbr(graph, node):
             return nbr, mut_nbrs
     return -1, []
 
-def update_adjmat(graph,node,nbr):
+def update_adjmat(matrix,node,nbr):
     """Updates adjacency matrix post contraction.
 
     Args:
@@ -129,15 +130,15 @@ def update_adjmat(graph,node,nbr):
     Returns:
         None
     """
-    node_nbrs, = np.where(graph.matrix[node] == 1)
+    node_nbrs, = np.where(matrix[node] == 1)
     for vertex in node_nbrs:
-        graph.matrix[node][vertex] = 0
-        graph.matrix[vertex][node] = 0
+        matrix[node][vertex] = 0
+        matrix[vertex][node] = 0
         if vertex != nbr:
-            graph.matrix[vertex][nbr] = 1
-            graph.matrix[nbr][vertex] = 1
+            matrix[vertex][nbr] = 1
+            matrix[nbr][vertex] = 1
 
-def update_goodnodes(graph,node,nbr,mut_nbrs):
+def update_goodnodes(degrees,node,nbr,mut_nbrs):
     """Updates list of good nodes post contraction.
 
     Args:
@@ -149,15 +150,13 @@ def update_goodnodes(graph,node,nbr,mut_nbrs):
     Returns:
         None
     """
-    graph.degrees[nbr] += graph.degrees[node] - 4
-    graph.degrees[mut_nbrs[0]] -= 1
-    graph.degrees[mut_nbrs[1]] -= 1
-    graph.degrees[node] = 0
-    check(graph,nbr)
-    check(graph,mut_nbrs[0])
-    check(graph,mut_nbrs[1])
+    degrees[nbr] += degrees[node] - 4
+    degrees[mut_nbrs[0]] -= 1
+    degrees[mut_nbrs[1]] -= 1
+    degrees[node] = 0
+    
 
-def check(graph,node):
+def check(matrix,degrees,goodnodes,node):
     """Checks if given node is good vertex post contraction.
 
     Args:
@@ -167,16 +166,16 @@ def check(graph,node):
     Returns:
         None
     """
-    if is_goodvertex(graph,node)\
-     and (node not in graph.goodnodes):
-        graph.goodnodes.append(node)
-    elif (not is_goodvertex(graph,node))\
-     and (node in graph.goodnodes):
-        graph.goodnodes.remove(node)
+    if is_goodvertex(matrix,degrees,node)\
+     and (node not in goodnodes):
+        goodnodes.append(node)
+    elif (not is_goodvertex(matrix,degrees,node))\
+     and (node in goodnodes):
+        goodnodes.remove(node)
     
 
-def contract(graph):
-    """Performs contractio on the graph.
+def contract(matrix,goodnodes,degrees):
+    """Performs contraction on the graph.
 
     Args:
         graph: An instance of InputGraph object.
@@ -185,24 +184,30 @@ def contract(graph):
         node: An integer representing good vertex for contraction.
         nbr: An integer representing contractible neighbour of node.
     """
-    attempts = len(graph.goodnodes)
+    cntrs = []
+    attempts = len(goodnodes)
     while attempts > 0:
-        node = graph.goodnodes.pop(0)
-        nbr, mut_nbrs = cntr_nbr(graph,node)
-        if nbr == -1:
-            graph.goodnodes.append(node)
+        node = goodnodes.pop(0)
+        nbr, mut_nbrs = cntr_nbr(matrix,node)
+        if(nbr==-1):
+            goodnodes.append(node)
             attempts -= 1
             continue
-        graph.cntrs.append({'node': node
+        print({'node': node
             , 'nbr': nbr
             , 'mut_nbrs': mut_nbrs
-            , 'node_nbrs': np.where(graph.matrix[node] == 1)[0]})
-        update_adjmat(graph,node,nbr)
-        update_goodnodes(graph,node,nbr,mut_nbrs)
-        graph.nodecnt -= 1
-        graph.edgecnt -= 3
-        return node, nbr
-    return -1, -1
+            , 'node_nbrs': np.where(matrix[node] == 1)[0]})
+        cntrs.append({'node': node
+            , 'nbr': nbr
+            , 'mut_nbrs': mut_nbrs
+            , 'node_nbrs': np.where(matrix[node] == 1)[0]})
+        update_adjmat(matrix,node,nbr)
+        update_goodnodes(degrees,node,nbr,mut_nbrs)
+        check(matrix,degrees,goodnodes,nbr)
+        check(matrix,degrees,goodnodes,mut_nbrs[0])
+        check(matrix,degrees,goodnodes,mut_nbrs[1])
+        attempts = len(goodnodes)
+    return matrix,degrees,goodnodes,cntrs
 
 
 

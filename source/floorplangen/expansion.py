@@ -27,7 +27,7 @@ import networkx as nx
 import numpy as np
 import source.graphoperations.operations as opr 
 
-def basecase(graph):
+def basecase(matrix,nodecnt):
     """Obtains the base case of expansion step.
 
     Args:
@@ -36,19 +36,20 @@ def basecase(graph):
     Returns:
         None
     """
-    for node in range(graph.matrix.shape[0]):
-        if graph.matrix[graph.north][node] == 1\
-         and node not in [graph.east,graph.west]:
-            graph.matrix[node][graph.north] = 2
-            graph.matrix[graph.north][node] = 0
-            graph.matrix[graph.south][node] = 2
-            graph.matrix[node][graph.south] = 0
-            graph.matrix[node][graph.east] = 3
-            graph.matrix[graph.east][node] = 0
-            graph.matrix[graph.west][node] = 3
-            graph.matrix[node][graph.west] = 0
+    for node in range(matrix.shape[0]):
+        if matrix[nodecnt - 4][node] == 1\
+         and node not in [nodecnt - 3,nodecnt - 1]:
+            matrix[node][nodecnt - 4] = 2
+            matrix[nodecnt - 4][node] = 0
+            matrix[nodecnt - 2][node] = 2
+            matrix[node][nodecnt - 2] = 0
+            matrix[node][nodecnt - 3] = 3
+            matrix[nodecnt - 3][node] = 0
+            matrix[nodecnt - 1][node] = 3
+            matrix[node][nodecnt - 1] = 0
+    return matrix
 
-def expand(graph):
+def expand(matrix,nodecnt,cntrs):
     """Performs the process of expansion.
 
     Args:
@@ -57,18 +58,21 @@ def expand(graph):
     Returns:
         None
     """
-    cntr = graph.cntrs.pop()
-    case = get_case(graph,cntr)
+    cntr = cntrs.pop()
+    case = get_case(matrix,nodecnt,cntr)
     nbr = cntr['nbr']
     node = cntr['node']
-    case(graph
+    print(case)
+    matrix = case(matrix
+        ,nodecnt
         ,nbr
         ,node
         ,cntr['mut_nbrs'][0]
         ,cntr['mut_nbrs'][1]
         ,cntr['node_nbrs'])
+    return matrix
 
-def get_case(graph,cntr):
+def get_case(matrix,nodecnt,cntr):
     """Identifies the case of expansion (Refer documentation).
 
     Args:
@@ -82,39 +86,37 @@ def get_case(graph,cntr):
     mut_nbrs = cntr['mut_nbrs']
     mut_nbr1 = mut_nbrs[0]
     mut_nbr2 = mut_nbrs[1]
-    if graph.matrix[nbr][mut_nbr1] == 2:
-        if graph.matrix[nbr][mut_nbr2] == 3:
+    if matrix[nbr][mut_nbr1] == 2:
+        if matrix[nbr][mut_nbr2] == 3:
             return case_a
-        elif graph.matrix[nbr][mut_nbr2] == 2:
+        elif matrix[nbr][mut_nbr2] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
-                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
             return case_b
-        elif graph.matrix[mut_nbr2][nbr] == 3:
+        elif matrix[mut_nbr2][nbr] == 3:
             return case_d
-        elif graph.matrix[mut_nbr2][nbr] == 2:
+        elif matrix[mut_nbr2][nbr] == 2:
             return case_f
         else:
             print("ERROR")
 
-    if graph.matrix[mut_nbr1][nbr] == 2:
-        if graph.matrix[nbr][mut_nbr2] == 3:
+    if matrix[mut_nbr1][nbr] == 2:
+        if matrix[nbr][mut_nbr2] == 3:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_e
-        elif graph.matrix[nbr][mut_nbr2] == 2:
+        elif matrix[nbr][mut_nbr2] == 2:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_f
-        elif graph.matrix[mut_nbr2][nbr] == 3:
+        elif matrix[mut_nbr2][nbr] == 3:
             return case_h
-        elif graph.matrix[mut_nbr2][nbr] == 2:
+        elif matrix[mut_nbr2][nbr] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
-                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -122,49 +124,47 @@ def get_case(graph,cntr):
         else:
             print("ERROR")
             
-    if graph.matrix[nbr][mut_nbr1] == 3:
-        if graph.matrix[nbr][mut_nbr2] == 3:
+    if matrix[nbr][mut_nbr1] == 3:
+        if matrix[nbr][mut_nbr2] == 3:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
-                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
                 if(label == 2):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
             return case_c
-        elif graph.matrix[nbr][mut_nbr2] == 2:
+        elif matrix[nbr][mut_nbr2] == 2:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_a
-        elif graph.matrix[mut_nbr2][nbr] == 3:
+        elif matrix[mut_nbr2][nbr] == 3:
             return case_g
-        elif graph.matrix[mut_nbr2][nbr] == 2:
+        elif matrix[mut_nbr2][nbr] == 2:
             return case_e
         else:
             print("ERROR")
 
-    if graph.matrix[mut_nbr1][nbr] == 3:
-        if graph.matrix[nbr][mut_nbr2] == 3:
+    if matrix[mut_nbr1][nbr] == 3:
+        if matrix[nbr][mut_nbr2] == 3:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_g
-        elif graph.matrix[nbr][mut_nbr2] == 2:
+        elif matrix[nbr][mut_nbr2] == 2:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_d
-        elif graph.matrix[mut_nbr2][nbr] == 3:
+        elif matrix[mut_nbr2][nbr] == 3:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label = opr.ordered_nbr_label(graph,nbr,vertex,cw=False)
-                vertex = opr.ordered_nbr(graph,nbr,vertex,False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
                 if(label == 2):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
             return case_j
-        elif graph.matrix[mut_nbr2][nbr] == 2:
+        elif matrix[mut_nbr2][nbr] == 2:
             mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
             return case_h
         else:
             print("ERROR")
 
-def handle_orig_nbrs(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def handle_orig_nbrs(matrix,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Handles original neighbours in contraction.
 
     Args:
@@ -180,14 +180,15 @@ def handle_orig_nbrs(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """
     for alpha in node_nbrs:
         if alpha != mut_nbr1 and alpha != mut_nbr2 and alpha != nbr:
-            if graph.matrix[nbr][alpha] != 0:
-                graph.matrix[node][alpha] = graph.matrix[nbr][alpha]
-                graph.matrix[nbr][alpha] = 0
-            if graph.matrix[alpha][nbr] != 0:
-                graph.matrix[alpha][node] = graph.matrix[alpha][nbr]
-                graph.matrix[alpha][nbr] = 0
+            if matrix[nbr][alpha] != 0:
+                matrix[node][alpha] = matrix[nbr][alpha]
+                matrix[nbr][alpha] = 0
+            if matrix[alpha][nbr] != 0:
+                matrix[alpha][node] = matrix[alpha][nbr]
+                matrix[alpha][nbr] = 0
+    return matrix
 
-def case_a(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_a(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case A of expansion.
 
     Args:
@@ -201,54 +202,56 @@ def case_a(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+    ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix, nodecnt,nbr,mut_nbr1,cw=True)
+    if ordered_nbr_label == 2:
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr1][node] = 3
-            graph.matrix[node][mut_nbr2] = 3
-            graph.matrix[nbr][node] = 2
+            matrix[mut_nbr1][node] = 3
+            matrix[node][mut_nbr2] = 3
+            matrix[nbr][node] = 2
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)     
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[node][mut_nbr2] = 3
-            graph.matrix[node][nbr] = 2
-            graph.matrix[nbr][mut_nbr1] = 0
-            graph.matrix[mut_nbr1][nbr] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[node][mut_nbr2] = 3
+            matrix[node][nbr] = 2
+            matrix[nbr][mut_nbr1] = 0
+            matrix[mut_nbr1][nbr] = 3
     else:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[mut_nbr2][node] = 2
-            graph.matrix[nbr][node] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[mut_nbr2][node] = 2
+            matrix[nbr][node] = 3
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs) 
-            graph.matrix[nbr][mut_nbr2] = 0
-            graph.matrix[mut_nbr2][nbr] = 2
-            graph.matrix[node][nbr] = 3
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[node][mut_nbr2] = 3
+            matrix[nbr][mut_nbr2] = 0
+            matrix[mut_nbr2][nbr] = 2
+            matrix[node][nbr] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[node][mut_nbr2] = 3
+    return matrix
 
-def case_b(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_b(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case B of expansion.
 
     Args:
@@ -262,18 +265,18 @@ def case_b(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    handle_orig_nbrs(graph
+    matrix = handle_orig_nbrs(matrix
         ,nbr
         ,node
         ,mut_nbr1
         ,mut_nbr2
         ,node_nbrs)
-    graph.matrix[mut_nbr2][node] = 3
-    graph.matrix[node][mut_nbr1] = 3
-    graph.matrix[nbr][node] = 2 
+    matrix[mut_nbr2][node] = 3
+    matrix[node][mut_nbr1] = 3
+    matrix[nbr][node] = 2 
+    return matrix
     
-
-def case_c(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_c(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case C of expansion.
 
     Args:
@@ -287,17 +290,17 @@ def case_c(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    handle_orig_nbrs(graph
+    matrix = handle_orig_nbrs(matrix
         ,nbr
         ,node
         ,mut_nbr1
         ,mut_nbr2
         ,node_nbrs)
-    graph.matrix[mut_nbr1][node] = 2
-    graph.matrix[node][mut_nbr2] = 2
-    graph.matrix[nbr][node] = 3
+    matrix[mut_nbr1][node] = 2
+    matrix[node][mut_nbr2] = 2
+    matrix[nbr][node] = 3
 
-def case_d(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_d(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case D of expansion.
 
     Args:
@@ -311,52 +314,58 @@ def case_d(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=False) == 2:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,False) in node_nbrs:
-            handle_orig_nbrs(graph
+    ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
+                                         ,nodecnt
+                                         ,nbr
+                                         ,mut_nbr1
+                                         ,False)
+    if ordered_nbr_label == 2:
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 3
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[nbr][node] = 2
+            matrix[node][mut_nbr1] = 3
+            matrix[mut_nbr2][node] = 3
+            matrix[nbr][node] = 2
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[nbr][mut_nbr1] = 3
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[node][nbr] = 2
+            matrix[nbr][mut_nbr1] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[mut_nbr2][node] = 3
+            matrix[node][nbr] = 2
     else:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,False) in node_nbrs:
-            handle_orig_nbrs(graph
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[mut_nbr2][node] = 2
-            graph.matrix[node][nbr] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[mut_nbr2][node] = 2
+            matrix[node][nbr] = 3
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr2][nbr] = 2
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[nbr][node] = 3
+            matrix[mut_nbr2][nbr] = 2
+            matrix[mut_nbr2][node] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[nbr][node] = 3
+    return matrix
 
-def case_e(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_e(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case E of expansion.
 
     Args:
@@ -370,53 +379,58 @@ def case_e(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+    ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
+                                         ,nodecnt
+                                         ,nbr
+                                         ,mut_nbr1
+                                         ,cw=True)
+    if ordered_nbr_label == 2:
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 3
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[node][nbr] = 2
+            matrix[node][mut_nbr1] = 3
+            matrix[mut_nbr2][node] = 3
+            matrix[node][nbr] = 2
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr2][nbr] = 3
-            graph.matrix[mut_nbr2][node] = 2
-            graph.matrix[node][mut_nbr1] = 3
-            graph.matrix[nbr][node] = 2
-
+            matrix[mut_nbr2][nbr] = 3
+            matrix[mut_nbr2][node] = 2
+            matrix[node][mut_nbr1] = 3
+            matrix[nbr][node] = 2
     else:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 2
-            graph.matrix[mut_nbr2][node] = 2
-            graph.matrix[nbr][node] = 3
+            matrix[node][mut_nbr1] = 2
+            matrix[mut_nbr2][node] = 2
+            matrix[nbr][node] = 3
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[nbr][mut_nbr1] = 2
-            graph.matrix[node][nbr] = 3
-            graph.matrix[node][mut_nbr1] = 3
-            graph.matrix[mut_nbr2][node] = 2
+            matrix[nbr][mut_nbr1] = 2
+            matrix[node][nbr] = 3
+            matrix[node][mut_nbr1] = 3
+            matrix[mut_nbr2][node] = 2
+    return matrix
 
-def case_f(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_f(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case F of expansion.
 
     Args:
@@ -430,28 +444,34 @@ def case_f(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-        handle_orig_nbrs(graph
+    ordered_nbr = opr.ordered_nbr(matrix
+                                         ,nodecnt
+                                         ,nbr
+                                         ,mut_nbr1
+                                         ,cw=True)
+    if ordered_nbr in node_nbrs:
+        matrix = handle_orig_nbrs(matrix
             ,nbr
             ,node
             ,mut_nbr1
             ,mut_nbr2
             ,node_nbrs)
-        graph.matrix[node][mut_nbr1] = 2
-        graph.matrix[mut_nbr2][node] = 2
-        graph.matrix[nbr][node] = 3
+        matrix[node][mut_nbr1] = 2
+        matrix[mut_nbr2][node] = 2
+        matrix[nbr][node] = 3
     else:
-        handle_orig_nbrs(graph
+        matrix = handle_orig_nbrs(matrix
             ,nbr
             ,node
             ,mut_nbr1
             ,mut_nbr2
             ,node_nbrs)
-        graph.matrix[node][mut_nbr1] = 2
-        graph.matrix[mut_nbr2][node] = 2
-        graph.matrix[node][nbr] = 3
+        matrix[node][mut_nbr1] = 2
+        matrix[mut_nbr2][node] = 2
+        matrix[node][nbr] = 3
+    return matrix
 
-def case_g(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_g(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case G of expansion.
 
     Args:
@@ -465,28 +485,34 @@ def case_g(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-        handle_orig_nbrs(graph
+    ordered_nbr = opr.ordered_nbr_label(matrix
+                                         ,nodecnt
+                                         ,nbr
+                                         ,mut_nbr1
+                                         ,cw=True)[1]
+    if ordered_nbr in node_nbrs:
+        matrix = handle_orig_nbrs(matrix
             ,nbr
             ,node
             ,mut_nbr1
             ,mut_nbr2
             ,node_nbrs)
-        graph.matrix[node][mut_nbr1] = 3
-        graph.matrix[mut_nbr2][node] = 3
-        graph.matrix[node][nbr] = 2
+        matrix[node][mut_nbr1] = 3
+        matrix[mut_nbr2][node] = 3
+        matrix[node][nbr] = 2
     else:
-        handle_orig_nbrs(graph
+        matrix = handle_orig_nbrs(matrix
             ,nbr
             ,node
             ,mut_nbr1
             ,mut_nbr2
             ,node_nbrs)
-        graph.matrix[node][mut_nbr1] = 3
-        graph.matrix[mut_nbr2][node] = 3
-        graph.matrix[nbr][node] = 2
+        matrix[node][mut_nbr1] = 3
+        matrix[mut_nbr2][node] = 3
+        matrix[nbr][node] = 2
+    return matrix
 
-def case_h(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_h(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case H of expansion.
 
     Args:
@@ -500,54 +526,60 @@ def case_h(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    if opr.ordered_nbr_label(graph,nbr,mut_nbr1,cw=True) == 2:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+    ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
+                                         ,nodecnt
+                                         ,nbr
+                                         ,mut_nbr1
+                                         ,cw=True)
+    if ordered_nbr_label == 2:
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[node][mut_nbr1] = 3
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[node][nbr] = 2
+            matrix[node][mut_nbr1] = 3
+            matrix[mut_nbr2][node] = 3
+            matrix[node][nbr] = 2
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr1][nbr] = 0
-            graph.matrix[nbr][mut_nbr1] = 3
-            graph.matrix[mut_nbr1][node] = 2
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[nbr][node] = 2
+            matrix[mut_nbr1][nbr] = 0
+            matrix[nbr][mut_nbr1] = 3
+            matrix[mut_nbr1][node] = 2
+            matrix[mut_nbr2][node] = 3
+            matrix[nbr][node] = 2
     else:
-        if opr.ordered_nbr(graph,nbr,mut_nbr1,True) in node_nbrs:
-            handle_orig_nbrs(graph
+        if ordered_nbr in node_nbrs:
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr1][node] = 2
-            graph.matrix[node][mut_nbr2] = 2
-            graph.matrix[node][nbr] = 3
+            matrix[mut_nbr1][node] = 2
+            matrix[node][mut_nbr2] = 2
+            matrix[node][nbr] = 3
         else:
-            handle_orig_nbrs(graph
+            matrix = handle_orig_nbrs(matrix
                 ,nbr
                 ,node
                 ,mut_nbr1
                 ,mut_nbr2
                 ,node_nbrs)
-            graph.matrix[mut_nbr2][nbr] = 0
-            graph.matrix[nbr][mut_nbr2] = 2
-            graph.matrix[mut_nbr1][node] = 2
-            graph.matrix[mut_nbr2][node] = 3
-            graph.matrix[nbr][node] = 3 
+            matrix[mut_nbr2][nbr] = 0
+            matrix[nbr][mut_nbr2] = 2
+            matrix[mut_nbr1][node] = 2
+            matrix[mut_nbr2][node] = 3
+            matrix[nbr][node] = 3
+    return matrix 
 
-def case_i(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_i(matrix, nodecnt,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case I of expansion.
 
     Args:
@@ -561,17 +593,18 @@ def case_i(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    handle_orig_nbrs(graph
+    matrix = handle_orig_nbrs(matrix
         ,nbr
         ,node
         ,mut_nbr1
         ,mut_nbr2
         ,node_nbrs)
-    graph.matrix[mut_nbr1][node] = 3
-    graph.matrix[node][mut_nbr2] = 3
-    graph.matrix[node][nbr] = 2
+    matrix[mut_nbr1][node] = 3
+    matrix[node][mut_nbr2] = 3
+    matrix[node][nbr] = 2
+    return matrix
 
-def case_j(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_j(matrix, nodecnt,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case J of expansion.
 
     Args:
@@ -585,12 +618,13 @@ def case_j(graph,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     Returns:
         None
     """
-    handle_orig_nbrs(graph
+    matrix = handle_orig_nbrs(matrix
         ,nbr
         ,node
         ,mut_nbr1
         ,mut_nbr2
         ,node_nbrs)
-    graph.matrix[node][mut_nbr1] = 2
-    graph.matrix[mut_nbr2][node] = 2
-    graph.matrix[node][nbr] = 3
+    matrix[node][mut_nbr1] = 2
+    matrix[mut_nbr2][node] = 2
+    matrix[node][nbr] = 3
+    return matrix

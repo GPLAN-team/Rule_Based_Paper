@@ -11,19 +11,17 @@ import networkx as nx
 import warnings
 import numpy as np
 import source.graphoperations.operations as opr
-import source.separatingtriangle.shortcutresolver as sr
 
-def find_cip(graph):
+def find_cip(bdy_ordered,shortcuts):
     """Returns cips in the input graph.
 
     Args:
-        graph: An instance of InputGraph class.
+        bdy_ordered: A list containing boundary nodes in circular order.
+        shortcuts: A list containing shortcuts of the input graph.
 
     Returns:
         cip: A list containing cips of the input graph.
     """
-    bdy_ordered = opr.ordered_bdy(graph)
-    shortcuts = sr.get_shortcut(graph)
     shortcut_endpts = []
     for shortcut in shortcuts:
         shortcut_endpts.append(shortcut[0])

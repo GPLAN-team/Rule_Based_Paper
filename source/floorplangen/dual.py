@@ -17,7 +17,7 @@ import networkx as nx
 import numpy as np 
 import source.graphoperations.operations as opr
 
-def populate_t1_matrix(graph):
+def populate_t1_matrix(matrix, nodecnt):
     """Populates t1_matrix attribute of InputGraph object.
 
     Args:
@@ -26,32 +26,36 @@ def populate_t1_matrix(graph):
     Returns:
         None
     """
-    get_n_s_paths(graph,graph.south, [graph.south])
-    graph.t1_matrix = np.empty((0, graph.t1longestdistval + 1), int)
+    nspaths = []
+    t1longestdistval = -1
+    t1longestdist = [-1] * (nodecnt)
+    t1longestdistval = get_n_s_paths(matrix, nodecnt, nodecnt - 2, [nodecnt - 2],nspaths, t1longestdist,t1longestdistval)
+    t1_matrix = np.empty((0, t1longestdistval + 1), int)
     row_index = 0
-    for path in graph.nspaths:
+    for path in nspaths:
         is_valid_path = True
-        row = [-1] * (graph.t1longestdistval + 1)
+        row = [-1] * (t1longestdistval + 1)
         path_index = 0
         current_vertex = path[path_index]
-        for distance in range(graph.t1longestdistval + 1):
-            if path_index + 1 < len(path) and graph.t1longestdist[path[path_index + 1]] <= distance:
+        for distance in range(t1longestdistval + 1):
+            if path_index + 1 < len(path) and t1longestdist[path[path_index + 1]] <= distance:
                 path_index += 1
                 current_vertex = path[path_index]
-            if row_index != 0 and graph.t1_matrix[row_index - 1][distance] != current_vertex \
-                    and current_vertex in graph.t1_matrix[:, distance]:
+            if row_index != 0 and t1_matrix[row_index - 1][distance] != current_vertex \
+                    and current_vertex in t1_matrix[:, distance]:
                 is_valid_path = False
                 break
             row[distance] = current_vertex
         if is_valid_path:
-            graph.t1_matrix = np.append(graph.t1_matrix, [row], axis=0)
+            t1_matrix = np.append(t1_matrix, [row], axis=0)
             row_index += 1
-    graph.t1_matrix = graph.t1_matrix.transpose()
+    t1_matrix = t1_matrix.transpose()
+    return t1_matrix
 
 # while populating the t1_matrix we need N-S paths such that they are obtained in a DFS ordered manner with children
 # obtained in anticlockwise direction..... but in the REL we have S-N paths... so we construct the S-N path with
 # children obtained in clockwise direction and reverse the path when we reach N.
-def get_n_s_paths(graph, source, path):
+def get_n_s_paths(matrix, nodecnt, source, path, nspaths, t1longestdist,t1longestdistval):
     """Obtain north-south paths in the graph.
 
     Args:
@@ -62,9 +66,9 @@ def get_n_s_paths(graph, source, path):
     Returns:
         None
     """
-    if source == graph.north: # base case of this recursive function as every S-N ends at N
+    if source == nodecnt - 4: # base case of this recursive function as every S-N ends at N
 
-        # making a deep copy of the path array as it changes during the recursive calls and wew want o save the
+        # making a deep copy of the path array as it changes during the recursive calls and we want to save the
         # current state of this array
         path_deep_copy = [i for i in path]
 
@@ -73,23 +77,30 @@ def get_n_s_paths(graph, source, path):
         #iterating over the nodes in path and updating their longest distance from north
         for i in range(len(path_deep_copy)):
             node = path_deep_copy[i]
-            graph.t1longestdist[node] = max(graph.t1longestdist[node], i) # index i represent the distance of node from north
+            t1longestdist[node] = max(t1longestdist[node], i) # index i represent the distance of node from north
             # updating the length of the longest N-S path
-            graph.t1longestdistval = max(graph.t1longestdistval, graph.t1longestdist[node])
+            t1longestdistval = max(t1longestdistval, t1longestdist[node])
 
         # adding this path in the n_s_paths
-        graph.nspaths.append(path_deep_copy)
-        return
+        nspaths.append(path_deep_copy)
+        return t1longestdistval
 
     # if we have not reached north yet then we get the children of the current source node and continue this DFS
     # to reach N from each children
-    ordered_children = get_t1_ordered_children(graph,source)
+    ordered_children = get_t1_ordered_children(matrix,nodecnt,source)
     for child in ordered_children:
         path.append(child)
-        get_n_s_paths(graph,child, path)
+        t1longestdistval = get_n_s_paths(matrix
+                                        ,nodecnt
+                                        ,child
+                                        , path
+                                        ,nspaths
+                                        ,t1longestdist
+                                        ,t1longestdistval)
         path.remove(child)
+    return t1longestdistval
 
-def get_t1_ordered_children(graph, centre):
+def get_t1_ordered_children(matrix, nodecnt, centre):
     """Obtain children of the node in south-north direction for t1 matrix.
 
     Args:
@@ -99,21 +110,21 @@ def get_t1_ordered_children(graph, centre):
     Returns:
         ordered_children: A list containing ordered children of the vertex.
     """
-    ordered_nbrs = opr.order_nbrs(graph,centre, cw=True)
+    ordered_nbrs = opr.order_nbrs(matrix, nodecnt, centre, cw=True)
     index = 0
     ordered_children = []
-    if centre == graph.south:
+    if centre == nodecnt - 2: #south
         return ordered_nbrs
-    while graph.matrix[ordered_nbrs[index]][centre] != 3:
+    while matrix[ordered_nbrs[index]][centre] != 3:
         index = (index + 1) % len(ordered_nbrs)
-    while graph.matrix[ordered_nbrs[index]][centre] == 3:
+    while matrix[ordered_nbrs[index]][centre] == 3:
         index = (index + 1) % len(ordered_nbrs)
-    while graph.matrix[centre][ordered_nbrs[index]] == 2:
+    while matrix[centre][ordered_nbrs[index]] == 2:
         ordered_children.append(ordered_nbrs[index])
         index = (index + 1) % len(ordered_nbrs)
     return ordered_children
 
-def populate_t2_matrix(graph):
+def populate_t2_matrix(matrix,nodecnt):
     """Populates t2_matrix attribute of InputGraph object.
 
     Args:
@@ -122,28 +133,32 @@ def populate_t2_matrix(graph):
     Returns:
         None
     """
-    get_w_e_paths(graph,graph.west, [graph.west])
-    graph.t2_matrix = np.empty((0, graph.t2longestdistval + 1), int)
+    wepaths = []
+    t2longestdistval = -1
+    t2longestdist = [-1] * (nodecnt)
+    t2longestdistval = get_w_e_paths(matrix, nodecnt, nodecnt - 1, [nodecnt - 1], wepaths, t2longestdist, t2longestdistval)
+    t2_matrix = np.empty((0, t2longestdistval + 1), int)
     row_index = 0
-    for path in graph.wepaths:
+    for path in wepaths:
         is_valid_path = True
-        row = [-1] * (graph.t2longestdistval + 1)
+        row = [-1] * (t2longestdistval + 1)
         path_index = 0
         current_vertex = path[path_index]
-        for distance in range(graph.t2longestdistval + 1):
-            if path_index + 1 < len(path) and graph.t2longestdist[path[path_index + 1]] <= distance:
+        for distance in range(t2longestdistval + 1):
+            if path_index + 1 < len(path) and t2longestdist[path[path_index + 1]] <= distance:
                 path_index += 1
                 current_vertex = path[path_index]
-            if row_index != 0 and graph.t2_matrix[row_index - 1][distance] != current_vertex \
-                    and current_vertex in graph.t2_matrix[:, distance]:
+            if row_index != 0 and t2_matrix[row_index - 1][distance] != current_vertex \
+                    and current_vertex in t2_matrix[:, distance]:
                 is_valid_path = False
                 break
             row[distance] = current_vertex
         if is_valid_path:
-            graph.t2_matrix = np.append(graph.t2_matrix, [row], axis=0)
+            t2_matrix = np.append(t2_matrix, [row], axis=0)
             row_index += 1
+    return t2_matrix
 
-def get_w_e_paths(graph, source, path):
+def get_w_e_paths(matrix, nodecnt, source, path, wepaths, t2longestdist, t2longestdistval):
     """Obtain west-east paths in the graph.
 
     Args:
@@ -154,19 +169,20 @@ def get_w_e_paths(graph, source, path):
     Returns:
         None
     """
-    graph.t2longestdist[source] = max(graph.t2longestdist[source], len(path) - 1)
-    graph.t2longestdistval = max(graph.t2longestdistval, graph.t2longestdist[source])
-    if source == graph.east:
+    t2longestdist[source] = max(t2longestdist[source], len(path) - 1)
+    t2longestdistval = max(t2longestdistval, t2longestdist[source])
+    if source == nodecnt - 3:
         path_deep_copy = [i for i in path]
-        graph.wepaths.append(path_deep_copy)
-        return
-    ordered_children = get_t2_ordered_children(graph,source)
+        wepaths.append(path_deep_copy)
+        return t2longestdistval
+    ordered_children = get_t2_ordered_children(matrix, nodecnt, source)
     for child in ordered_children:
         path.append(child)
-        get_w_e_paths(graph,child, path)
+        t2longestdistval = get_w_e_paths(matrix, nodecnt, child, path, wepaths, t2longestdist, t2longestdistval)
         path.remove(child)
+    return t2longestdistval
 
-def get_t2_ordered_children(graph, centre):
+def get_t2_ordered_children(matrix, nodecnt, centre): 
     """Obtain children of the node in west-east direction for t1 matrix.
 
     Args:
@@ -176,16 +192,16 @@ def get_t2_ordered_children(graph, centre):
     Returns:
         ordered_children: A list containing ordered children of the vertex.
     """
-    ordered_nbrs = opr.order_nbrs(graph,centre, cw=True)
+    ordered_nbrs = opr.order_nbrs(matrix, nodecnt, centre, cw=True)
     index = 0
     ordered_children = []
-    if centre == graph.west:
+    if centre == nodecnt - 1:
         return ordered_nbrs
-    while graph.matrix[centre][ordered_nbrs[index]] != 2:
+    while matrix[centre][ordered_nbrs[index]] != 2:
         index = (index + 1) % len(ordered_nbrs)
-    while graph.matrix[centre][ordered_nbrs[index]] == 2:
+    while matrix[centre][ordered_nbrs[index]] == 2:
         index = (index + 1) % len(ordered_nbrs)
-    while graph.matrix[centre][ordered_nbrs[index]] == 3:
+    while matrix[centre][ordered_nbrs[index]] == 3:
         ordered_children.append(ordered_nbrs[index])
         index = (index + 1) % len(ordered_nbrs)
     return ordered_children

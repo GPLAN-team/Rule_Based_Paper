@@ -72,7 +72,7 @@ def chk_chordality(nxgraph):
         return False
 
 
-def triangulate(graph):
+def triangulate(matrix):
     """Triangulates a given input graph.
 
     Args:
@@ -81,21 +81,9 @@ def triangulate(graph):
     Returns:
         None
     """
-    nxgraph = nx.from_numpy_matrix(graph.matrix)
+    nxgraph = nx.from_numpy_matrix(matrix)
+    trng_edges = []
     if not chk_chordality(nxgraph):
-        graph.trng_edges = make_chordal(nxgraph)
+        trng_edges = make_chordal(nxgraph)
+    return trng_edges
 
-
-def add_edge(graph, edge):
-    """Adds extra edges to the graph.
-
-    Args:
-        graph: An instance of InputGraph object.
-        edge: A list representing the edge to be added.
-
-    Returns:
-        None
-    """
-    graph.edgecnt += 1
-    graph.matrix[edge[0]][edge[1]] = 1
-    graph.matrix[edge[1]][edge[0]] = 1

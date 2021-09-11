@@ -21,53 +21,6 @@ from random import randint
 import copy
 import itertools 
 
-
-def find_cip_single(graph):
-    boundary_vertices = opr.ordered_outer_boundary(graph)
-    boundary_vertices.append(boundary_vertices[0])
-    outer_boundary = opr.get_outer_boundary_vertices(graph)[1]
-    cip = []
-    temp = []
-    for i in range(0,len(boundary_vertices)):
-        breakpoint = 0
-        if(len(temp) == 0):
-            temp.append(boundary_vertices[i])
-            continue
-        else:
-            for j in temp:
-                if(boundary_vertices[i],j) not in outer_boundary and graph.matrix[boundary_vertices[i]][j] == 1:
-                    breakpoint =1
-                    break
-        if breakpoint == 1:
-            value = temp[len(temp)-1]
-            cip.append(temp)
-            temp = []
-            temp.append(value)
-            temp.append(boundary_vertices[i])
-        else:
-            temp.append(boundary_vertices[i])
-    cip.append(temp)
-    merge = 0
-    if(len(cip)>1):
-        for i in cip[len(cip)-1]:
-            for j in cip[0]:
-                if (i,j) not in outer_boundary and graph.matrix[i][j] == 1:
-                    merge = 1
-                    break
-            if merge == 1:
-                break
-        if merge == 0:
-            for i in range(1,len(cip[0])):
-                cip[len(cip)-1].append(cip[0][i])
-            cip.pop(0)
-    print(cip)
-    if(len(cip)<4):
-        for i in range(4-len(cip)):
-            index = cip.index(max(cip,key =len))
-            # print(index)
-            create_cip(cip,index)
-    return cip
-
 def find_bdy(cip):
     """Returns cip paths in the input graph.
 
@@ -263,7 +216,7 @@ def create_cip(cip,index):
     del cip[index + 1][0:1]
 
 
-def news_edges(graph,matrix,cip, source_node):
+def news_edges(matrix,cip, source_node):
     """Connects given cip to given exterior vertex.
 
     Args:
@@ -275,10 +228,12 @@ def news_edges(graph,matrix,cip, source_node):
     Returns:
         None
     """
+    edgecnt = 0
     for node in cip:
-        graph.edgecnt += 1
+        edgecnt += 1
         matrix[source_node][node] = 1
         matrix[node][source_node] = 1
+    return edgecnt
 
 
 def populate_cip_list(graph):
@@ -323,8 +278,7 @@ def populate_cip_list(graph):
     
     return new_list_of_cips
 
-
-def connect_news(matrix,graph):
+def connect_news(matrix,nodecnt):
     """Connects exterior vertices to each other.
 
     Args:
@@ -334,36 +288,34 @@ def connect_news(matrix,graph):
     Returns:
         None
     """
-    matrix[graph.north][graph.west] = 1
-    matrix[graph.west][graph.north] = 1
-    matrix[graph.west][graph.south] = 1
-    matrix[graph.south][graph.west] = 1
-    matrix[graph.south][graph.east] = 1
-    matrix[graph.east][graph.south] = 1
-    matrix[graph.north][graph.east] = 1
-    matrix[graph.east][graph.north] = 1
+    matrix[nodecnt][nodecnt + 3] = 1
+    matrix[nodecnt + 3][nodecnt] = 1
+    matrix[nodecnt + 3][nodecnt + 2] = 1
+    matrix[nodecnt + 2][nodecnt + 3] = 1
+    matrix[nodecnt + 2][nodecnt + 1] = 1
+    matrix[nodecnt + 1][nodecnt + 2] = 1
+    matrix[nodecnt][nodecnt + 1] = 1
+    matrix[nodecnt + 1][nodecnt] = 1
     
-
-def add_news(graph):
+def add_news(bdy,matrix,nodecnt,edgecnt):
     """Adds 4 outer vertices- N, E, S and W to the input graph.
 
     Args:
-        graph: An instance of InputGraph object.
+        bdy: A list containing 4 outer boundaries of the graph.
+        matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
         None
     """
-    cip = graph.cip
-    graph.nodecnt += 4
-    adjmatrix = np.zeros([graph.nodecnt, graph.nodecnt], int)
-    adjmatrix[0:graph.matrix.shape[0],0:graph.matrix.shape[1]] = graph.matrix
-    news_edges(graph,adjmatrix,cip[0], graph.north)
-    news_edges(graph,adjmatrix,cip[1], graph.east)
-    news_edges(graph,adjmatrix,cip[2], graph.south)
-    news_edges(graph,adjmatrix,cip[3], graph.west)
-    graph.edgecnt += 4
-    connect_news(adjmatrix,graph)
-    graph.matrix = adjmatrix.copy()
-    # graph.user_matrix = adjmatrix
+    
+    adjmatrix = np.zeros([matrix.shape[0]+4, matrix.shape[0]+4], int)
+    adjmatrix[0:matrix.shape[0],0:matrix.shape[0]] = matrix
+    edgecnt += news_edges(adjmatrix,bdy[0], nodecnt)
+    edgecnt += news_edges(adjmatrix,bdy[1], nodecnt + 1) #east
+    edgecnt += news_edges(adjmatrix,bdy[2], nodecnt + 2) #south
+    edgecnt += news_edges(adjmatrix,bdy[3], nodecnt + 3) #west
+    edgecnt += 4
+    connect_news(adjmatrix,nodecnt)
+    return adjmatrix,edgecnt
 
 

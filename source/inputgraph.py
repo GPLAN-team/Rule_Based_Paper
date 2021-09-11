@@ -55,11 +55,8 @@ class InputGraph:
                of the North vertex. (Default value: nodecnt+2)
         west: An integer indicating the node number 
               of the North vertex. (Default value: nodecnt+3)
-        trngls: A list containing all triangular cycles in the graph.
-        digraph: A networkx digraph of the graph.
         bdy_nodes: A list containing all boundary nodes in the graph.
         bdy_edges: A list contaning all boundary edges in the graph.
-        shortcuts: A list containing all shortcuts in the graph.
         cip: A list containing all cips in the graph.
         irreg_nodes1: A list containing irregular room nodes.
         irreg_nodes2: A list containing irregular room nodes.
@@ -116,30 +113,12 @@ class InputGraph:
         for edges in (edgeset): 
             self.matrix[edges[0]][edges[1]] = 1
             self.matrix[edges[1]][edges[0]] = 1
-        self.north = self.nodecnt
-        self.east = self.nodecnt + 1
-        self.south = self.nodecnt + 2
-        self.west = self.nodecnt + 3
-        self.trngls = opr.get_trngls(self)
-        self.digraph = opr.get_directed(self)
         self.bdy_nodes = []
         self.bdy_edges = []
-        self.shortcuts = []
-        self.cip = []
         self.irreg_nodes1 = []
         self.irreg_nodes2 = []
         self.mergednodes = []
         self.degrees = None
-        self.goodnodes = None
-        self.cntrs = []
-        self.t1_matrix = None
-        self.t2_matrix = None
-        self.t1longestdist = [-1] * (self.nodecnt + 4)
-        self.t2longestdist = [-1] * (self.nodecnt + 4)
-        self.t1longestdistval = -1
-        self.t2longestdistval = -1
-        self.nspaths = []
-        self.wepaths = []
         self.room_x = np.zeros(self.nodecnt)
         self.room_y = np.zeros(self.nodecnt)
         self.room_x_bottom_right = np.zeros(self.nodecnt)
@@ -440,89 +419,108 @@ class InputGraph:
                 # self.make_corridor(edge[0], edge[1], canvas, 1, cyan, 5)
 
     def single_dual(self):
-        """Creates a single dimensionless floorplan for given graph"""
-        
-        if (not nx.is_biconnected(nx.from_numpy_matrix(self.matrix))):
-            bcn.init_bccsets(self)
-            bcn.find_articulationpnts(self)
-            bcn.makebcn(self)  
-        trng.triangulate(self)
-        for edge in self.trng_edges:
-            trng.addedge(self,edge)
-        k4.findk4(self)
-        if(len(self.k4)!=0):
-            self.nonrect = True
-            for k4s in self.k4:
-                k4.removek4(self
-                    , k4s
-                    , k4s.edge
-                    , self.irreg_nodes1
-                    , self.irreg_nodes2
-                    , self.mergednodes)
-        for edge in self.trng_edges:
+        """Finds K4 cycle in the graph.
+
+        Args:
+            graph: An instance of InputGraph object.
+
+        Returns:
+            None
+        """
+        # if (not nx.is_biconnected(nx.from_numpy_matrix(self.matrix))):
+        #     bcn.init_bccsets(self)
+        #     bcn.find_articulationpnts(self)
+        #     bcn.makebcn(self)  
+        trng_edges = trng.triangulate(self.matrix)
+        for edge in trng_edges:
+            self.matrix[edge[0]][edge[1]] = 1
+            self.matrix[edge[1]][edge[0]] = 1
+            self.edgecnt += 1
+        # sep_triangles = k4.findk4(self)
+        # if(len(sep_triangles)!=0):
+        #     self.nonrect = True
+        #     for k4s in sep_triangles:
+        #         k4.removek4(sep_triangles
+        #             , self.matrix
+        #             , k4s
+        #             , k4s.edge
+        #             , self.irreg_nodes1
+        #             , self.irreg_nodes2
+        #             , self.mergednodes)
+        for edge in trng_edges:
             self.extranodes.append(self.nodecnt)
-            transform.transform(self,edge)
+            self.matrix,extra_edges_cnt = transform.transform(self.matrix,edge)
+            self.nodecnt += 1
+            self.edgecnt += extra_edges_cnt
             self.nonrect = True
-        for edge in self.bcn_edges:
-            self.extranodes.append(self.nodecnt)
-            transform.transform(self,edge)
-            self.nonrect = True
-        # if triangulate_type == "space":
-        #     # Triangulate with empty spaces
-        #     for edges in additional_edges_for_triangulation:
-        #         self.extra_vertices.append(self.node_count)
-        #         transformation.transformEdges(self,edges)
-        #     for edges in self.final_added_edges:
-        #         self.extra_vertices.append(self.node_count)
-        #         transformation.transformEdges(self,edges)
-        # elif triangulate_type == "wall":
-        #     for edges in self.final_added_edges:
-        #         self.extra_vertices.append(self.node_count)
-        #         transformation.transformEdges(self,edges)
-        #     # Triangulate with walls or doors, done through drawing.py
-        # self.graph = nx.from_numpy_matrix(self.matrix)
-        if self.nonrect:
-            self.trngls = opr.get_trngls(self)
-            self.digraph = opr.get_directed(self)
+        # for edge in self.bcn_edges:
+        #     self.extranodes.append(self.nodecnt)
+        #     transform.transform(self,edge)
+        #     self.nonrect = True
+        # # if triangulate_type == "space":
+        # #     # Triangulate with empty spaces
+        # #     for edges in additional_edges_for_triangulation:
+        # #         self.extra_vertices.append(self.node_count)
+        # #         transformation.transformEdges(self,edges)
+        # #     for edges in self.final_added_edges:
+        # #         self.extra_vertices.append(self.node_count)
+        # #         transformation.transformEdges(self,edges)
+        # # elif triangulate_type == "wall":
+        # #     for edges in self.final_added_edges:
+        # #         self.extra_vertices.append(self.node_count)
+        # #         transformation.transformEdges(self,edges)
+        # #     # Triangulate with walls or doors, done through drawing.py
+        # # self.graph = nx.from_numpy_matrix(self.matrix)
         # if not nx.check_planarity(self.graph) or (len(self.triangles)+self.node_count-self.edge_count)!=1:
         #     raise Exception("Error")
-        
-        self.bdy_nodes = opr.get_bdy(self)[0]
-        self.bdy_edges = opr.get_bdy(self)[1]
-        self.shortcuts = sr.get_shortcut(self)
+        triangular_cycles = opr.get_trngls(self.matrix)
+        digraph = opr.get_directed(self.matrix)
+        self.bdy_nodes,self.bdy_edges = opr.get_bdy(triangular_cycles,digraph)
+        shortcuts = sr.get_shortcut(self.matrix,self.bdy_nodes,self.bdy_edges)
+        bdys = []
         if(self.edgecnt==3 and self.nodecnt==3):
-            self.cip = [[0],[0,1],[1,2],[2,0]]
+            bdys = [[0],[0,1],[1,2],[2,0]]
         else:
-            cips = cip.find_cip(self)
-            print(cips)
-            if(len(cips)<=4):
-                self.cip = news.bdy_path(news.find_bdy(cips),
-                    opr.ordered_bdy(self))
+            bdy_ordered = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
+            cips = cip.find_cip(bdy_ordered,shortcuts)
+            if(len(cips) <= 4):
+                bdys = news.bdy_path(news.find_bdy(cips),
+                    bdy_ordered)
             else:
-                shortcut = sr.get_shortcut(self)
-                while(len(shortcut)>4):
-                    index = randint(0,len(shortcut)-1)
-                    sr.remove_shortcut(shortcut[index]
-                        ,self,self.irreg_nodes1
-                        ,self.irreg_nodes2
-                        ,self.mergednodes)
-                    shortcut.pop(index)
-                cips = cip.find_cip(self)
-                self.cip = news.bdy_path(news.find_bdy(cips)
-                    ,opr.ordered_bdy(self))
-        news.add_news(self)
+                while(len(shortcuts)>4):
+                    index = randint(0,len(shortcuts)-1)
+                    self.matrix = sr.remove_shortcut(shortcuts[index]
+                        ,triangular_cycles,
+                        self.matrix)
+                    self.irreg_nodes1.append(shortcuts[index][0])
+                    self.irreg_nodes2.append(shortcuts[index][1])
+                    self.mergednodes.append(self.nodecnt)
+                    self.nodecnt += 1 #Extra vertex added to remove shortcut
+                    self.edgecnt += 3 #Extra edges added to remove shortcut
+                    shortcuts.pop(index)
+                    triangular_cycles = opr.get_trngls(self.matrix)
+                bdy_ordered = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
+                cips = cip.find_cip(bdy_ordered,shortcuts)
+                bdys = news.bdy_path(news.find_bdy(cips)
+                    ,bdy_ordered)
+        print(self.matrix)
+        self.matrix,self.edgecnt = news.add_news(bdys,self.matrix,self.nodecnt,self.edgecnt)
+        self.nodecnt += 4
+        print(self.matrix)
+        
+        self.degrees = cntr.degrees(self.matrix)
+        goodnodes = cntr.goodnodes(self.matrix,self.degrees)
+        self.matrix,self.degrees,goodnodes,cntrs = cntr.contract(self.matrix,
+                                                            goodnodes,
+                                                            self.degrees)
 
-        cntr.init_degrees(self)
-        cntr.init_goodnodes(self)
-        v, u = cntr.contract(self)
-        while v != -1:
-            v, u = cntr.contract(self)
-
-        exp.basecase(self)
-        while len(self.cntrs) != 0:
-            exp.expand(self)
-
-        rdg.construct_dual(self,self.mergednodes,self.irreg_nodes1)
+        self.matrix = exp.basecase(self.matrix,self.nodecnt)
+        while len(cntrs) != 0:
+            self.matrix = exp.expand(self.matrix,self.nodecnt,cntrs)
+        self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top = rdg.construct_dual(self.matrix
+        ,self.nodecnt
+        ,self.mergednodes
+        ,self.irreg_nodes1)
     
     # def create_single_floorplan(self,pen,textbox,mode):
     #     if(mode == 0):
