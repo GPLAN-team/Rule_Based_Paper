@@ -9,17 +9,15 @@ This module contains the following functions:
                      make graph triangulated.
     * chk_chordality - checks if the graph is chordal.
     * triangulate - triangulates a given graph.
-    * addedges - adds given edge to the graph.
 """
 
 import networkx as nx
-
 
 def make_chordal(nxgraph):
     """Finds edges to be added to make graph triangulated.
 
     Args:
-        nxgraph: An instance of InputGraph object.
+        nxgraph: An instance of NetworkX Graph object.
 
     Returns:
         edges: A list representing edges to be added.
@@ -52,12 +50,11 @@ def make_chordal(nxgraph):
     edges = chords
     return edges
 
-
 def chk_chordality(nxgraph):
     """Checks chordality of a given graph.
 
     Args:
-        nxgraph: An instance of InputGraph object.
+        nxgraph: An instance of NetworkX Graph object.
 
     Returns:
         boolean: A boolean representing if graph
@@ -71,12 +68,12 @@ def chk_chordality(nxgraph):
             return True
         return False
 
-
 def triangulate(matrix):
-    """Triangulates a given input graph.
+    """Checks if a graph needs to be triangulated and returns
+        edges to be added to make it triangulated.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
         None

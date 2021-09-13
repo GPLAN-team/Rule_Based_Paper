@@ -1,5 +1,5 @@
 import numpy as np
-from digraph_to_eq import digraph_to_eq
+from source.dimensioning.digraph_to_eq import digraph_to_eq
 def floorplan_to_st(A,min_width,min_height,max_width,max_height):
 	# A=[[1,2,6,9,10],[3,4,7,11,12],[5,5,8,13,13]]
 	m=len(A)

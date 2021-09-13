@@ -206,87 +206,73 @@ def get_t2_ordered_children(matrix, nodecnt, centre):
         index = (index + 1) % len(ordered_nbrs)
     return ordered_children
 
-def get_coordinates(graph,hor_dgph):
-        
-        def ismember(d, k):
-            return [1 if (i == k) else 0 for i in d]
+def get_coordinates(encoded_matrix, nodecnt, room_width, room_height, hor_dgph):
+    room_x = np.zeros(nodecnt-4)
+    room_y = np.zeros(nodecnt-4)
+    def ismember(d, k):
+        return [1 if (i == k) else 0 for i in d]
+    def any(A):
+        for i in A:
+            if i != 0:
+                return 1
+        return 0
+    def find_sp(arr):
+        for i in range(0,len(arr)):
+            if arr[i]==1:
+                return [i+1]
+        return [0]
+    def find(arr):
+        for i in range(0,len(arr)):
+            if arr[i]==1:
+                return [i]
+        return [0]
 
-        def any(A):
-            for i in A:
-                if i != 0:
-                    return 1
-            return 0
+    hor_dgph=np.array(hor_dgph)
+    hor_dgph=hor_dgph.transpose()
+    xmin=float(0)
+    ymin=float(0)
+    B=np.array(encoded_matrix)
+    m=len(B[0])
+    n=len(B)
+    N=np.amax(B)+1
+    rect_drawn=[]
 
-        def find_sp(arr):
-            for i in range(0,len(arr)):
-                if arr[i]==1:
-                    return [i+1]
-            return [0]
+    j=0
+    C=[[-1 for i in range(0,len(B[0]))] for i in range(0,len(B))]
+    while j<len(B[0]):
+        rows=[]
+        for i in range(0,len(B)):
+            if B[i][j] not in rows:
+                rows.append(B[i][j])
+        k=0
+        for k in range(0,len(rows)):
+            C[k][j]=rows[k]
+        j+=1
 
-        def find(arr):
-            for i in range(0,len(arr)):
-                if arr[i]==1:
-                    return [i]
-            return [0]
-
-        hor_dgph=np.array(hor_dgph)
-        hor_dgph=hor_dgph.transpose()
-        xmin=float(0)
-        ymin=float(0)
-        B=np.array(graph.encoded_matrix)
-        m=len(B[0])
-        n=len(B)
-        N=np.amax(B)+1
-        rect_drawn=[]
-        # C = np.zeros((n,m))
-        # for i in range(0,m):
-        #     temp = len(np.unique(np.transpose(B[i])))
-        #     for j in range(0,temp):
-        #         C[j][i] = np.unique(np.transpose(B[i]))[j]
-        # print(C)
-
-
-        j=0
-        C=[[-1 for i in range(0,len(B[0]))] for i in range(0,len(B))]
-        # print(C)
-        while j<len(B[0]):
-            rows=[]
-            for i in range(0,len(B)):
-                if B[i][j] not in rows:
-                    rows.append(B[i][j])
-            k=0
-            for k in range(0,len(rows)):
-                C[k][j]=rows[k]
-            j+=1
-        # print(C)
-
-
-        # for i in range(0,len(C)):
-        #     for j in range(0,len(C[0])):
-        #         C[i][j] +=1
-        xR=np.zeros((N),float)
-        for i in range(0,m):
-            xmax=np.zeros((N),float)
-            ymin=0
-            for j in range(0,n):
-                if C[j][i]==-1:
-                    break
+    xR=np.zeros((N),float)
+    for i in range(0,m):
+        xmax=np.zeros((N),float)
+        ymin=0
+        for j in range(0,n):
+            if C[j][i]==-1:
+                break
+            else:
+                if any(ismember(rect_drawn,C[j][i])):
+                    ymin = ymin + room_height[C[j][i]]
+                    xmax=np.zeros((N),float)
+                    xmax[0]=xR[C[j][i]]
+                    continue
                 else:
-                    if any(ismember(rect_drawn,C[j][i])):
-                        ymin = ymin + graph.room_height[C[j][i]]
-                        xmax=np.zeros((N),float)
-                        xmax[0]=xR[C[j][i]]
-                        continue
+                    if not any(find_sp(hor_dgph[C[j][i]])):
+                        ymin=ymin
                     else:
-                        if not any(find_sp(hor_dgph[C[j][i]])):
-                            ymin=ymin
-                        else:
-                            l=find(hor_dgph[C[j][i]])
-                            xmin=xR[l]
-                    graph.room_x[C[j][i]],graph.room_y[C[j][i]]=xmin,ymin #-graph.room_height[C[j][i]]  #not subtracting height because code requires top left corner
-                    rect_drawn.append(C[j][i])
-                    xmax[C[j][i]]=xmin+graph.room_width[C[j][i]]
-                    xR[C[j][i]]=xmax[C[j][i]]
-                    ymin = ymin + graph.room_height[C[j][i]]
-            xmax=xmax[xmax!=0]
-            xmin=min(xmax)
+                        l=find(hor_dgph[C[j][i]])
+                        xmin=xR[l]
+                room_x[C[j][i]],room_y[C[j][i]]=xmin,ymin #-room_height[C[j][i]]  #not subtracting height because code requires top left corner
+                rect_drawn.append(C[j][i])
+                xmax[C[j][i]]=xmin+room_width[C[j][i]]
+                xR[C[j][i]]=xmax[C[j][i]]
+                ymin = ymin + room_height[C[j][i]]
+        xmax=xmax[xmax!=0]
+        xmin=min(xmax)
+    return room_x, room_y

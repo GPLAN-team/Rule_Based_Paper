@@ -35,7 +35,6 @@ def find_bdy(cip):
         paths.append(path[1:len(path)-1])
     return paths
 
-
 def bdy_path(paths, bdy):
     """Returns boundary paths in the input graph.
 
@@ -90,27 +89,19 @@ def find_multiple_boundary(corner_points,boundary):
 
 def multiple_boundaries(paths):
     n = len(paths)
-
     indices = [0 for i in range(n)]
-
     multiple_corner_points = []
     while(1):
-
         temp =[]
         for i in range(n):
-            print(i)
             temp.append(paths[i][indices[i]])
-
         multiple_corner_points.append(temp)
         next = n-1
         while(next >=0 and indices[next]+1 >= len(paths[next])):
             next-=1
-
         if(next<0):
             return multiple_corner_points
-
         indices[next] +=1
-
         for i in range(next+1,n):
             indices[i] = 0
 
@@ -215,7 +206,6 @@ def create_cip(cip,index):
     cip[index] = cip[index][0:2]
     del cip[index + 1][0:1]
 
-
 def news_edges(matrix,cip, source_node):
     """Connects given cip to given exterior vertex.
 
@@ -234,7 +224,6 @@ def news_edges(matrix,cip, source_node):
         matrix[source_node][node] = 1
         matrix[node][source_node] = 1
     return edgecnt
-
 
 def populate_cip_list(graph):
     new_list_of_cips =[]

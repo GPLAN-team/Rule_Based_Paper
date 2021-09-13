@@ -5,20 +5,21 @@ edge into a node.
 
 This module contains the following functions:
 
-    * transform - transforms given esge in graph into node.
+    * transform - transforms given edge in graph into node.
     * find_nbr - finds neigbour of the given vertex.
 """
 import numpy as np
 
-def transform(matrix,edge):
+def transform_edges(matrix,edge):
     """Transforms edge into vertex.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
         edge: A list representing edge to be transformed.
 
     Returns:
-        None
+        adjmatrix: A modified matrix after edge transformation.
+        edgecnt: An integer representing the increase in edgecnt (2 or 3).
     """
     nbd1= find_nbr(matrix,edge[0])
     nbd2 = find_nbr(matrix,edge[1])
@@ -35,15 +36,15 @@ def transform(matrix,edge):
         adjmatrix[vertex][matrix.shape[0]]=1
         adjmatrix[matrix.shape[0]][vertex]=1
     if(len(common_nbrs)==1):
-        return adjmatrix,2
+        return adjmatrix,2 # 2 edges are added if it was external edge
     else:
-        return adjmatrix,3
+        return adjmatrix,3 # 3 edges are added if it was internal edge
 
 def find_nbr(matrix,vertex):
     """Finds neighbour of the given vertex.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
         vertex: An integer whose neighbours are to be found.
 
     Returns:

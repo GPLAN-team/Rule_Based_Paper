@@ -4,6 +4,7 @@ This module provides Ptpg class to the user and allows to
 create multiple dimensioned floorplans.
 
 """
+import copy
 import numpy as np
 import networkx as nx
 from random import randint
@@ -18,6 +19,8 @@ import source.floorplangen.rdg as rdg
 import source.separatingtriangle.k4 as k4
 import source.graphoperations.triangularity as trng
 import source.floorplangen.transformation as transform
+import source.dimensioning.floorplan_to_st as fpts
+import source.floorplangen.flippable as flp
 # import itertools as itr
 # import warnings
 
@@ -25,7 +28,7 @@ import source.floorplangen.transformation as transform
 
 
 # import flippable as flp
-# import copy
+
 
 # from floorplan_to_st import floorplan_to_st
 # import dimension_gui as dimgui
@@ -133,7 +136,6 @@ class InputGraph:
         self.room_width = np.zeros(self.nodecnt)
         self.k4=[]
         self.nonrect = False
-        self.trng_edges = []
         self.extranodes = []
         self.time = 0
         self.articulationpts = [False] * (self.nodecnt)
@@ -145,6 +147,8 @@ class InputGraph:
         self.added_edges = set()
         self.removed_edges = set()
         self.bcn_edges = set()
+        self.area = []
+        self.rel_matrix_list = []
         # self.rdg_vertices = []
         # self.to_be_merged_vertices = []
         # self.k4 = []
@@ -176,7 +180,7 @@ class InputGraph:
         # self.original_west = self.west
 
 
-        # self.rel_matrix =[]
+        
         # self.room_x = np.zeros(self.node_count)
         # self.room_x_list = []
         # self.room_y = np.zeros(self.node_count)
@@ -435,7 +439,7 @@ class InputGraph:
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
-            self.edgecnt += 1
+            self.edgecnt += 1 #Extra edge added
         # sep_triangles = k4.findk4(self)
         # if(len(sep_triangles)!=0):
         #     self.nonrect = True
@@ -449,8 +453,8 @@ class InputGraph:
         #             , self.mergednodes)
         for edge in trng_edges:
             self.extranodes.append(self.nodecnt)
-            self.matrix,extra_edges_cnt = transform.transform(self.matrix,edge)
-            self.nodecnt += 1
+            self.matrix,extra_edges_cnt = transform.transform_edges(self.matrix,edge)
+            self.nodecnt += 1 #Extra node added
             self.edgecnt += extra_edges_cnt
             self.nonrect = True
         # for edge in self.bcn_edges:
@@ -470,7 +474,6 @@ class InputGraph:
         # #         self.extra_vertices.append(self.node_count)
         # #         transformation.transformEdges(self,edges)
         # #     # Triangulate with walls or doors, done through drawing.py
-        # # self.graph = nx.from_numpy_matrix(self.matrix)
         # if not nx.check_planarity(self.graph) or (len(self.triangles)+self.node_count-self.edge_count)!=1:
         #     raise Exception("Error")
         triangular_cycles = opr.get_trngls(self.matrix)
@@ -506,8 +509,7 @@ class InputGraph:
         print(self.matrix)
         self.matrix,self.edgecnt = news.add_news(bdys,self.matrix,self.nodecnt,self.edgecnt)
         self.nodecnt += 4
-        print(self.matrix)
-        
+
         self.degrees = cntr.degrees(self.matrix)
         goodnodes = cntr.goodnodes(self.matrix,self.degrees)
         self.matrix,self.degrees,goodnodes,cntrs = cntr.contract(self.matrix,
@@ -522,34 +524,169 @@ class InputGraph:
         ,self.mergednodes
         ,self.irreg_nodes1)
     
-    # def create_single_floorplan(self,pen,textbox,mode):
-    #     if(mode == 0):
-    #         self.create_single_dual(0,pen,textbox)
-    #     self.encoded_matrix = opr.get_encoded_matrix(self)
-    #     B = copy.deepcopy(self.encoded_matrix)
-    #     A = copy.deepcopy(self.encoded_matrix)
-    #     # minimum_width = min(self.inp_min)
-    #     for i in range(0,len(self.extra_vertices)):
-    #         self.width_min.append(0)
-    #         self.height_min.append(0)
-    #     [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
-    #     A=B
-    #     # print(A)
-    #     width = np.transpose(width)
-    #     height = np.transpose(height)
-    #     self.room_width = width.flatten()
-    #     self.room_height = height.flatten()
-    #     draw.construct_rfp(self,hor_dgph,self.to_be_merged_vertices,self.rdg_vertices)
-    #     for i in range(0,len(self.room_x)):
-    #         self.room_x[i]=round(self.room_x[i],3)
-    #         # print(self.room_x[i])
-    #     for i in range(0,len(self.room_y)):
-    #         self.room_y[i]=round(self.room_y[i],3)
-    #         # print(self.room_x[i],self.room_y[i],self.room_width[i],self.room_height[i],self.room_x_top_left[i],self.room_x_top_right[i],self.room_y_left_top[i],self.room_y_left_bottom[i],self.room_x_bottom_left[i],self.room_x_bottom_right[i],self.room_y_right_top[i],self.room_y_right_bottom[i])
-    #     # print(self.room_x,self.room_y,self.room_width,self.room_height,self.room_x_top_left,self.room_x_top_right,self.room_y_left_top,self.room_y_left_bottom,self.room_x_bottom_left,self.room_x_bottom_right,self.room_y_right_top,self.room_y_right_bottom)
-    #         # print(self.room_y[i])
-    #     opr.calculate_area(self,self.to_be_merged_vertices,self.rdg_vertices)
-        
+    def single_floorplan(self,min_width,min_height,max_width,max_height):
+        print(self.matrix
+            , self.room_x
+            , self.room_y
+            , self.room_width
+            , self.room_height)
+        encoded_matrix = opr.get_encoded_matrix(self.matrix.shape[0]-4
+                                    , self.room_x
+                                    , self.room_y
+                                    , self.room_width
+                                    , self.room_height)
+        encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
+        for i in range(0,len(self.extranodes)):
+            min_width.append(0)
+            min_height.append(0)
+            max_width.append(max(max_width))
+            max_height.append(max(max_height))
+        [width,height,hor_dgph,status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
+                                                ,min_width
+                                                ,min_height
+                                                ,max_width
+                                                ,max_height)
+        width = np.transpose(width)
+        height = np.transpose(height)
+        self.room_width = width.flatten()
+        self.room_height = height.flatten()
+        self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top = rdg.construct_rfp(encoded_matrix
+            , self.nodecnt
+            , self.room_width
+            , self.room_height
+            , hor_dgph
+            , self.mergednodes
+            , self.irreg_nodes1)
+        for i in range(0,len(self.room_x)):
+            self.room_x[i]=round(self.room_x[i],3)
+            self.room_y[i]=round(self.room_y[i],3)
+        self.area = opr.calculate_area(self.room_x.shape[0]
+                                        , self.room_width
+                                        , self.room_height
+                                        , self.extranodes
+                                        , self.mergednodes
+                                        , self.irreg_nodes1)
+    
+    def multiple_dual(self):
+        trng_edges = trng.triangulate(self.matrix)
+        for edge in trng_edges:
+            self.matrix[edge[0]][edge[1]] = 1
+            self.matrix[edge[1]][edge[0]] = 1
+            self.edgecnt += 1
+        for edge in trng_edges:
+            self.extranodes.append(self.nodecnt)
+            self.matrix,extra_edges_cnt = transform.transform_edges(self.matrix,edge)
+            self.nodecnt += 1
+            self.edgecnt += extra_edges_cnt
+            self.nonrect = True
+        triangular_cycles = opr.get_trngls(self.matrix)
+        digraph = opr.get_directed(self.matrix)
+        self.bdy_nodes,self.bdy_edges = opr.get_bdy(triangular_cycles,digraph)
+        shortcuts = sr.get_shortcut(self.matrix,self.bdy_nodes,self.bdy_edges)
+        if(self.edgecnt==3 and self.nodecnt==3):
+            cip_list = [[[0],[0,1],[1,2],[2,0]],[[0,1],[1],[1,2],[2,0]],[[0,1],[1,2],[2],[2,0]]]
+        else:
+            bdy_ordered = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
+            cips = cip.find_cip(bdy_ordered,shortcuts)
+            boundaries = news.multiple_boundaries(news.find_bdy(cips))
+            outer_boundary = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
+            cip_list= news.find_multiple_boundary(news.all_boundaries(boundaries,outer_boundary),outer_boundary)
+        for bdys in cip_list:
+            matrix = copy.deepcopy(self.matrix)
+            rel_matrices = generate_multiple_dual(bdys,matrix,self.nodecnt,self.edgecnt)
+            for i in rel_matrices:
+                self.rel_matrix_list.append(i)
+        self.room_x = []
+        self.room_y = []
+        self.room_width = []
+        self.room_height = []
+        self.room_x_bottom_left = []
+        self.room_x_bottom_right = []
+        self.room_x_top_left = []
+        self.room_x_top_right = []
+        self.room_y_left_bottom = []
+        self.room_y_right_bottom = []
+        self.room_y_left_top = []
+        self.room_y_right_top = []
+        for rel in self.rel_matrix_list:
+            room_x, room_y, room_width, room_height, room_x_bottom_left, room_x_bottom_right, room_x_top_left, room_x_top_right, room_y_left_bottom, room_y_right_bottom, room_y_left_top, room_y_right_top = rdg.construct_dual(rel
+            ,self.nodecnt+4
+            ,self.mergednodes
+            ,self.irreg_nodes1)
+            self.room_x.append(room_x)
+            self.room_y.append(room_y)
+            self.room_width.append(room_width)
+            self.room_height.append(room_height)
+            self.room_x_bottom_left.append(room_x_bottom_left)
+            self.room_x_bottom_right.append(room_x_bottom_right)
+            self.room_x_top_left.append(room_x_top_left)
+            self.room_x_top_right.append(room_x_top_right)
+            self.room_y_left_bottom.append(room_y_left_bottom)
+            self.room_y_right_bottom.append(room_y_right_bottom)
+            self.room_y_left_top.append(room_y_left_top)
+            self.room_y_right_top.append(room_y_right_top)
+
+    def multiple_floorplan(self,min_width,min_height,max_width,max_height):
+        for i in range(len(self.rel_matrix_list)):
+            rel_matrix = self.rel_matrix_list[i]
+            encoded_matrix = opr.get_encoded_matrix(rel_matrix.shape[0]-4
+                                    , self.room_x[i]
+                                    , self.room_y[i]
+                                    , self.room_width[i]
+                                    , self.room_height[i])
+            encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
+            [width,height,hor_dgph,status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
+                                                ,min_width
+                                                ,min_height
+                                                ,max_width
+                                                ,max_height)
+            width = np.transpose(width)
+            height = np.transpose(height)
+            self.room_width[i] = width.flatten()
+            self.room_height[i] = height.flatten()
+            self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i], self.room_x_bottom_left[i], self.room_x_bottom_right[i], self.room_x_top_left[i], self.room_x_top_right[i], self.room_y_left_bottom[i], self.room_y_right_bottom[i], self.room_y_left_top[i], self.room_y_right_top[i] = rdg.construct_rfp(encoded_matrix
+            , self.nodecnt + 4
+            , self.room_width[i]
+            , self.room_height[i]
+            , hor_dgph
+            , self.mergednodes
+            , self.irreg_nodes1)
+            for j in range(0,len(self.room_x[i])):
+                self.room_x[i][j]=round(self.room_x[i][j],3)
+            for j in range(0,len(self.room_y[i])):
+                self.room_y[i][j]=round(self.room_y[i][j],3)
+            # opr.calculate_area(self,self.to_be_merged_vertices,self.rdg_vertices)
+
+def generate_multiple_dual(bdys,matrix,nodecnt,edgecnt):
+    matrix,edgecnt = news.add_news(bdys,matrix,nodecnt,edgecnt)
+    news_matrix = copy.deepcopy(matrix)
+    nodecnt += 4
+    degrees = cntr.degrees(news_matrix)
+    goodnodes = cntr.goodnodes(news_matrix,degrees)
+    news_matrix,degrees,goodnodes,cntrs = cntr.contract(news_matrix
+                                                    ,goodnodes
+                                                    ,degrees)
+
+    news_matrix = exp.basecase(news_matrix,nodecnt)
+    while len(cntrs) != 0:
+        news_matrix = exp.expand(news_matrix,nodecnt,cntrs)
+    rel_matrix = []
+    rel_matrix.append(news_matrix)
+    for mat in rel_matrix:
+        flippable_edges = flp.get_flippable_edges(matrix,mat,nodecnt-4)
+        flippable_vertices, flippable_vertices_neighbours = flp.get_flippable_vertices(matrix,mat,nodecnt-4)
+        for j in range(0,len(flippable_edges)):
+            new_rel = flp.resolve_flippable_edge(flippable_edges[j],mat)
+            if(not any(np.array_equal(new_rel, i) for i in rel_matrix)):
+                rel_matrix.append(new_rel)
+        for j in range(0,len(flippable_vertices)):
+            new_rel = flp.resolve_flippable_vertex(flippable_vertices[j],flippable_vertices_neighbours[j],mat)
+            if(not any(np.array_equal(new_rel, i) for i in rel_matrix)):
+                rel_matrix.append(new_rel)
+    return rel_matrix
+
+    
+
     # def create_multiple_dual(self,mode,pen,textbox):
     #     if (not bcn.isBiconnected(self)):
     #         bcn.initialize_bcc_sets(self)
@@ -914,81 +1051,4 @@ class InputGraph:
     #     # print(self.room_x,self.room_y,self.room_width,self.room_height,self.room_x_top_left,self.room_x_top_right,self.room_y_left_top,self.room_y_left_bottom,self.room_x_bottom_left,self.room_x_bottom_right,self.room_y_right_top,self.room_y_right_bottom)
         
 
-    # def create_multiple_floorplan(self,pen,textbox,mode):
-    #     global box
-    #     box = textbox
-    #     self.create_multiple_dual(0,pen,textbox)
-    #     count = 0
-    #     origin_count = 1
-    #     minimum_width = min(self.width_min)
-    #     minimum_height = min(self.height_min)
-    #     if(len(self.to_be_merged_vertices)!=0):
-    #         for i in range(0,len(self.to_be_merged_vertices[0])):
-    #             self.width_min.append(minimum_width)
-    #             self.height_min.append(minimum_height)
-    #     for i in range(0,len(self.extra_vertices)):
-    #         self.width_min.append(0)
-    #         self.height_min.append(0)
-    #     for i in range(0,len(self.rel_matrix)):
-    #         self.matrix = self.rel_matrix[i]
-    #         if(len(self.to_be_merged_vertices)!= 0):
-    #             draw.construct_rdg(self,self.to_be_merged_vertices[count],self.rdg_vertices[count])
-    #             self.encoded_matrix = opr.get_encoded_matrix(self)
-    #             B = copy.deepcopy(self.encoded_matrix)
-    #             A = copy.deepcopy(self.encoded_matrix)
-    #             [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
-    #             A=B
-    #             width = np.transpose(width)
-    #             height = np.transpose(height)
-    #             self.room_width = width.flatten()
-    #             self.room_height = height.flatten()
-    #             draw.construct_rfp(self,hor_dgph,self.to_be_merged_vertices[count],self.rdg_vertices[count])
-    #             for i in range(0,len(self.room_x)):
-    #                 self.room_x[i]=round(self.room_x[i],3)
-    #             for i in range(0,len(self.room_y)):
-    #                 self.room_y[i]=round(self.room_y[i],3)
-    #                 print(self.room_x[i],self.room_y[i],self.room_width[i],self.room_height[i],self.room_x_top_left[i],self.room_x_top_right[i],self.room_y_left_top[i],self.room_y_left_bottom[i],self.room_x_bottom_left[i],self.room_x_bottom_right[i],self.room_y_right_top[i],self.room_y_right_bottom[i])
-    #             opr.calculate_area(self,self.to_be_merged_vertices[count],self.rdg_vertices[count])
-    #             draw.draw_rdg(self,count+1,pen,self.to_be_merged_vertices[count],self.rdg_vertices[count],mode,self.colors,self.names)
-    #             self.area =[]
-    #             origin_count +=1
-    #             if(origin_count != 1):
-    #                 self.origin += 1000
-    #             draw.construct_rfp(self,hor_dgph,self.to_be_merged_vertices[count],self.rdg_vertices2[count])
-    #             for i in range(0,len(self.room_x)):
-    #                 self.room_x[i]=round(self.room_x[i],3)
-    #                 # print(self.room_x[i])
-    #             for i in range(0,len(self.room_y)):
-    #                 self.room_y[i]=round(self.room_y[i],3)
-    #             opr.calculate_area(self,self.to_be_merged_vertices[count],self.rdg_vertices2[count])
-    #             raw.draw_rdg(self,count+1,pen,self.to_be_merged_vertices[count],self.rdg_vertices[count],mode,self.colors,self.names)
-    #             self.area =[]
-    #             origin_count+=1
-    #             if(origin_count != 1):
-    #                 self.origin += 500
-                
-    #             count+=1
-    #         else:
-    #             draw.construct_rdg(self,self.to_be_merged_vertices,self.rdg_vertices)
-    #             self.encoded_matrix = opr.get_encoded_matrix(self)
-    #             B = copy.deepcopy(self.encoded_matrix)
-    #             A = copy.deepcopy(self.encoded_matrix)
-    #             [width,height,hor_dgph,status] = floorplan_to_st(A,self.width_min,self.height_min,self.width_max,self.height_max)
-    #             A=B
-    #             # print(A)
-    #             width = np.transpose(width)
-    #             height = np.transpose(height)
-    #             self.room_width = width.flatten()
-    #             self.room_height = height.flatten()
-    #             draw.construct_rfp(self,hor_dgph,self.to_be_merged_vertices,self.rdg_vertices)
-    #             for i in range(0,len(self.room_x)):
-    #                 self.room_x[i]=round(self.room_x[i],3)
-    #             for i in range(0,len(self.room_y)):
-    #                 self.room_y[i]=round(self.room_y[i],3)
-    #             if(origin_count != 1):
-    #                 self.origin += 500
-    #             opr.calculate_area(self,self.to_be_merged_vertices,self.rdg_vertices)
-    #             draw.draw_rdg(self,count+1,pen,self.to_be_merged_vertices,self.rdg_vertices,mode,self.colors,self.names)
-    #             self.area =[]
-    #             origin_count +=1
-    #             count+=1
+    

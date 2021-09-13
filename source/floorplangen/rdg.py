@@ -158,24 +158,15 @@ def construct_dual(matrix, nodecnt,mergednodes,irreg_nodes1):
         , nodecnt,mergednodes,irreg_nodes1)
     return room_x, room_y, room_width, room_height, room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top
 
-def construct_rfp(G,hor_dgph,mergednodes,irreg_nodes1):
-    G.t1_matrix = None
-    G.t2_matrix = None
-    G.t1_longest_distance = [-1] * (G.west + 1)
-    G.t2_longest_distance = [-1] * (G.west + 1)
-    G.t1_longest_distance_value = -1
-    G.t2_longest_distance_value = -1
-    G.nspaths = []
-    G.wepaths = []
+def construct_rfp(matrix, nodecnt, room_width, room_height, hor_dgph,mergednodes,irreg_nodes1):
 
-    G.room_x = np.zeros(G.west - 3)
-    G.room_y = np.zeros(G.west - 3)
-    # G.room_height = np.zeros(G.west - 3)
-    # G.room_width = np.zeros(G.west - 3)
-    dual.populate_t1_matrix(G)
-    dual.populate_t2_matrix(G)
-    dual.get_coordinates(G,hor_dgph)
-    get_rectangle_coordinates(G,mergednodes,irreg_nodes1)
+    room_x, room_y = dual.get_coordinates(matrix, nodecnt, room_width, room_height,hor_dgph)
+    room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top = get_rectangle_coordinates(room_x
+        , room_y
+        , room_width
+        , room_height
+        , nodecnt,mergednodes,irreg_nodes1)
+    return room_x, room_y, room_width, room_height, room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top
 
 def get_dimensions(matrix, nodecnt, t1_matrix, t2_matrix):
     """Gets dimension for each room.

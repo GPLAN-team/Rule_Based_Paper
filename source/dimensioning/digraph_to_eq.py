@@ -1,7 +1,7 @@
-from Convert_adj_equ import Convert_adj_equ
+from source.dimensioning.Convert_adj_equ import Convert_adj_equ
 import numpy as np
 import scipy.optimize
-from solve_linear import solve_linear
+from source.dimensioning.solve_linear import solve_linear
 
 # global N,f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, ar_max, ar_min
 

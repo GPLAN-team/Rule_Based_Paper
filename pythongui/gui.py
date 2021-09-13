@@ -1552,8 +1552,6 @@ class gui_class:
         self.end.set(self.end.get()+1)
         print("are you here atleast?")
 
-
-
     def save_file(self,filename = "Rectangular Dual Graph.txt"):
         # self.root.filename = self.value
         if filename == "Rectangular Dual Graph.txt":

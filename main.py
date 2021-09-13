@@ -9,6 +9,7 @@ import networkx as nx
 import pythongui.gui as gui
 import source.inputgraph as inputgraph
 import pythongui.drawing as draw
+import pythongui.dimensiongui as dimgui
 # import circulation
 # import checker
 # from tkinter import messagebox
@@ -51,24 +52,137 @@ def run():
             graph = inputgraph.InputGraph(gclass.value[0]
                 ,gclass.value[1]
                 ,gclass.value[2])
-            # if (gclass.command == "circulation"):
-            #     gclass.pen.ht()
-            #     make_graph_circulation(G, gclass)
+            origin = 0
             if(gclass.command == "single"):
-                # test_result = checker.gui_checker(G)
-                start = time.time()
-                graph.single_dual()
-                end = time.time()
-                printe("Time taken: " + str((end-start)*1000) + " ms")
-                draw.draw_rdg(graph
-                    ,1
-                    ,gclass.pen
-                    ,graph.mergednodes
-                    ,graph.irreg_nodes1
-                    ,1
-                    ,gclass.value[6]
-                    ,[]
-                    ,origin)
+                if(gclass.value[4] == 0):
+                    start = time.time()
+                    graph.single_dual()
+                    end = time.time()
+                    printe("Time taken: " + str((end-start)*1000) + " ms")
+                    graph_data = {
+                            'room_x': graph.room_x,
+                            'room_y': graph.room_y,
+                            'room_width': graph.room_width,
+                            'room_height': graph.room_height,
+                            'room_x_bottom_left': graph.room_x_bottom_left,
+                            'room_x_bottom_right': graph.room_x_bottom_right,
+                            'room_x_top_left': graph.room_x_top_left,
+                            'room_x_top_right': graph.room_x_top_right,
+                            'room_y_left_bottom': graph.room_y_left_bottom,
+                            'room_y_right_bottom': graph.room_y_right_bottom,
+                            'room_y_left_top': graph.room_y_left_top,
+                            'room_y_right_top': graph.room_y_right_top,
+                            'area': graph.area,
+                            'extranodes': graph.extranodes,
+                            'mergednodes': graph.mergednodes,
+                            'irreg_nodes': graph.irreg_nodes1
+                        }
+                    draw.draw_rdg(graph_data
+                            ,1
+                            ,gclass.pen
+                            ,1
+                            ,gclass.value[6]
+                            ,[]
+                            ,origin)
+                else:
+                    min_width,max_width,min_height,max_height= dimgui.gui_fnc(gclass.value[0])
+                    start = time.time()
+                    graph.single_dual()
+                    graph.single_floorplan(min_width,min_height,max_width,max_height)
+                    end = time.time()
+                    printe("Time taken: " + str((end-start)*1000) + " ms")
+                    graph_data = {
+                            'room_x': graph.room_x,
+                            'room_y': graph.room_y,
+                            'room_width': graph.room_width,
+                            'room_height': graph.room_height,
+                            'room_x_bottom_left': graph.room_x_bottom_left,
+                            'room_x_bottom_right': graph.room_x_bottom_right,
+                            'room_x_top_left': graph.room_x_top_left,
+                            'room_x_top_right': graph.room_x_top_right,
+                            'room_y_left_bottom': graph.room_y_left_bottom,
+                            'room_y_right_bottom': graph.room_y_right_bottom,
+                            'room_y_left_top': graph.room_y_left_top,
+                            'room_y_right_top': graph.room_y_right_top,
+                            'area': graph.area,
+                            'extranodes': graph.extranodes,
+                            'mergednodes': graph.mergednodes,
+                            'irreg_nodes': graph.irreg_nodes1
+                        }
+                    draw.draw_rdg(graph_data
+                            ,1
+                            ,gclass.pen
+                            ,1
+                            ,gclass.value[6]
+                            ,[]
+                            ,origin)
+            elif(gclass.command == "multiple"):
+                if(gclass.value[4] == 0):
+                    start = time.time()
+                    graph.multiple_dual()
+                    end = time.time()
+                    printe("Time taken: " + str((end-start)*1000) + " ms")
+                    for idx in range(len(graph.rel_matrix_list)):
+                        graph_data = {
+                            'room_x': graph.room_x[idx],
+                            'room_y': graph.room_y[idx],
+                            'room_width': graph.room_width[idx],
+                            'room_height': graph.room_height[idx],
+                            'room_x_bottom_left': graph.room_x_bottom_left[idx],
+                            'room_x_bottom_right': graph.room_x_bottom_right[idx],
+                            'room_x_top_left': graph.room_x_top_left[idx],
+                            'room_x_top_right': graph.room_x_top_right[idx],
+                            'room_y_left_bottom': graph.room_y_left_bottom[idx],
+                            'room_y_right_bottom': graph.room_y_right_bottom[idx],
+                            'room_y_left_top': graph.room_y_left_top[idx],
+                            'room_y_right_top': graph.room_y_right_top[idx],
+                            'area': graph.area,
+                            'extranodes': graph.extranodes,
+                            'mergednodes': graph.mergednodes,
+                            'irreg_nodes': graph.irreg_nodes1
+                        }
+                        origin += 1000
+                        draw.draw_rdg(graph_data
+                            ,1
+                            ,gclass.pen
+                            ,1
+                            ,gclass.value[6]
+                            ,[]
+                            ,origin)
+                else:
+                    min_width,max_width,min_height,max_height= dimgui.gui_fnc(gclass.value[0])
+                    start = time.time()
+                    graph.multiple_dual()
+                    graph.multiple_floorplan(min_width,min_height,max_width,max_height)
+                    end = time.time()
+                    printe("Time taken: " + str((end-start)*1000) + " ms")
+                    for idx in range(len(graph.rel_matrix_list)):
+                        graph_data = {
+                            'room_x': graph.room_x[idx],
+                            'room_y': graph.room_y[idx],
+                            'room_width': graph.room_width[idx],
+                            'room_height': graph.room_height[idx],
+                            'room_x_bottom_left': graph.room_x_bottom_left[idx],
+                            'room_x_bottom_right': graph.room_x_bottom_right[idx],
+                            'room_x_top_left': graph.room_x_top_left[idx],
+                            'room_x_top_right': graph.room_x_top_right[idx],
+                            'room_y_left_bottom': graph.room_y_left_bottom[idx],
+                            'room_y_right_bottom': graph.room_y_right_bottom[idx],
+                            'room_y_left_top': graph.room_y_left_top[idx],
+                            'room_y_right_top': graph.room_y_right_top[idx],
+                            'area': graph.area,
+                            'extranodes': graph.extranodes,
+                            'mergednodes': graph.mergednodes,
+                            'irreg_nodes': graph.irreg_nodes1
+                        }
+                        origin += 1000
+                        draw.draw_rdg(graph_data
+                            ,1
+                            ,gclass.pen
+                            ,1
+                            ,gclass.value[6]
+                            ,[]
+                            ,origin)
             #     if(not test_result[0]):
             #         messagebox.showerror("Invalid Graph", "Graph is not planar")
             #     # elif(not test_result[1]):

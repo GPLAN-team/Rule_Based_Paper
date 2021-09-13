@@ -92,7 +92,7 @@ def get_case(matrix,nodecnt,cntr):
         elif matrix[nbr][mut_nbr2] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -116,7 +116,7 @@ def get_case(matrix,nodecnt,cntr):
         elif matrix[mut_nbr2][nbr] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -128,7 +128,7 @@ def get_case(matrix,nodecnt,cntr):
         if matrix[nbr][mut_nbr2] == 3:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
                 if(label == 2):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -579,7 +579,7 @@ def case_h(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
             matrix[nbr][node] = 3
     return matrix 
 
-def case_i(matrix, nodecnt,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_i(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case I of expansion.
 
     Args:
@@ -604,7 +604,7 @@ def case_i(matrix, nodecnt,node,mut_nbr1,mut_nbr2,node_nbrs):
     matrix[node][nbr] = 2
     return matrix
 
-def case_j(matrix, nodecnt,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_j(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     """Resolves Case J of expansion.
 
     Args:

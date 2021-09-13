@@ -4,30 +4,43 @@ This module allows user to perform different graph theoretical operations
 on InputGraph class object.
 
 This module contains the following functions:
-    * list_comparer - checks if there exists an element in list 2
+    * intersection - returns intersection of two lists.
+    * list_comparer - checks if there exists an element in list 1
                       whose intersection with list 2 is of given 
                       size.
     * get_directed - returns a directed graph.
     * get_trngls - returns all triangles in the graph.
     * get_bdy - returns outer boundary of the graph.
-    * ordered_nbr_label - returns label of ordered 
+    * ordered_nbr_label - returns label and the ordered 
                           neighbour of the vertex.
     * ordered_nbr - returns ordered neighbour 
                     of the vertex.
     * order_nbrs - returns ordered neighbours around
                    a given vertex.
+    * get_encoded_matrix - returns the encoded matrix of the floorplan.
+    * ordered_bdy - returns the ordered boundary.
+    * calculate_area - returns area of each room.
 """
 import numpy as np
 import networkx as nx 
 
 
-def intersection(lst1, lst2): 
+def intersection(lst1, lst2):
+    """Returns intersection of two lists.
+
+    Args:
+        lst1: A list containing elements of list 1.
+        lst2: A list containing elements of list 2.
+
+    Returns:
+        lst3: A list containing intersection of elements of list1 and list2.
+    """
     lst3 = [value for value in lst1 if value in lst2] 
     return lst3
  
-def list_comparer(lst1,lst2,size):
-    """Checks if there exists an element in liat 2
-       whoae intersectioj with list 1 is of given size. 
+def list_comparer(lst1, lst2, size):
+    """Checks if there exists an element in list 2
+       whose intersection with list 1 is of given size. 
 
     Args:
         lst1: A list containing elements of list 1.
@@ -35,7 +48,7 @@ def list_comparer(lst1,lst2,size):
         size: An integer representing size to be compared.
 
     Returns:
-        boolena: A boolean representing if such an element exists.
+        boolean: A boolean representing if such an element exists.
     """
     for elem in lst2:
         if(len(intersection(lst1,elem)) == size):
@@ -49,11 +62,10 @@ def get_directed(matrix):
         matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
-        digraph: A networkx directed graph of the input graph.
+        digraph: A NetworkX directed graph of the input graph.
     """
-    digraph = nx.from_numpy_matrix(matrix,create_using=nx.DiGraph)
+    digraph = nx.from_numpy_matrix(matrix,create_using = nx.DiGraph)
     return digraph
-
 
 def get_trngls(matrix):
     """Returns all triangular cycles in a graph.
@@ -65,16 +77,16 @@ def get_trngls(matrix):
         trngles: A list containing all triangular cycles in the graph.
     """
     nxgraph = nx.from_numpy_matrix(matrix)
-    all_cliques= nx.enumerate_all_cliques(nxgraph)
-    trngles=[x for x in all_cliques if len(x)==3 ]
+    all_cliques = nx.enumerate_all_cliques(nxgraph)
+    trngles = [x for x in all_cliques if len(x) == 3]
     return trngles
 
-def get_bdy(trngls,digraph):
+def get_bdy(trngls, digraph):
     """Returns outer boundary of the graph.
 
     Args:
         trngls: A list containing all triangular cycles in the graph.
-        digraph: A networkx directed graph of the input graph.
+        digraph: A NetworkX directed graph of the input graph.
 
     Returns:
         bdy_nodes: A list containing nodes on the outer boundary.
@@ -94,22 +106,21 @@ def get_bdy(trngls,digraph):
             bdy_nodes.append(edge[0])
         if edge[1] not in bdy_nodes:
             bdy_nodes.append(edge[1])
-    return bdy_nodes,bdy_edges
-
-
-
+    return bdy_nodes, bdy_edges
 
 def ordered_nbr_label(matrix, nodecnt, centre, nbr, cw=False):
     """Returns label of ordered neighbour of the vertex.
 
     Args:
-        graph: An instance of InputGraph class.
-        centre: An integer indicating representing the vertex.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        centre: An integer representing the vertex.
         nbr: An integer represening neighbour of the vertex.
         cw: A boolean representing direction to move.
 
     Returns:
         integer: An integer representing label (2 or 3).
+        next: An integer representing the ordered neighbour.
     """
     next = ordered_nbr(matrix, nodecnt, centre, nbr, cw)
     if matrix[centre][next] == 2 or matrix[next][centre] == 2:
@@ -121,8 +132,9 @@ def ordered_nbr(matrix, nodecnt, centre, nbr, cw=False):
     """Returns ordered neighbour of the vertex.
 
     Args:
-        graph: An instance of InputGraph class.
-        centre: An integer indicating representing the vertex.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        centre: An integer representing the vertex.
         nbr: An integer represening neighbour of the vertex.
         cw: A boolean representing direction to move.
 
@@ -191,38 +203,34 @@ def order_nbrs(matrix, nodecnt, centre, cw=False):
         ord_set.reverse()
     return ord_set
 
+def get_encoded_matrix(nodecnt, room_x, room_y, room_width, room_height):
+    """Returns the encoded matrix.
 
-def get_encoded_matrix(graph):
-    encoded_matrix =  np.zeros((graph.t2_matrix.shape[0],graph.t1_matrix.shape[1]), int)
-    room_width = np.array(graph.room_width, dtype='int')
-    room_height = np.array(graph.room_height, dtype='int')
-    room_x = np.array(graph.room_x, dtype='int')
-    room_y = np.array(graph.room_y, dtype='int')
-    for node in range(graph.matrix.shape[0]-4):
-        for width in range(room_width[node]):
-            for height in range(room_height[node]):
-                encoded_matrix[room_y[node]+height][room_x[node]+width] = node
+    Args:
+        nodecnt: An integer representing the node count of the graph.
+        room_x: A list representing the x coordinates of the room.
+        room_y: A list representing the y coordinates of the room.
+        room_width: A list representing the width of the room.
+        room_height: A list representing the height of the room.
+
+    Returns:
+        encoded_matrix: A matrix representing the encoded matrix.
+    """  
+
+    mat_width = int(max(a + b for a, b in zip(room_x, room_width)))
+    mat_height = int(max(a + b for a, b in zip(room_y, room_height)))
+    encoded_matrix =  np.zeros((mat_width, mat_height), int)
+    room_width_arr = np.array(room_width, dtype='int')
+    room_height_arr = np.array(room_height, dtype='int')
+    room_x_arr = np.array(room_x, dtype='int')
+    room_y_arr = np.array(room_y, dtype='int')
+    for node in range(nodecnt):
+        for width in range(room_width_arr[node]):
+            for height in range(room_height_arr[node]):
+                encoded_matrix[room_y_arr[node]  +height][room_x_arr[node] + width] = node
     return encoded_matrix
 
-def is_complex_triangle(graph):
-    for node in range(0,graph.original_node_count):
-        value = np.count_nonzero(graph.matrix[node])
-        if(value <4):
-            return True
-    H = nx.from_numpy_matrix(graph.matrix,create_using=nx.DiGraph)
-    all_cycles = list(nx.simple_cycles(H))
-    all_triangles = 0
-    for cycle in all_cycles:
-        if len(cycle) == 3:
-            all_triangles+=1
-    vertices = graph.matrix.shape[0]
-    edges = int(np.count_nonzero(graph.matrix)/2)
-    if(int(all_triangles/2) == (edges-vertices + 1)):
-        return False
-    else:
-        return True
-
-def ordered_bdy(bdy_nodes,bdy_edges):
+def ordered_bdy(bdy_nodes, bdy_edges):
     """Returns ordered boundary of the input graph.
 
     Args:
@@ -234,7 +242,7 @@ def ordered_bdy(bdy_nodes,bdy_edges):
     """
     ordered_bdy = [bdy_nodes[0]]
     while(len(ordered_bdy) != len(bdy_nodes)):
-        temp = ordered_bdy[len(ordered_bdy)-1]
+        temp = ordered_bdy[len(ordered_bdy) - 1]
         for vertex in bdy_nodes:
             if((temp,vertex) in bdy_edges
              and vertex not in ordered_bdy):
@@ -242,24 +250,27 @@ def ordered_bdy(bdy_nodes,bdy_edges):
                 break
     return ordered_bdy
 
-def find_possible_boundary(boundary):
-    list_of_boundaries = []
-    for i in boundary:
-        index = boundary.index(i)
-        temp1 = boundary[0:index]
-        temp2 = boundary[index:len(boundary)]
-        temp = temp2 + temp1
-        temp.append(temp[0])
-        list_of_boundaries.append(temp)
-        # print(list_of_boundaries)
-    return list_of_boundaries
+def calculate_area(nodecnt, room_width, room_height, extranodes, mergednodes, irreg_nodes):
+    """Calculates area of the given graph.
 
-def calculate_area(graph,to_be_merged_vertices,rdg_vertices):
-    for i in range(graph.room_x.shape[0]):
-        if graph.room_width[i] == 0 or i in graph.biconnected_vertices or i in to_be_merged_vertices:
+    Args:
+        nodecnt: An integer repesenting the node count of the graph.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        extranodes: A list representing the extra vertices.
+        mergednodes: A list representing nodes to be merged.
+        irreg_nodes: A list representing the irregular nodes.
+
+    Returns:
+        rooms_area: A list representing the area of the rooms.
+    """
+    rooms_area = []
+    for i in range(nodecnt):
+        if room_width[i] == 0 or i in extranodes or i in mergednodes:
             continue
-        area = graph.room_width[i]*graph.room_height[i]
-        if(i in rdg_vertices):
-            area+= graph.room_width[to_be_merged_vertices[rdg_vertices.index(i)]]*graph.room_height[to_be_merged_vertices[rdg_vertices.index(i)]]
-        graph.area.append(round(area,3))
+        area = room_width[i] * room_height[i]
+        if(i in irreg_nodes):
+            area += room_width[mergednodes[irreg_nodes.index(i)]] * room_height[mergednodes[irreg_nodes.index(i)]]
+        rooms_area.append(round(area,3))
+    return rooms_area
 

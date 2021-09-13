@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.optimize
-from con_fes import con_fes
+from source.dimensioning.con_fes import con_fes
 # global N,f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, ar_max, ar_min
 
 def solve_linear(N,f_VER, A_VER, b_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, min_height,max_height):
