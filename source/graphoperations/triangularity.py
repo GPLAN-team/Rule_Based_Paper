@@ -76,7 +76,7 @@ def triangulate(matrix):
         matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
-        None
+        trng_edges: Edges to be added to make the graph triangulated.
     """
     nxgraph = nx.from_numpy_matrix(matrix)
     trng_edges = []
