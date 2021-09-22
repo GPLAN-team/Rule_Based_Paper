@@ -20,7 +20,7 @@ source gplan_env/bin/activate
 
 **Windows**
 ```bash
-py -3 -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 **Unix/macOS**
 ```bash
