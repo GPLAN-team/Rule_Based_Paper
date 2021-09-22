@@ -11,8 +11,7 @@ This module contains the following functions:
 import numpy as np
 import networkx as nx 
 
-
-def get_shortcut(matrix,bdy_nodes,bdy_edges):
+def get_shortcut(matrix, bdy_nodes, bdy_edges):
     """Returns shortcuts in the input graph.
 
     Args:
@@ -23,16 +22,16 @@ def get_shortcut(matrix,bdy_nodes,bdy_edges):
     Returns:
         shortcuts: A list containing shortcuts of the input graph.
     """
-    shortcuts =[]
-    for node1 in range(0,len(bdy_nodes)):
-        for node2 in range(0,len(bdy_nodes)):
+    shortcuts = []
+    for node1 in range(0, len(bdy_nodes)):
+        for node2 in range(0, len(bdy_nodes)):
             if(matrix[bdy_nodes[node1]][bdy_nodes[node2]] == 1 
-                and (bdy_nodes[node1],bdy_nodes[node2]) not in bdy_edges 
-                and [bdy_nodes[node2],bdy_nodes[node1]] not in shortcuts):
-                shortcuts.append([bdy_nodes[node1],bdy_nodes[node2]])
+                and (bdy_nodes[node1], bdy_nodes[node2]) not in bdy_edges 
+                and [bdy_nodes[node2], bdy_nodes[node1]] not in shortcuts):
+                shortcuts.append([bdy_nodes[node1], bdy_nodes[node2]])
     return shortcuts
 
-def remove_shortcut(shortcut,trngls,matrix):
+def remove_shortcut(shortcut, trngls, matrix):
     """Removes particular shortcut from the input graph.
 
     Args:
@@ -43,14 +42,14 @@ def remove_shortcut(shortcut,trngls,matrix):
     Returns:
         adjmatrix: A matrix representing the modified adjacency matrix.
     """
-    nbr_nodes =[]
+    nbr_nodes = []
     for trngl in trngls:
         if(shortcut[0] in trngl and shortcut[1] in trngl):
             for node in trngl:
                 if(node not in shortcut and node not in nbr_nodes):
                     nbr_nodes.append(node)
     adjmatrix = np.zeros([matrix.shape[0]+1, matrix.shape[0]+1], int)
-    adjmatrix[0:matrix.shape[0],0:matrix.shape[0]] = matrix
+    adjmatrix[0:matrix.shape[0], 0:matrix.shape[0]] = matrix
     
     adjmatrix[shortcut[0]][shortcut[1]] = 0
     adjmatrix[shortcut[1]][shortcut[0]] = 0

@@ -10,23 +10,39 @@ This module contains the following functions:
     * get_direction - populates rectangular coordinates for
                       irregular rooms
     * construct_dual - constructs rectangular dual for PTPG.
-    * get_dimensions - finds dimension of each room.
+    * construct_floorplan - constructs dimensioned rfloorplan for PTPG.
+    * get_dimensions - returns dimension of each room.
 """
-import networkx as nx 
 import numpy as np 
 import source.floorplangen.dual as dual
-import math
 
-def get_rectangle_coordinates(room_x, room_y, room_width, room_height, nodecnt, mergednodes,irreg_nodes1):
+def get_rectangle_coordinates(room_x
+                                , room_y
+                                , room_width
+                                , room_height
+                                , nodecnt
+                                , mergednodes
+                                , irreg_nodes):
     """Populates rectangular coordinates for each room.
 
     Args:
-        graph: An instance of InputGraph object.
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        nodecnt: An integer representing the node count of the graph.
         mergednodes: A list representing nodes to be merged.
-        irreg_nodes1: A list representing nodes for irregular rooms.
+        irreg_nodes: A list representing nodes for irregular rooms.
 
     Returns:
-        None
+        room_x_bottom_left: A list representing the x coordinate of the middle left of bottom edge of the room.
+        room_x_bottom_right: A list representing the x coordinate of the middle right of bottom edge of the room.
+        room_x_top_left: A list representing the x coordinate of the middle left of top edge of the room.
+        room_x_top_right: A list representing the x coordinate of the middle right of top edge of the room.
+        room_y_left_bottom: A list representing the y coordinate of the middle bottom of left edge of the room.
+        room_y_right_bottom: A list representing the y coordinate of the middle bottom of right edge of the room.
+        room_y_left_top: A list representing the y coordinate of the middle top of left edge of the room.
+        room_y_right_top: A list representing the y coordinate of the middle top of right edge of the room.
     """
     room_x_bottom_right = np.zeros(nodecnt-4)
     room_x_bottom_left = np.zeros(nodecnt-4)
@@ -46,21 +62,28 @@ def get_rectangle_coordinates(room_x, room_y, room_width, room_height, nodecnt, 
         room_y_left_bottom[i] = room_y[i] + room_height[i]
         room_y_left_top[i] = room_y[i] + room_height[i]
     for i in range(0,len(mergednodes)):
-        vertices = [irreg_nodes1[i],mergednodes[i]]
+        vertices = [irreg_nodes[i], mergednodes[i]]
         get_direction(room_x_bottom_left
         , room_x_bottom_right
         , room_x_top_left
         , room_x_top_right
         , room_y_left_bottom
         , room_y_right_bottom
-        ,room_y_left_top
-        ,room_y_right_top
-        ,room_x
-        ,room_y
-        ,room_height
-        ,room_width
-        ,vertices)
-    return room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top
+        , room_y_left_top
+        , room_y_right_top
+        , room_x
+        , room_y
+        , room_height
+        , room_width
+        , vertices)
+    return [room_x_bottom_left
+            , room_x_bottom_right
+            , room_x_top_left
+            , room_x_top_right
+            , room_y_left_bottom
+            , room_y_right_bottom
+            , room_y_left_top
+            , room_y_right_top]
 
 def get_direction(room_x_bottom_left
         , room_x_bottom_right
@@ -78,8 +101,19 @@ def get_direction(room_x_bottom_left
     """Populates rectangular coordinates for irregular rooms.
 
     Args:
-        graph: An instance of InputGraph object.
-        vertices: A list containing two vertices which need to be merged.
+        room_x_bottom_left: A list representing the x coordinate of the middle left of bottom edge of the room.
+        room_x_bottom_right: A list representing the x coordinate of the middle right of bottom edge of the room.
+        room_x_top_left: A list representing the x coordinate of the middle left of top edge of the room.
+        room_x_top_right: A list representing the x coordinate of the middle right of top edge of the room.
+        room_y_left_bottom: A list representing the y coordinate of the middle bottom of left edge of the room.
+        room_y_right_bottom: A list representing the y coordinate of the middle bottom of right edge of the room.
+        room_y_left_top: A list representing the y coordinate of the middle top of left edge of the room.
+        room_y_right_top: A list representing the y coordinate of the middle top of right edge of the room.
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        vertices: A list containing pair of irregular node and merged node.
 
     Returns:
         None
@@ -137,45 +171,123 @@ def get_direction(room_x_bottom_left
             room_y_left_top[vertices[0]]=room_y[vertices[1]]+ room_height[vertices[1]]
             room_y_right_top[vertices[1]]=room_y[vertices[1]]+ room_height[vertices[1]]
 
-def construct_dual(matrix, nodecnt,mergednodes,irreg_nodes1):
+def construct_dual(matrix, nodecnt, mergednodes, irreg_nodes):
     """Constructs dual for a PTPG.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
         mergednodes: A list representing nodes to be merged.
-        irreg_nodes1: A list representing nodes for irregular rooms.
+        irreg_nodes: A list representing nodes for irregular rooms.
 
     Returns:
-        None
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        room_x_bottom_left: A list representing the x coordinate of the middle left of bottom edge of the room.
+        room_x_bottom_right: A list representing the x coordinate of the middle right of bottom edge of the room.
+        room_x_top_left: A list representing the x coordinate of the middle left of top edge of the room.
+        room_x_top_right: A list representing the x coordinate of the middle right of top edge of the room.
+        room_y_left_bottom: A list representing the y coordinate of the middle bottom of left edge of the room.
+        room_y_right_bottom: A list representing the y coordinate of the middle bottom of right edge of the room.
+        room_y_left_top: A list representing the y coordinate of the middle top of left edge of the room.
+        room_y_right_top: A list representing the y coordinate of the middle top of right edge of the room.
     """
-    t1_matrix = dual.populate_t1_matrix(matrix,nodecnt)
-    t2_matrix = dual.populate_t2_matrix(matrix,nodecnt)
+    t1_matrix = dual.populate_t1_matrix(matrix, nodecnt)
+    t2_matrix = dual.populate_t2_matrix(matrix, nodecnt)
     room_x, room_y, room_width, room_height = get_dimensions(matrix, nodecnt, t1_matrix, t2_matrix)
-    room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top = get_rectangle_coordinates(room_x
-        , room_y
-        , room_width
-        , room_height
-        , nodecnt,mergednodes,irreg_nodes1)
-    return room_x, room_y, room_width, room_height, room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top
+    [room_x_bottom_left
+    , room_x_bottom_right
+    , room_x_top_left
+    , room_x_top_right
+    , room_y_left_bottom
+    , room_y_right_bottom
+    , room_y_left_top
+    , room_y_right_top] = get_rectangle_coordinates(room_x
+                                                    , room_y
+                                                    , room_width
+                                                    , room_height
+                                                    , nodecnt, mergednodes, irreg_nodes)
+    return [room_x
+            , room_y
+            , room_width
+            , room_height
+            , room_x_bottom_left
+            , room_x_bottom_right
+            , room_x_top_left
+            , room_x_top_right
+            , room_y_left_bottom
+            , room_y_right_bottom
+            , room_y_left_top
+            , room_y_right_top]
 
-def construct_rfp(matrix, nodecnt, room_width, room_height, hor_dgph,mergednodes,irreg_nodes1):
-
-    room_x, room_y = dual.get_coordinates(matrix, nodecnt, room_width, room_height,hor_dgph)
-    room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top = get_rectangle_coordinates(room_x
-        , room_y
-        , room_width
-        , room_height
-        , nodecnt,mergednodes,irreg_nodes1)
-    return room_x, room_y, room_width, room_height, room_x_bottom_left,room_x_bottom_right,room_x_top_left,room_x_top_right,room_y_left_bottom,room_y_right_bottom,room_y_left_top,room_y_right_top
-
-def get_dimensions(matrix, nodecnt, t1_matrix, t2_matrix):
-    """Gets dimension for each room.
+def construct_floorplan(matrix, nodecnt, room_width, room_height, hor_dgph, mergednodes, irreg_nodes):
+    """Constructs dimensioned floorplan for a PTPG.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        hor_dgph: A digraph representing the horizontal digraph.
+        mergednodes: A list representing nodes to be merged.
+        irreg_nodes: A list representing nodes for irregular rooms.
 
     Returns:
-        None
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
+        room_x_bottom_left: A list representing the x coordinate of the middle left of bottom edge of the room.
+        room_x_bottom_right: A list representing the x coordinate of the middle right of bottom edge of the room.
+        room_x_top_left: A list representing the x coordinate of the middle left of top edge of the room.
+        room_x_top_right: A list representing the x coordinate of the middle right of top edge of the room.
+        room_y_left_bottom: A list representing the y coordinate of the middle bottom of left edge of the room.
+        room_y_right_bottom: A list representing the y coordinate of the middle bottom of right edge of the room.
+        room_y_left_top: A list representing the y coordinate of the middle top of left edge of the room.
+        room_y_right_top: A list representing the y coordinate of the middle top of right edge of the room.
+    """
+    room_x, room_y = dual.get_coordinates(matrix, nodecnt, room_width, room_height,hor_dgph)
+    [room_x_bottom_left
+    , room_x_bottom_right
+    , room_x_top_left
+    , room_x_top_right
+    , room_y_left_bottom
+    , room_y_right_bottom
+    , room_y_left_top
+    , room_y_right_top] = get_rectangle_coordinates(room_x
+                                                    , room_y
+                                                    , room_width
+                                                    , room_height
+                                                    , nodecnt, mergednodes, irreg_nodes)
+    return [room_x
+            , room_y
+            , room_width
+            , room_height
+            , room_x_bottom_left
+            , room_x_bottom_right
+            , room_x_top_left
+            , room_x_top_right
+            , room_y_left_bottom
+            , room_y_right_bottom
+            , room_y_left_top
+            , room_y_right_top]
+
+def get_dimensions(matrix, nodecnt, t1_matrix, t2_matrix):
+    """Returns dimension of each room.
+
+    Args:
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        t1_matrix: A matrix representing the T1 graph.
+        t2_matrix: A matrix representing the T2 graph.
+
+    Returns:
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+        room_width: A list representing the width of the rooms.
+        room_height: A list representing the height of the rooms.
     """
     room_x = np.zeros(nodecnt-4)
     room_y = np.zeros(nodecnt-4)

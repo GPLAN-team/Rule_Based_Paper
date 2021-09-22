@@ -23,18 +23,17 @@ This module contains the following functions:
 
 """
 
-import networkx as nx 
-import numpy as np
 import source.graphoperations.operations as opr 
 
-def basecase(matrix,nodecnt):
-    """Obtains the base case of expansion step.
+def basecase(matrix, nodecnt):
+    """Resolves the base case of expansion step.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     for node in range(matrix.shape[0]):
         if matrix[nodecnt - 4][node] == 1\
@@ -49,20 +48,21 @@ def basecase(matrix,nodecnt):
             matrix[node][nodecnt - 1] = 0
     return matrix
 
-def expand(matrix,nodecnt,cntrs):
-    """Performs the process of expansion.
+def expand(matrix, nodecnt, cntrs):
+    """Expands a given contraction.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing nodecount of the graph.
+        cntrs: A list representing the contractions.
 
     Returns:
-        None
+        matrix: An updated adjacency matrix.
     """
     cntr = cntrs.pop()
-    case = get_case(matrix,nodecnt,cntr)
+    case = get_case(matrix, nodecnt, cntr)
     nbr = cntr['nbr']
     node = cntr['node']
-    print(case)
     matrix = case(matrix
         ,nodecnt
         ,nbr
@@ -72,15 +72,16 @@ def expand(matrix,nodecnt,cntrs):
         ,cntr['node_nbrs'])
     return matrix
 
-def get_case(matrix,nodecnt,cntr):
+def get_case(matrix, nodecnt, cntr):
     """Identifies the case of expansion (Refer documentation).
 
     Args:
-        graph: An instance of InputGraph object.
-        cntr: A dict representing contraction to be expanded.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
+        cntr: A dictionary representing the contraction.
 
     Returns:
-        None
+        case: A function representing the case of the contraction.
     """
     nbr = cntr['nbr']
     mut_nbrs = cntr['mut_nbrs']
@@ -92,7 +93,7 @@ def get_case(matrix,nodecnt,cntr):
         elif matrix[nbr][mut_nbr2] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt, nbr, vertex, cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -116,7 +117,7 @@ def get_case(matrix,nodecnt,cntr):
         elif matrix[mut_nbr2][nbr] == 2:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt, nbr, vertex, cw=False)
                 if(label == 3):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -128,7 +129,7 @@ def get_case(matrix,nodecnt,cntr):
         if matrix[nbr][mut_nbr2] == 3:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt, nbr, vertex, cw=False)
                 if(label == 2):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -153,7 +154,7 @@ def get_case(matrix,nodecnt,cntr):
         elif matrix[mut_nbr2][nbr] == 3:
             vertex = mut_nbr1
             while(vertex!=mut_nbr2):
-                label,vertex = opr.ordered_nbr_label(matrix, nodecnt,nbr,vertex,cw=False)
+                label,vertex = opr.ordered_nbr_label(matrix, nodecnt, nbr, vertex, cw=False)
                 if(label == 2):
                     mut_nbrs[0], mut_nbrs[1] = mut_nbrs[1], mut_nbrs[0]
                     break
@@ -164,11 +165,11 @@ def get_case(matrix,nodecnt,cntr):
         else:
             print("ERROR")
 
-def handle_orig_nbrs(matrix,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def handle_orig_nbrs(matrix, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Handles original neighbours in contraction.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -176,7 +177,7 @@ def handle_orig_nbrs(matrix,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     for alpha in node_nbrs:
         if alpha != mut_nbr1 and alpha != mut_nbr2 and alpha != nbr:
@@ -188,11 +189,12 @@ def handle_orig_nbrs(matrix,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
                 matrix[alpha][nbr] = 0
     return matrix
 
-def case_a(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_a(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case A of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -200,7 +202,7 @@ def case_a(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix, nodecnt,nbr,mut_nbr1,cw=True)
     if ordered_nbr_label == 2:
@@ -251,11 +253,12 @@ def case_a(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
             matrix[node][mut_nbr2] = 3
     return matrix
 
-def case_b(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_b(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case B of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -263,7 +266,7 @@ def case_b(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     matrix = handle_orig_nbrs(matrix
         ,nbr
@@ -276,11 +279,12 @@ def case_b(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     matrix[nbr][node] = 2 
     return matrix
     
-def case_c(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_c(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case C of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -288,7 +292,7 @@ def case_c(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     matrix = handle_orig_nbrs(matrix
         ,nbr
@@ -300,11 +304,12 @@ def case_c(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     matrix[node][mut_nbr2] = 2
     matrix[nbr][node] = 3
 
-def case_d(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_d(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case D of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -312,7 +317,7 @@ def case_d(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
                                          ,nodecnt
@@ -365,11 +370,12 @@ def case_d(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
             matrix[nbr][node] = 3
     return matrix
 
-def case_e(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_e(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case E of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -377,7 +383,7 @@ def case_e(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
                                          ,nodecnt
@@ -430,11 +436,12 @@ def case_e(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
             matrix[mut_nbr2][node] = 2
     return matrix
 
-def case_f(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_f(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case F of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -442,7 +449,7 @@ def case_f(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr = opr.ordered_nbr(matrix
                                          ,nodecnt
@@ -471,11 +478,12 @@ def case_f(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         matrix[node][nbr] = 3
     return matrix
 
-def case_g(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_g(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case G of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -483,7 +491,7 @@ def case_g(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr = opr.ordered_nbr_label(matrix
                                          ,nodecnt
@@ -512,11 +520,12 @@ def case_g(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         matrix[nbr][node] = 2
     return matrix
 
-def case_h(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_h(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case H of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -524,7 +533,7 @@ def case_h(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     ordered_nbr_label,ordered_nbr = opr.ordered_nbr_label(matrix
                                          ,nodecnt
@@ -579,11 +588,12 @@ def case_h(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
             matrix[nbr][node] = 3
     return matrix 
 
-def case_i(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_i(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case I of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -591,7 +601,7 @@ def case_i(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     matrix = handle_orig_nbrs(matrix
         ,nbr
@@ -604,11 +614,12 @@ def case_i(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
     matrix[node][nbr] = 2
     return matrix
 
-def case_j(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
+def case_j(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case J of expansion.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing node count of the graph.
         nbr: An integer representing neighbour in contraction.
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
@@ -616,7 +627,7 @@ def case_j(matrix, nodecnt,nbr,node,mut_nbr1,mut_nbr2,node_nbrs):
         node_nbrs: A list representing node_nbrs in contraction
 
     Returns:
-        None
+        matrix: An updated matrix representing the adjacency matrix of the graph.
     """
     matrix = handle_orig_nbrs(matrix
         ,nbr

@@ -233,195 +233,6 @@ class InputGraph:
         # self.original_edge_count = self.edge_count
         # self.original_node_count = self.node_count
     
-
-    
-    def make_corridor(self,e1, e2,canvas,num, color = "white",  wide = 0):
-        self.leaves = self.nodes
-        leaves = self.leaves
-        room1 = leaves[e1]
-        room2 = leaves[e2]
-        pts = self.common_points(room1, room2,num, 2)
-        if len(pts) != 4:
-            pts = self.common_points(room2,room1,num, 2)
-        print(pts)
-        if len(pts) == 4:
-            
-            if wide >0:
-                if( abs( pts[0]- pts[2] )  > abs ( pts[1] - pts[3] ) ):             # hor
-                    print("hor")
-                    if pts[0] < pts[2] :
-                        canvas.create_rectangle(pts[0] + wide,pts[1],pts[2] - wide,pts[3],fill= cyan, outline = cyan)
-                    else:                        
-                        canvas.create_rectangle(pts[0] - wide,pts[1],pts[2] + wide,pts[3],fill= cyan, outline = cyan)
-                else :
-                    print("ver")
-                    if pts[1] < pts[3]:
-                        canvas.create_rectangle(pts[0],pts[1] + wide ,pts[2],pts[3] - wide,fill= cyan, outline = cyan)
-                    else :
-                        canvas.create_rectangle(pts[0],pts[1]  ,pts[2],pts[3],fill= cyan, outline = cyan)
-    
-            else :
-                canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill=color, outline = color)
-
-    def make_space(self,e1, e2,canvas,num):
-        self.leaves = self.nodes
-        leaves = self.leaves
-        room1 = leaves[e1]
-        room2 = leaves[e2]
-        print(vars(room1))
-
-        print(vars(room2))
-        pts = self.common_points(room1, room2,num, 2)
-        if len(pts) != 4:
-            pts = self.common_points(room2,room1, num, 2)
-        print(pts)
-        if len(pts) == 4:
-            # canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill="black", outline = "black")
-            if( abs( pts[0]- pts[2] )  > abs ( pts[1] - pts[3] ) ):             # hor
-                var1 = pts[0]/2 + pts[2]/2
-                canvas.create_rectangle(var1 - 5,pts[1],var1 + 5,pts[3],fill="white",outline="white")
-                print("hor")
-            else :
-                print("ver")
-                var1 = pts[1]/2 + pts[3] / 2
-                canvas.create_rectangle(pts[0],var1 -5 ,pts[2],var1 + 5,fill="white",outline="white")
-                
-    def intersect(self,row1, row2, n):
-        pt = []
-        for i in range(0,n):
-            if(row1[i]==1 and row2[i]==1):
-                pt.append(i)
-
-        return pt
-
-    # d1 = topx; d2 = topleft y;d3 = botrig x; d4 = botrig y
-    def common_points(self,leaf1, leaf2,num, wide):
-        pt = []
-        if ( leaf1.d4 == leaf2.d2):
-            print("commonpt11")
-            pt.append( max(leaf1.d1,leaf2.d1) -wide)
-            pt.append(leaf1.d4-wide)
-            pt.append(min(leaf1.d3,leaf2.d3 ) )
-            pt.append(leaf1.d4+wide)
-        elif ( leaf1.d3 == leaf2.d1):
-            print("commonpt9")
-            pt.append(leaf2.d1-wide)
-            pt.append(min( leaf1.d2,leaf2.d2)-wide)
-            pt.append(leaf2.d1+wide)
-            pt.append(max(leaf1.d4,leaf2.d4))
-        return pt
-
-    def add_cir(self,cir_class,canvas):
-        mat = cir_class.matrix
-        e1 = 1
-        e2 = 2
-        print(e1,e2)
-        print("hi")
-        i = 0
-        self.leaves = self.nodes
-        leaves = self.leaves
-        for room in leaves: # drawing all 
-            i+=1
-            canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i], width = 5)
-            canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text=i - 1)
-
-        num_corridors = len(mat) - len(leaves)
-        print("No of corridors are ",num_corridors)
-        n = len(leaves)
-        self.make_corridor(e1 - 1 ,e2 - 1,canvas,0)
-        mat = np.squeeze(np.asarray(mat))
-
-        for cor in range(n+1,len(mat)):
-            print(cor, "row", len(mat[cor]), "sz")
-            for itr in range(n,cor):
-                print(itr,"col")
-                if( mat[cor][itr] == 1):
-                    rms = self.intersect(mat[cor], mat[itr], n)
-                    print(rms , "rms")
-                    self.make_corridor(rms[0] , rms[1], canvas,1)
-                    break
-
-    def circulation(self,pen,canvas, cir_class, door1, door2):
-        print("Make corrdor start")
-        num_cor = cir_class.node_count - self.node_count
-        print(num_cor)
-        self.create_treenodes()
-        
-        self.add_cir(cir_class,canvas)
-
-    def create_treenodes(self):
-        width= np.amax(self.room_width)
-        height = np.amax(self.room_height)
-        self.nodes = []
-        origin = {'x': 50 - 200, 'y': -50}
-        scale = 100*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
-        for i in range(self.room_x.shape[0]):
-            node = gui.treenode(None, None, None, self.room_height[i], self.room_width[i], None, (self.room_x[i]) * scale + origin['x'], (self.room_y[i]+ self.room_height[i]) * scale + origin['y'], (self.room_x[i] + self.room_width[i]) * scale + origin['x'], (self.room_y[i]) * scale + origin['y'] )
-            print(node.d1, node.d2, node.d3, node.d4)
-            self.nodes.append(node)
-
-    def make_walls(self, canvas, connectivity = []):  # additional edges , create tree nodes , pen, canvas, part of make corridor in a for loop with additional edges
-        self.create_treenodes()
-        self.leaves = self.nodes
-        leaves = self.leaves
-        i = 0
-        print( "rdg", self.rdg_vertices)
-
-        for room in leaves: # drawing all 
-            
-            if i not in self.extra_v:
-                canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, width = 5, fill = colors[i])
-                if len(self.to_be_merged_vertices) is 0 or i < (self.to_be_merged_vertices[0]):
-                    canvas.create_text((room.d1+room.d3)/2,(room.d2+room.d4)/2,text= i)
-                i+=1
-        i= 0
-        print("Room No {x1,y1,x2,y2} ")
-        for room in leaves :
-            if room in self.rdg_vertices:
-                print("Room ",i,"{",room.d1,room.d2,room.d3,room.d4,"}")
-                i+=1
-
-        print("--------------------------")
-        print(self.graph.edges())
-        # nx.draw(self.graph, labels=None, font_size=12, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1.0, bbox=None, ax=None)
-        # plt.show()
-        con = [] 
-        print()
-        for edge in connectivity:
-            con.append((edge[0],edge[1]))
-        print("con", con)
-        self.connectivity_graph = con
-        print("conn", self.connectivity_graph)
-        for edge in self.graph.edges():
-            # i = input()
-            print(edge)
-            if ( edge in con) or ((edge[1],edge[0]) in con):
-                self.make_space(edge[0], edge[1], canvas, 1)
-
-        # nx.draw(self.graph, labels=None, font_size=12, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1.0, bbox=None, ax=None)
-        # plt.show()
-        
-
-        for edge in self.additional_adjacencies:
-            print("make_walls")
-            print(edge)
-            self.make_corridor(edge[0], edge[1], canvas, 1, "black")
-        
-        for edge in self.final_added_edges:
-            print("make_walls")
-            print(edge)
-            self.make_corridor(edge[0], edge[1], canvas, 1, "black")
-
-    def merge_orthogonal_walls(self, canvas):
-        for i in range(len(self.to_be_merged_vertices)):
-            self.make_corridor(self.to_be_merged_vertices[i], self.rdg_vertices[i], canvas, 1, cyan, 5)
-        
-        # for edge in self.graph.edges():
-        #     print(edge)
-        #     if( edge[0] in self.to_be_merged_vertices and edge[1] in self.to_be_merged_vertices):
-                # print(edge)
-                # self.make_corridor(edge[0], edge[1], canvas, 1, cyan, 5)
-
     def single_dual(self):
         """Finds K4 cycle in the graph.
 
@@ -478,14 +289,14 @@ class InputGraph:
         #     raise Exception("Error")
         triangular_cycles = opr.get_trngls(self.matrix)
         digraph = opr.get_directed(self.matrix)
-        self.bdy_nodes,self.bdy_edges = opr.get_bdy(triangular_cycles,digraph)
-        shortcuts = sr.get_shortcut(self.matrix,self.bdy_nodes,self.bdy_edges)
+        self.bdy_nodes,self.bdy_edges = opr.get_bdy(triangular_cycles, digraph)
+        shortcuts = sr.get_shortcut(self.matrix,self.bdy_nodes, self.bdy_edges)
         bdys = []
-        if(self.edgecnt==3 and self.nodecnt==3):
+        if(self.edgecnt == 3 and self.nodecnt == 3):
             bdys = [[0],[0,1],[1,2],[2,0]]
         else:
-            bdy_ordered = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
-            cips = cip.find_cip(bdy_ordered,shortcuts)
+            bdy_ordered = opr.ordered_bdy(self.bdy_nodes, self.bdy_edges)
+            cips = cip.find_cip(bdy_ordered, shortcuts)
             if(len(cips) <= 4):
                 bdys = news.bdy_path(news.find_bdy(cips),
                     bdy_ordered)
@@ -506,7 +317,7 @@ class InputGraph:
                 cips = cip.find_cip(bdy_ordered,shortcuts)
                 bdys = news.bdy_path(news.find_bdy(cips)
                     ,bdy_ordered)
-        print(self.matrix)
+
         self.matrix,self.edgecnt = news.add_news(bdys,self.matrix,self.nodecnt,self.edgecnt)
         self.nodecnt += 4
 
@@ -519,10 +330,21 @@ class InputGraph:
         self.matrix = exp.basecase(self.matrix,self.nodecnt)
         while len(cntrs) != 0:
             self.matrix = exp.expand(self.matrix,self.nodecnt,cntrs)
-        self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top = rdg.construct_dual(self.matrix
-        ,self.nodecnt
-        ,self.mergednodes
-        ,self.irreg_nodes1)
+        [self.room_x
+        , self.room_y
+        , self.room_width
+        , self.room_height
+        , self.room_x_bottom_left
+        , self.room_x_bottom_right
+        , self.room_x_top_left
+        , self.room_x_top_right
+        , self.room_y_left_bottom
+        , self.room_y_right_bottom
+        , self.room_y_left_top
+        , self.room_y_right_top] = rdg.construct_dual(self.matrix
+                                                        , self.nodecnt
+                                                        , self.mergednodes
+                                                        , self.irreg_nodes1)
     
     def single_floorplan(self,min_width,min_height,max_width,max_height):
         print(self.matrix
@@ -550,13 +372,24 @@ class InputGraph:
         height = np.transpose(height)
         self.room_width = width.flatten()
         self.room_height = height.flatten()
-        self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top = rdg.construct_rfp(encoded_matrix
-            , self.nodecnt
+        [self.room_x
+            , self.room_y
             , self.room_width
             , self.room_height
-            , hor_dgph
-            , self.mergednodes
-            , self.irreg_nodes1)
+            , self.room_x_bottom_left
+            , self.room_x_bottom_right
+            , self.room_x_top_left
+            , self.room_x_top_right
+            , self.room_y_left_bottom
+            , self.room_y_right_bottom
+            , self.room_y_left_top
+            , self.room_y_right_top] = rdg.construct_floorplan(encoded_matrix
+                                                                , self.nodecnt
+                                                                , self.room_width
+                                                                , self.room_height
+                                                                , hor_dgph
+                                                                , self.mergednodes
+                                                                , self.irreg_nodes1)
         for i in range(0,len(self.room_x)):
             self.room_x[i]=round(self.room_x[i],3)
             self.room_y[i]=round(self.room_y[i],3)
@@ -588,9 +421,9 @@ class InputGraph:
         else:
             bdy_ordered = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
             cips = cip.find_cip(bdy_ordered,shortcuts)
-            boundaries = news.multiple_boundaries(news.find_bdy(cips))
+            corner_pts = news.multiple_corners(news.find_bdy(cips))
             outer_boundary = opr.ordered_bdy(self.bdy_nodes,self.bdy_edges)
-            cip_list= news.find_multiple_boundary(news.all_boundaries(boundaries,outer_boundary),outer_boundary)
+            cip_list= news.find_multiple_boundary(news.all_boundaries(corner_pts,outer_boundary),outer_boundary)
         for bdys in cip_list:
             matrix = copy.deepcopy(self.matrix)
             rel_matrices = generate_multiple_dual(bdys,matrix,self.nodecnt,self.edgecnt)

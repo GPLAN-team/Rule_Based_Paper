@@ -1,7 +1,6 @@
 """Graph Theoretical Operations Module
 
-This module allows user to perform different graph theoretical operations
-on InputGraph class object.
+This module allows user to perform different graph theoretical operations.
 
 This module contains the following functions:
     * intersection - returns intersection of two lists.
@@ -56,13 +55,13 @@ def list_comparer(lst1, lst2, size):
     return False
 
 def get_directed(matrix):
-    """Returns a directed graph of the input graph.
+    """Returns a directed graph of the input adjacency matrix.
 
     Args:
         matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
-        digraph: A NetworkX directed graph of the input graph.
+        digraph: A NetworkX directed graph of the input adjacency matrix.
     """
     digraph = nx.from_numpy_matrix(matrix,create_using = nx.DiGraph)
     return digraph
