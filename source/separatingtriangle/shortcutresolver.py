@@ -25,6 +25,11 @@ def get_shortcut(matrix, bdy_nodes, bdy_edges):
     shortcuts = []
     for node1 in range(0, len(bdy_nodes)):
         for node2 in range(0, len(bdy_nodes)):
+            print(node1, node2, bdy_nodes, bdy_edges, shortcuts, matrix)
+            print(matrix[0][0])
+            print(matrix[bdy_nodes[node1]][bdy_nodes[node2]] == 1)
+            print((bdy_nodes[node1], bdy_nodes[node2]) not in bdy_edges)
+            print([bdy_nodes[node2], bdy_nodes[node1]] not in shortcuts)
             if(matrix[bdy_nodes[node1]][bdy_nodes[node2]] == 1 
                 and (bdy_nodes[node1], bdy_nodes[node2]) not in bdy_edges 
                 and [bdy_nodes[node2], bdy_nodes[node1]] not in shortcuts):

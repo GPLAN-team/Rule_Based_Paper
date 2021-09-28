@@ -303,6 +303,7 @@ def case_c(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     matrix[mut_nbr1][node] = 2
     matrix[node][mut_nbr2] = 2
     matrix[nbr][node] = 3
+    return matrix
 
 def case_d(matrix, nodecnt, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
     """Resolves Case D of expansion.

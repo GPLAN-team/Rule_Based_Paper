@@ -218,7 +218,8 @@ def get_encoded_matrix(nodecnt, room_x, room_y, room_width, room_height):
 
     mat_width = int(max(a + b for a, b in zip(room_x, room_width)))
     mat_height = int(max(a + b for a, b in zip(room_y, room_height)))
-    encoded_matrix =  np.zeros((mat_width, mat_height), int)
+    print(mat_width, mat_height)
+    encoded_matrix =  np.zeros((mat_height, mat_width), int)
     room_width_arr = np.array(room_width, dtype='int')
     room_height_arr = np.array(room_height, dtype='int')
     room_x_arr = np.array(room_x, dtype='int')
@@ -226,7 +227,7 @@ def get_encoded_matrix(nodecnt, room_x, room_y, room_width, room_height):
     for node in range(nodecnt):
         for width in range(room_width_arr[node]):
             for height in range(room_height_arr[node]):
-                encoded_matrix[room_y_arr[node]  +height][room_x_arr[node] + width] = node
+                encoded_matrix[room_y_arr[node] + height][room_x_arr[node] + width] = node
     return encoded_matrix
 
 def ordered_bdy(bdy_nodes, bdy_edges):
