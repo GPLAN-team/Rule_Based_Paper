@@ -18,7 +18,7 @@ import pythongui.dimensiongui as dimgui
 
 # import tests
 # import triangularity as trng
-origin = 50
+origin = 0
 def run():
     """Runs the GPLAN program.
 
@@ -85,10 +85,21 @@ def run():
                             ,[]
                             ,origin)
                 else:
-                    min_width,max_width,min_height,max_height= dimgui.gui_fnc(gclass.value[0])
+                    old_dims = [[0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , ""
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]]
+                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
                     start = time.time()
-                    graph.single_dual()
-                    graph.single_floorplan(min_width,min_height,max_width,max_height)
+                    graph.multiple_dual()
+                    graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                    while(graph.floorplan_exist == False):
+                        old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
+                        graph.multiple_dual()
+                        graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
                     graph_data = {
@@ -121,8 +132,9 @@ def run():
                     start = time.time()
                     graph.multiple_dual()
                     end = time.time()
-                    printe("Time taken: " + str((end-start)*1000) + " ms")
-                    for idx in range(len(graph.rel_matrix_list)):
+                    printe("Average Time taken: " + str(((end-start)*1000)/graph.fpcnt) + " ms")
+                    printe("Number of floorplans: " +  str(graph.fpcnt))
+                    for idx in range(graph.fpcnt):
                         graph_data = {
                             'room_x': graph.room_x[idx],
                             'room_y': graph.room_y[idx],
@@ -136,27 +148,35 @@ def run():
                             'room_y_right_bottom': graph.room_y_right_bottom[idx],
                             'room_y_left_top': graph.room_y_left_top[idx],
                             'room_y_right_top': graph.room_y_right_top[idx],
-                            'area': graph.area,
-                            'extranodes': graph.extranodes,
-                            'mergednodes': graph.mergednodes,
-                            'irreg_nodes': graph.irreg_nodes1
+                            'area': graph.area[idx],
+                            'extranodes': graph.extranodes[idx],
+                            'mergednodes': graph.mergednodes[idx],
+                            'irreg_nodes': graph.irreg_nodes1[idx]
                         }
-                        origin += 1000
                         draw.draw_rdg(graph_data
-                            ,1
+                            ,idx+1
                             ,gclass.pen
                             ,1
                             ,gclass.value[6]
                             ,[]
                             ,origin)
+                        origin += 1000
                 else:
-                    min_width,max_width,min_height,max_height= dimgui.gui_fnc(gclass.value[0])
+                    old_dims = [[0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]
+                                , ""
+                                , [0] * gclass.value[0]
+                                , [0] * gclass.value[0]]
+                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
                     start = time.time()
                     graph.multiple_dual()
-                    graph.multiple_floorplan(min_width,min_height,max_width,max_height)
+                    graph.multiple_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
-                    for idx in range(len(graph.rel_matrix_list)):
+                    printe("Number of floorplans: " +  str(len(graph.room_x)))
+                    for idx in range(len(graph.room_x)):
                         graph_data = {
                             'room_x': graph.room_x[idx],
                             'room_y': graph.room_y[idx],

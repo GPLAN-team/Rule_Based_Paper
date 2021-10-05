@@ -66,22 +66,17 @@ def get_flippable_vertices(matrix,news_matrix,nodecnt):
 
 def resolve_flippable_edge(edge,rel):
 	new_rel = rel.copy()
+	nbr_label = opr.ordered_nbr_label(new_rel, new_rel.shape[0], edge[0], edge[1], True)[0]
 	if(new_rel[edge[0],edge[1]] == 2):
-		if(opr.ordered_nbr_label(rel, rel.shape[0], edge[0], edge[1], True) == 3):
-			# print("Case A")
-			new_rel[edge[0],edge[1]] = 0
+		if(nbr_label == 3):
 			new_rel[edge[0],edge[1]] = 3
-		elif(opr.ordered_nbr_label(rel, rel.shape[0], edge[0], edge[1], True) == 2):
-			# print("Case B")
+		elif(nbr_label == 2):
 			new_rel[edge[0],edge[1]] = 0
 			new_rel[edge[1],edge[0]] = 3
 	elif(new_rel[edge[0],edge[1]] == 3):
-		if(opr.ordered_nbr_label(rel, rel.shape[0], edge[0], edge[1], True) == 3):
-			# print("Case C")
-			new_rel[edge[0],edge[1]] = 0
+		if(nbr_label == 3):
 			new_rel[edge[0],edge[1]] = 2
-		elif(opr.ordered_nbr_label(rel, rel.shape[0], edge[0], edge[1], True) == 2):
-			# print("Case D")
+		elif(nbr_label == 2):
 			new_rel[edge[0],edge[1]] = 0
 			new_rel[edge[1],edge[0]] = 2
 	return new_rel
