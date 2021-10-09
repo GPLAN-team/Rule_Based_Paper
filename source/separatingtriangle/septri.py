@@ -1,16 +1,48 @@
-import matplotlib.pyplot as plt
+"""Shortcut Resolver Module
+
+This module allows user to identify shortcuts (refer Documentation) in
+the graph and helps in removing shortcuts if required.
+
+This module contains the following functions:
+
+    * sign - calculates value of (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3).
+    * point_in_triangle - checks if a point is inside the triangle.
+    * get_edges - returns edges of a cycle.
+    * add_edge_to_cover - add edge of separating triangle to edge cover.
+    * generate_alternate_graph - returns transformed graph for given graph.
+    * get_graph_cover - returns edge cover of a graph.
+    * get_separating_edge_cover - returns separating edge cover of the input graph.
+    * get_multiple_separating_edge_covers - returns smultiple eparating edge cover of the input graph.
+    * remove_separating_triangles - removes separating triangles by bisecting the cover edge.
+    * handle_STs - handles separating triangles in a given adjacency matrix.
+
+"""
 import networkx as nx
 import numpy as np
 from shapely.geometry import Point, Polygon
 import random, copy
 
-INT_MAX = 10000
-
 def sign(x1, y1, x2, y2, x3, y3):
+    """Calculates value of (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
+
+    Args:
+        x1, x2, x3, y1, y2, y3
+
+    Returns:
+        (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
+    """
     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
 
+def point_in_triangle(x1, y1, x2, y2, x3, y3, x, y):
+    """Checks if a point is inside the triangle.
 
-def PointInTriangle(x1, y1, x2, y2, x3, y3, x, y):
+    Args:
+        x, y: Coordinate of the point.
+        x1, y1, x2, y2, x3, y3: Coordinates of triangle vertices.
+
+    Returns:
+        A boolean indicating if the point is inside triangle or not.
+    """
     d1 = sign(x, y, x1, y1, x2, y2)
     d2 = sign(x, y, x2, y2, x3, y3)
     d3 = sign(x, y, x3, y3, x1, y1)
@@ -19,15 +51,30 @@ def PointInTriangle(x1, y1, x2, y2, x3, y3, x, y):
 
     return not (has_neg and has_pos)
 
-
 def get_edges(cycle):
-    
-    ## Return edges of a cycle as a list of tuples containing each edge's vertices in sorted order
+    """Returns edges of a cycle.
 
+    Args:
+        cycle: A list containing vertices in a cycle.
+
+    Returns:
+        A list of tuples containing each edge's vertices in sorted order
+    """
     return [tuple(sorted([cycle[i], cycle[(i+1)%3]])) for i in range(len(cycle))]
 
 def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles):
+    """Add edge of separating triangle to edge cover.
 
+    Args:
+        edge: A list representing the edge to be removed.
+        edge_cover: A list containing the edge cover.
+        separating_triangles: A list of separating triangles.
+        separating_edges: A list of separating triangles.
+        separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
+
+    Returns:
+        None
+    """
     ## Add edge to edge_cover, update separating_triangles, separating_edges, separating_edge_to_triangles accordingly
 
     if(edge in edge_cover):
@@ -52,7 +99,16 @@ def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, 
     edge_cover.append(edge)
 
 def generate_alternate_graph(separating_triangles, separating_edges, separating_edge_to_triangles):
+    """Returns transformed graph for given graph.(Check algorithm)
 
+    Args:
+        separating_triangles: A list of separating triangles.
+        separating_edges: A list of separating triangles.
+        separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
+
+    Returns:
+        alternate_graph: A NxGraph containing the transformed graph.
+    """
     ## Generate a transformed graph where edges of STs form nodes, and each ST is represented by at least 1 edge between such nodes
     ## A node cover on this graph generates a cover of separating edges
 
@@ -78,13 +134,18 @@ def generate_alternate_graph(separating_triangles, separating_edges, separating_
         else:
             alternate_graph.add_edge(relevant_edges[0], relevant_edges[1])
     
-    # nx.draw(alternate_graph, with_labels = True)
-    # plt.show()
-
     return alternate_graph
 
 def get_graph_cover(graph, cover):
+    """Returns edge cover of a graph.
 
+    Args:
+        graph. A networkx graph object representing the graph.
+        cover: A list containing the cover.
+
+    Returns:
+        A list containing the edge cover.
+    """
     edges = list(graph.edges())
     if(edges == []):
         return cover
@@ -95,7 +156,17 @@ def get_graph_cover(graph, cover):
     return get_graph_cover(graph, cover)
 
 def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles):
+    """Returns separating edge cover of the input graph.
 
+    Args:
+        edge_cover: A list containing the edge cover.
+        separating_triangles: A list of separating triangles.
+        separating_edges: A list of separating triangles.
+        separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
+
+    Returns:
+        edge_cover: A list containing the edge cover.
+    """
     ## Calls itself recursively
     ## Handles isolated STs
     ## Greedily selects separating_edge that handles the most STs, and adds it to the cover
@@ -123,7 +194,17 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     # get_separating_edge_cover(edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles)
 
 def get_multiple_separating_edge_covers(expected_count, separating_triangles, separating_edges, separating_edge_to_triangles):
+    """Returns smultiple eparating edge cover of the input graph.
 
+    Args:
+        expected_count: An integer indicating the expected number of solutions.
+        separating_triangles: A list of separating triangles.
+        separating_edges: A list of separating triangles.
+        separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
+
+    Returns:
+       covers: A list containing multiple edge covers.
+    """
     covers = set()
     futility_counter = 0
     while(len(covers) < expected_count):
@@ -137,7 +218,16 @@ def get_multiple_separating_edge_covers(expected_count, separating_triangles, se
     return covers
 
 def remove_separating_triangles(graph, separating_edges, edge_to_faces):
+    """Removes separating triangles by bisecting the cover edge.
 
+    Args:
+        graph: A NetworkX object representing the graph.
+        separating_edges: A list representing the separating edges.
+        edge_to_faces: A dictionary mapping each edge to respective face.
+
+    Returns:
+        extra_nodes: A dictionary containing extra nodes added for removing separating triangle.
+    """
     ## Remove separating triangles by bisecting each edge in the cover, separating_edges
 
     ## Get initial graph data
@@ -180,7 +270,17 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
     return extra_nodes
 
 def handle_STs(adjacency, positions, num_expected_outputs):
+    """Handles separating triangles in a given adjacency matrix.
 
+    Args:
+        adjacency: A matrix representing the adjacency matrix.
+        positions: A list representing coordinates of each node.
+        num_expected_outputs: An integer representing the expected number of solutions.
+
+    Returns:
+        adjacencies: A list containing the multiple modified adjacency matrices.
+        extra_nodes_pair: A list containing the extra nodes added.
+    """
     ## Remove separating triangles by finding a cover of separating edges, bisecting them and retriangulating the graph
 
     ## Input display
@@ -212,7 +312,7 @@ def handle_STs(adjacency, positions, num_expected_outputs):
                 continue
 
             ## Search for node within triangle
-            if (PointInTriangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0],
+            if (point_in_triangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0],
                                 origin_pos[face[1]][1], origin_pos[face[2]][0],
                                 origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
                 flag = True

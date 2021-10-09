@@ -66,7 +66,6 @@ def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
     for i in range(0, z):
         f[0][i] = 1
 
-    # print(f)
 
     # Linear inequalities (Dimensional Constraints)
     def ismember(d, k):

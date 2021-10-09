@@ -5,12 +5,13 @@ are used for generation of rectangular floorplans.
 
 This module contains the following functions:
 
-    * populate_t1_matrix - populates t1_matrix.
-    * get_n_s_paths - finds north-south paths in the graph.
-    * get_t1_ordered_children - obtain t1 children for given vertex.
-    * populate_t2_matrix - populates t2_matrix.
-    * get_w_e_paths - finds west-east paths in the graph.
-    * get_t2_ordered_children - obtain t2 children for given vertex.
+    * populate_t1_matrix - returns populated T1 matrix for the graph. 
+    * get_n_s_paths - obtains north-south paths in the graph.
+    * get_t1_ordered_children - obtains children of the node in south-north direction for t1 matrix.
+    * populate_t2_matrix - returns populated T2 matrix for the graph. 
+    * get_w_e_paths - obtains west-east paths in the graph.
+    * get_t2_ordered_children - obtains children of the node in south-north direction for t2 matrix.
+    * get_coordinates: returns corner coordinates for each room in the floorplan. 
 
 """
 import networkx as nx 
@@ -18,13 +19,14 @@ import numpy as np
 import source.graphoperations.operations as opr
 
 def populate_t1_matrix(matrix, nodecnt):
-    """Populates t1_matrix attribute of InputGraph object.
+    """Returns populated T1 matrix for the graph. 
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix repressenting the adjacency matrix.
+        nodecnt: An integer representing the node count of the graph.
 
     Returns:
-        None
+        t1_matrix: A matrix represrenting the t1 matix of the graph.
     """
     nspaths = []
     t1longestdistval = -1
@@ -55,16 +57,20 @@ def populate_t1_matrix(matrix, nodecnt):
 # while populating the t1_matrix we need N-S paths such that they are obtained in a DFS ordered manner with children
 # obtained in anticlockwise direction..... but in the REL we have S-N paths... so we construct the S-N path with
 # children obtained in clockwise direction and reverse the path when we reach N.
-def get_n_s_paths(matrix, nodecnt, source, path, nspaths, t1longestdist,t1longestdistval):
-    """Obtain north-south paths in the graph.
+def get_n_s_paths(matrix, nodecnt, source, path, nspaths, t1longestdist, t1longestdistval):
+    """Obtains north-south paths in the graph.
 
     Args:
-        graph: An instance of InputGraph object.
-        source: An integer representing the source vertex.
-        path: A list containing paths.
+        matrix: A matrix representing the adjacency matrix.
+        nodecnt: An integer representing the node count of the graph.
+        source: An integer representing the source node.
+        path: A list representing the path.
+        nspaths: A list containing different north-south paths
+        t1longestdist: A list representing the longest distance in t1 matrix for each node.
+        t1longestdistval: An integer representing max value in t1longestdist.
 
     Returns:
-        None
+        t1longestdistval: An integer representing max value in t1longestdist.
     """
     if source == nodecnt - 4: # base case of this recursive function as every S-N ends at N
 
@@ -101,10 +107,11 @@ def get_n_s_paths(matrix, nodecnt, source, path, nspaths, t1longestdist,t1longes
     return t1longestdistval
 
 def get_t1_ordered_children(matrix, nodecnt, centre):
-    """Obtain children of the node in south-north direction for t1 matrix.
+    """Obtains children of the node in south-north direction for t1 matrix.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
         centre: An integer representing the source vertex.
 
     Returns:
@@ -125,13 +132,14 @@ def get_t1_ordered_children(matrix, nodecnt, centre):
     return ordered_children
 
 def populate_t2_matrix(matrix,nodecnt):
-    """Populates t2_matrix attribute of InputGraph object.
+    """Returns populated T2 matrix for the graph. 
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix repressenting the adjacency matrix.
+        nodecnt: An integer representing the node count of the graph.
 
     Returns:
-        None
+        t2_matrix: A matrix represrenting the t2 matix of the graph.
     """
     wepaths = []
     t2longestdistval = -1
@@ -159,15 +167,19 @@ def populate_t2_matrix(matrix,nodecnt):
     return t2_matrix
 
 def get_w_e_paths(matrix, nodecnt, source, path, wepaths, t2longestdist, t2longestdistval):
-    """Obtain west-east paths in the graph.
+    """Obtains west-east paths in the graph.
 
     Args:
-        graph: An instance of InputGraph object.
-        source: An integer representing the source vertex.
-        path: A list containing paths.
+        matrix: A matrix representing the adjacency matrix.
+        nodecnt: An integer representing the node count of the graph.
+        source: An integer representing the source node.
+        path: A list representing the path.
+        nspaths: A list containing different west-east paths.
+        t2longestdist: A list representing the longest distance in t2 matrix for each node.
+        t2longestdistval: An integer representing max value in t2longestdist.
 
     Returns:
-        None
+        t2longestdistval: An integer representing max value in t2longestdist.
     """
     t2longestdist[source] = max(t2longestdist[source], len(path) - 1)
     t2longestdistval = max(t2longestdistval, t2longestdist[source])
@@ -183,10 +195,11 @@ def get_w_e_paths(matrix, nodecnt, source, path, wepaths, t2longestdist, t2longe
     return t2longestdistval
 
 def get_t2_ordered_children(matrix, nodecnt, centre): 
-    """Obtain children of the node in west-east direction for t1 matrix.
+    """Obtains children of the node in south-north direction for t2 matrix.
 
     Args:
-        graph: An instance of InputGraph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
         centre: An integer representing the source vertex.
 
     Returns:
@@ -207,6 +220,19 @@ def get_t2_ordered_children(matrix, nodecnt, centre):
     return ordered_children
 
 def get_coordinates(encoded_matrix, nodecnt, room_width, room_height, hor_dgph):
+    """Returns corner coordinates for each room in the floorplan. 
+
+    Args:
+        encoded_matrix: A matrix representing the encode matrix for the floorplan.
+        nodecnt: An integer representing the node count of the graph.
+        room_width: An integer representing the width of each room.
+        room_height: An integer representing the height of each room.
+        hor_dgph: A horizontal digraph of the floorplan.
+
+    Returns:
+        room_x: A list representing the x coordinate of the rooms.
+        room_y: A list representing the y coordinate of the rooms.
+    """
     room_x = np.zeros(nodecnt-4)
     room_y = np.zeros(nodecnt-4)
     def ismember(d, k):

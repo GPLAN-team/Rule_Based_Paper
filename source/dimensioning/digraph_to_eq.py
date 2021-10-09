@@ -18,8 +18,6 @@ def digraph_to_eq(VER,HOR,min_width,min_height,max_width,max_height):
 	[f_VER,A_VER,Aeq_VER,Beq_VER]=Convert_adj_equ(VER,5)
 	[f_HOR,A_HOR,Aeq_HOR,Beq_HOR]=Convert_adj_equ(HOR,5)
 
-	# print(len(f_VER[0]))
-	# print(len(A_VER[0]))
 
 	# inp_min=[int(x) for x in input("Enter the minimum width of room: ").strip().split()]
 

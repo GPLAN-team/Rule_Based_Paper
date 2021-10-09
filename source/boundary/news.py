@@ -1,4 +1,4 @@
-"""4-completion Module
+"""North-East-West-South (NEWS) Module
 
 This module allows user to do 4-completion (refer Documentation) of the
 input graph and add four exterior vertices.

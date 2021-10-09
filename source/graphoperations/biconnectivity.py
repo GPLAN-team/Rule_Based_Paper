@@ -4,64 +4,32 @@ This module allows user to check if the graph is biconnected and can
 make it biconnected.
 
 This module contains the following functions:
-
-    * biconnect - checks if a graph needs to be vertex biconnected and returns edges to be added to make it so.
-    * is_Vertex_biconnected - returns a boolean representing whether the graph
-        is vertex biconnected or not. (Note: vertex biconnected graph is interchangably called as a biconnected graph.)
-    * is_Edge_biconnected - returns a boolean representing whether the graph is edge biconnected or not.
-    * edge_Biconnect - checks if a graph needs to be edge biconnected and returns edges to be added to make it so.
-    * get_Cutvertices - returns a list of cut vertices(a.k.a articulation points) present in the graph.
-    * get_Biconnected_Components - Returns a generator of sets of vertices, one set for each biconnected component present in the graph. 
+    * is_biconnected - returns a boolean representing whether the graph is biconnected or not.
+    * get_cutvertices - returns a list of cut vertices(a.k.a articulation points) present in the graph.
+    * get_biconnected_components - Returns a generator of sets of vertices, one set for each biconnected component present in the graph. 
         (Advised to be converted to list for any other operations)
-    * same_Component - returns a boolean representing whether the given 2 nodes are in the same biconnected component or not.
+    * same_component - returns a boolean representing whether the given 2 nodes are in the same biconnected component or not.
+    * biconnect - returns the edges to be added to make graph biconnected.
 """
 from os import remove
 import numpy as np
 import networkx as nx
 
-
-def is_Edge_Biconnected(nxgraph):
-    """returns a boolean representing whether the graph
-     is edge biconnected or not.
-
-    Args:
-        nxgraph: An instance of NetworkX Graph object.
-
-    Returns:
-        boolean: indicating TRUE if biconnected, FALSE otherwise.
-    """
-    return nx.is_k_edge_connected(nxgraph, k=2)
-
-def is_Vertex_Biconnected(nxgraph):
-    """returns a boolean representing whether the graph 
+def is_biconnected(matrix):
+    """Returns a boolean representing whether the graph 
     is vertex biconnected or not.
     
     Args:
-        nxgraph: An instance of NetworkX Graph object.
+        matrix: A matrix representing the adjacency matrix of the graph.
     
     Returns:
         boolean: indicating TRUE if biconnected, FALSE otherwise.
     """
+    nxgraph = nx.from_numpy_matrix(matrix)
     return nx.is_biconnected(nxgraph)
 
-def edge_Biconnect(matrix):
-    """ checks if a graph needs to be biconnected 
-    and returns edges to be added to make it biconnected
-    
-    Args:
-        matrix: Adjacency matrix of the said graph.
-    
-    Returns:
-        ebicon_edges: Edges to be added to make the graph edge biconnected
-    """
-    nxgraph = nx.from_numpy_matrix(matrix)
-    bicon_edges = []
-    if not is_Edge_Biconnected(nxgraph):
-        ebicon_edges = sorted((nx.k_edge_augmentation(nxgraph, k=2)))
-    return ebicon_edges
-
-def get_Cutvertices(nxgraph):
-    """
+def get_cutvertices(nxgraph):
+    """Returns list of cutvertices in the graph.
     Args:
         nxgraph: an instance of NetworkX graph object.
     
@@ -71,8 +39,8 @@ def get_Cutvertices(nxgraph):
     articulation_list = list(nx.articulation_points(nxgraph))
     return articulation_list
 
-def get_Biconnected_Components(nxgraph):
-    """
+def get_biconnected_components(nxgraph):
+    """Returns list of biconnected components in the graph.
     Args:
         nxgraph: an instance of NetworkX graph object.
     
@@ -82,8 +50,8 @@ def get_Biconnected_Components(nxgraph):
     components = nx.biconnected_components(nxgraph)
     return components
 
-def same_Component(nxgraph,u,v):
-    """
+def same_component(nxgraph,u,v):
+    """Returns list of biconnected components in the graph.
     Args: 
         nxgraph: an instance of Networkx graph object
         u,v: vertices to be checked
@@ -91,14 +59,14 @@ def same_Component(nxgraph,u,v):
     Returns:
         boolean: TRUE if vertices are in the same biconnected component else FALSE.
     """
-    components = list(get_Biconnected_Components(nxgraph))
+    components = list(get_biconnected_components(nxgraph))
     for itr in range(len(components)):
         if (u in components[itr]) and (v in components[itr]):
             return True
     return False
 
 def biconnect(matrix):
-    """
+    """Returns the edges to be added to make graph biconnected.
     Args:
         matrix: Adjacency matrix of the said graph.
     
@@ -106,14 +74,14 @@ def biconnect(matrix):
         bicon_edges: Edges to be added to make the graph biconnected
     """
     nxgraph = nx.from_numpy_matrix(matrix)
-    articulation_points = get_Cutvertices(nxgraph)
+    articulation_points = get_cutvertices(nxgraph)
     bicon_edges = set()
     added_edges = set()
     removed_edges = set()
     for i in range(len(articulation_points)): 
         neighbors = list(nx.neighbors(nxgraph,articulation_points[i]))
         for j in range(0,len(neighbors)-1):
-            if not same_Component(nxgraph,neighbors[j],neighbors[j+1]):
+            if not same_component(nxgraph,neighbors[j],neighbors[j+1]):
                 added_edges.add((neighbors[j],neighbors[j+1]))
                 if(articulation_points[i], neighbors[j]) in added_edges\
                     or (neighbors[j],articulation_points[i]) in added_edges:

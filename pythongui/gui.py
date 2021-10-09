@@ -170,7 +170,13 @@ class gui_class:
         connectivity = []
 
         def return_everything(self):
-            return [len(self.nodes_data),self.edge_count,self.edges,self.command,self.master.checkvar1.get(),list(filter(None, [row[1].get() for row in self.table._data_vars])),self.hex_list]
+            node_coordinate = []
+            for i in self.nodes_data:
+                temp_node_data = []
+                temp_node_data.append(i.pos_x)
+                temp_node_data.append(i.pos_y)
+                node_coordinate.append(temp_node_data)
+            return [len(self.nodes_data),self.edge_count,self.edges,self.command,self.master.checkvar1.get(),list(filter(None, [row[1].get() for row in self.table._data_vars])),self.hex_list, node_coordinate]
 
         def createCanvas(self):
             self.id_circle.clear()
