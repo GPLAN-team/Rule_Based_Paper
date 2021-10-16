@@ -1,5 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.classes import graph
+import numpy as np
 from networkx.readwrite.json_graph import adjacency
 
 class Point:
@@ -13,11 +15,33 @@ class Edge:
         self.left = left
         self.right = right
 
+class Room:
+    def __init__(self, name, tl_x, tl_y, br_x, br_y):
+        self.label = name
+        # self.color = color
+        self.top_left_x = tl_x
+        self.top_left_y = tl_y
+        self.bottom_right_x = br_x
+        self.bottom_right_y = br_y
+        self.height = abs(self.bottom_right_y - self.top_left_y)
+        self.width = abs(self.bottom_right_x - self.top_left_x)
+
+class RFP:
+    def __init__(self,graph,rooms):
+        self.graph = graph
+        self.rooms = rooms
+
+
+    #Functions to create RFP from the graph
+
 class circulation:
-    def __init__(self,graph):
+    def __init__(self,graph,room1, room2):
         self.graph = graph
         self.adjacency = {}
-        # self.circulation_graph = nx.graph()
+        self.circulation_graph = nx.Graph()
+        self.room1 = room1 #For testing common_edges
+        self.room2 = room2 #For testing common_edges
+        # self.RFP = RFP
 
     def circulation_algorithm(self,v1=1,v2=2):
         """
@@ -80,22 +104,84 @@ class circulation:
         self.circulation_graph = graph
         self.adjacency = final_adjacency
 
-    def corridor_boundary_rooms(self,corridor_vertex,v1=1,v2=2):
+    def corridor_boundary_rooms(self,corridor_vertex):
         """For a given corridor, this function outputs the two rooms it connects
 
         Args:
             corridor_vertex (Networkx node): Node corresponding to the corridor for which we need to find the neighbors
-            v1 (int, optional): First endpoint of the exterior edge to start the circulation algorithm. Defaults to 1.
-            v2 (int, optional): Second endpoint of the exterior edge to start the circulation algorithm. Defaults to 2.
+            # v1 (int, optional): First endpoint of the exterior edge to start the circulation algorithm. Defaults to 1.
+            # v2 (int, optional): Second endpoint of the exterior edge to start the circulation algorithm. Defaults to 2.
 
         Returns:
             [a,b]: pair of rooms that the corridor_vertex is adjacent to
         """
-        input_graph = self.circulation_graph        
+        # input_graph = self.circulation_graph        
         # Gets the tuple corresponding to the key value (key = corridor_vertex)
         [a,b] = self.adjacency.get(corridor_vertex)
         
         return [a,b]
+
+    def adjust_RFP_to_circulation(self):
+        """
+        Adjusts the RFP to form the circulation
+
+        Args:
+            None
+
+        Returns:
+            None
+        """       
+        for corridor in range(len(self.graph), len(self.circulation_graph)):
+            [room1, room2] = self.corridor_boundary_rooms(corridor)
+            self.add_corridor_between_2_rooms(room1,room2)
+    
+    def add_corridor_between_2_rooms(self,room1,room2):
+        """Adds corridors between 2 given rooms
+
+        Args:
+            room1 (int): Room index of first room 
+            room2 (int): Room index of second room
+        """
+
+        common_edges = self.find_common_edges(room1, room2)
+
+    def find_common_edges(self,room1,room2):
+        """Given two rooms this function finds the common edges between the two rooms
+
+        Args:
+            room1 (int): Room index of first room 
+            room2 (imt): Room index of second room 
+
+        Returns:
+            [tuple]: This tuple has 5 elements, namely the x and y of left end of common edge, x and y of right end of common edge
+                     and the direction of common edge with respect to room1 (N/S/E/W)
+        """
+
+        common_edge = (0,0,0,0,(room1.label,"Null"))
+        # Case1: The rooms are vertically (same y coordinates)
+        # Room1 is below Room2
+        if room1.top_left_y == room2.bottom_right_y:
+            common_edge = (max(room1.top_left_x, room2.top_left_x), room1.top_left_y, min(room1.bottom_right_x, room2.bottom_right_x), room2.bottom_right_y, (room1.label, "N"))
+        
+        # Room1 is above Room2
+        elif room1.bottom_right_y == room2.top_left_y:
+            common_edge = (max(room1.top_left_x, room2.top_left_x), room2.top_left_y, min(room1.bottom_right_x, room2.bottom_right_x), room1.bottom_right_y, (room1.label, "S"))
+
+        # Case2: The rooms are horizontally adjacent (same x coordinates)
+        # Room1 is to right of Room2 
+        elif room1.top_left_x == room2.bottom_right_x:
+            common_edge = (room1.top_left_x, max(room1.bottom_right_y, room2.bottom_right_y), room2.bottom_right_x, min(room1.top_left_y,room2.top_left_y), (room1.label, "W"))
+        
+        # Room1 is to left of Room2
+        elif room1.bottom_right_x == room2.top_left_x:
+            common_edge = (room2.top_left_x, max(room1.bottom_right_y, room2.bottom_right_y), room1.bottom_right_x, min(room1.top_left_y,room2.top_left_y), (room1.label, "E"))
+        
+        return common_edge
+
+    # def find_directions_for_common_edges(room1,room2):
+    # def find_neighboring_edges_other_than_one(edge, exclude_vertex):
+    # def Move_edge(room, shift_by, direction, shift_edge):
+    # def remove_corridor_between_2_rooms(room1,room2):
 
 def plot(graph,m):
     """Plots thr graph using matplotlib
@@ -115,30 +201,94 @@ def plot(graph,m):
     plt.show()
 
 def main():
-    g = nx.Graph()
-    g.add_edge(0,1)
-    g.add_edge(0,2)
-    g.add_edge(2,1)
-    n = len(g)
+    def make_graph():
+        g = nx.Graph()
+        g.add_edge(0,1)
+        g.add_edge(0,2)
+        g.add_edge(2,1)
+        n = len(g)
+        return g
+    
+    def test_circ():
+        g = make_graph()
+        circulation_obj = circulation(g)
+        rooms = []
+        circulation_obj.circulation_algorithm()
+        plot(circulation_obj.circulation_graph,n)
+        rooms = circulation_obj.corridor_boundary_rooms(n)
+        print("Adjacency: ", circulation_obj.adjacency)
+        print("Rooms that corridor 6 connects: ", rooms)
 
-    circulation_obj = circulation(g)
+    def test_comm_edges():
+        # Case1 test:
+        g1 = make_graph()
+        tl_x1 = 10
+        br_x1 = 20
+        br_y1 = 0
+        tl_y1 = 10
+        tl_x2 = 0
+        tl_y2 = 20
+        br_x2 = 30
+        br_y2 = 10
+        room1 = Room("0", tl_x1, tl_y1, br_x1, br_y1)
+        room2 = Room("1", tl_x2, tl_y2, br_x2, br_y2)
 
-    rooms = []
-    circulation_obj.circulation_algorithm()
-    plot(circulation_obj.circulation_graph,n)
-    rooms = circulation_obj.corridor_boundary_rooms(n)
-    print("Adjacency: ", circulation_obj.adjacency)
-    print("Rooms that corridor 6 connects: ", rooms)
+        circulation_obj1 = circulation(g1, room1, room2)
+        common_edge1 = circulation_obj1.find_common_edges(room1, room2)
+        print("Common edge case1:", common_edge1)
+
+        # Case2 test:
+        g2 = make_graph()
+        tl_x3 = 10
+        br_x3 = 20
+        br_y3 = 10
+        tl_y3 = 20
+        tl_x4 = 0
+        tl_y4 = 10
+        br_x4 = 30
+        br_y4 = 0
+        room3 = Room("0", tl_x3, tl_y3, br_x3, br_y3)
+        room4 = Room("1", tl_x4, tl_y4, br_x4, br_y4)
+
+        circulation_obj2 = circulation(g2, room3, room4)
+        common_edge2 = circulation_obj2.find_common_edges(room3, room4)
+        print("Common edge case2:", common_edge2)
+
+        # Case3 test:
+        g3 = make_graph()
+        tl_x5 = 10
+        br_x5 = 20
+        br_y5 = 5
+        tl_y5 = 15
+        tl_x6 = 0
+        tl_y6 = 20
+        br_x6 = 10
+        br_y6 = 0
+        room5 = Room("0", tl_x5, tl_y5, br_x5, br_y5)
+        room6 = Room("1", tl_x6, tl_y6, br_x6, br_y6)
+
+        circulation_obj3 = circulation(g3, room5, room6)
+        common_edge3 = circulation_obj3.find_common_edges(room5, room6)
+        print("Common edge case3:", common_edge3)
+
+        # Case4 test:
+        g4 = make_graph()
+        tl_x7= 0
+        br_x7 = 10
+        br_y7 = 5
+        tl_y7 = 15 
+        tl_x8 = 10
+        tl_y8 = 20
+        br_x8 = 20
+        br_y8 = 0
+        room7 = Room("0", tl_x7, tl_y7, br_x7, br_y7)
+        room8 = Room("1", tl_x8, tl_y8, br_x8, br_y8)
+
+        circulation_obj4 = circulation(g4, room7, room8)
+        common_edge4 = circulation_obj4.find_common_edges(room7, room8)
+        print("Common edge case4:", common_edge4)
+
+    test_comm_edges()
 
 if __name__ == "__main__":
     main()
-
-
-
-# def adjust_RFP_to_circulation():
-# def add_corridor_between_2_rooms(room1,room2):
-# def find_common_edges(room1,room2):
-# def find_directions_for_common_edges(room1,room2):
-# def find_neighboring_edges_other_than_one(edge, exclude_vertex):
-# def Move_edge(room, shift_by, direction, shift_edge):
-# def remove_corridor_between_2_rooms(room1,room2):
