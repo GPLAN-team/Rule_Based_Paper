@@ -8,7 +8,7 @@ A running example is available.
 """
 import source.inputgraph as inputgraph
 
-normalize_const = 50
+normalize_const = 40
 
 
 def dual_to_rfp(input_data):
