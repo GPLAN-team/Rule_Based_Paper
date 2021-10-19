@@ -40,7 +40,7 @@ def run():
         gclass.textbox.insert('end',string)
         gclass.textbox.insert('end',"\n")
 
-    warnings.filterwarnings("ignore")
+    warnings.filterwarnings("ignore") 
     gclass = gui.gui_class() 
 
     while (gclass.command!="end"):

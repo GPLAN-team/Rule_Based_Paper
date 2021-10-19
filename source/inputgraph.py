@@ -172,6 +172,9 @@ class InputGraph:
         else:
             bdy_ordered = opr.ordered_bdy(self.bdy_nodes, self.bdy_edges)
             cips = cip.find_cip(bdy_ordered, shortcuts)
+            print("Ordered boundary: ",bdy_ordered)
+            print("CIP: ", cips)
+            print("Modified CIP: ", news.find_bdy(cips) )
             if(len(cips) <= 4):
                 bdys = news.bdy_path(news.find_bdy(cips)
                                         , bdy_ordered)
@@ -195,7 +198,6 @@ class InputGraph:
 
         self.matrix, self.edgecnt = news.add_news(bdys, self.matrix, self.nodecnt, self.edgecnt)
         self.nodecnt += 4
-
         self.degrees = cntr.degrees(self.matrix)
         goodnodes = cntr.goodnodes(self.matrix, self.degrees)
         self.matrix, self.degrees, goodnodes,cntrs = cntr.contract(self.matrix
@@ -220,6 +222,7 @@ class InputGraph:
                                                         , self.nodecnt
                                                         , self.mergednodes
                                                         , self.irreg_nodes1)
+        self.fpcnt = 1
     
     def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
