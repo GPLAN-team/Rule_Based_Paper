@@ -6,7 +6,7 @@ Current support only for rectangular floorplans.
 A running example is available.
 
 """
-import source.inputgraph as inputgraph
+from .source import inputgraph as inputgraph
 
 normalize_const = 40
 
