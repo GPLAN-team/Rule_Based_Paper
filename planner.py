@@ -1,4 +1,4 @@
-import final
+import pythongui.final as final
 import main
 import tkinter as tk
 from PIL import ImageTk,Image
