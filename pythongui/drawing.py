@@ -1,20 +1,5 @@
 """Drawing Module
 
-This module allows user to perform contraction on a Proper Triangulated
-Planar Graph (PTPG) to transform it into a trivial Regular Edge
-Labelling (REL).
-
-This module contains the following functions:
-
-    * init_degrees - finds degree of each node in the graph.
-    * init_goodnodes - finds good vertices in the graph.
-    * is_goodvertex - finds if a vertex is a good vertex.
-    * cntr_nbr - finds contractible neighbour of given vertex.
-    * update_adjmat - updates adjacency matrix post contraction.
-    * update_goodnodes - updates good vertices post contraction.
-    * check - checks if a vertex is god vertex post contraction.
-    * contract - performs contraction on the graph.
-
 """
 import networkx as nx 
 import numpy as np 
@@ -50,7 +35,7 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
     print("----------------------------")
     print(graph_data['extranodes'])
     for i in range(graph_data['room_x'].shape[0]):
-        if graph_data['room_width'][i] == 0 or i in graph_data['extranodes'][0]:
+        if graph_data['room_width'][i] == 0 or i in graph_data['extranodes']:
             continue
         if i in graph_data['mergednodes']:
             pen.fillcolor(color_list[graph_data['irreg_nodes'][graph_data['mergednodes'].index(i)]])
@@ -147,7 +132,7 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
     #         pen.penup()
     for i in range(graph_data['room_x'].shape[0]):
         print(i)
-        if i in graph_data['extranodes'][0]:
+        if i in graph_data['extranodes']:
             continue
         pen.color('black')
         if(i not in graph_data['mergednodes']):

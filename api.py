@@ -6,12 +6,12 @@ Current support only for rectangular floorplans.
 A running example is available.
 
 """
-from .source import inputgraph as inputgraph
+from source import inputgraph as inputgraph
 
 normalize_const = 40
 
 
-def dual_to_rfp(input_data):
+def graph_to_rfp(input_data):
     """Generates a rfp for given graph data
 
     Args:
@@ -38,7 +38,6 @@ def dual_to_rfp(input_data):
         graph.single_dual()
         output_fp = []
         for node in input_data['nodes']:
-<<<<<<< HEAD
             output_fp.append({"id": node["id"]
                                 ,"label": node["label"]
                                 ,"color": node["color"]
@@ -52,17 +51,12 @@ def dual_to_rfp(input_data):
                                 ,"topLeft": [int(graph.room_x[graph.mergednodes[cnt]] *normalize_const), int(graph.room_y[graph.mergednodes[cnt]] *normalize_const)]
                                 ,"width": int(graph.room_width[graph.mergednodes[cnt]] *normalize_const)
                                 ,"height": int(graph.room_height[graph.mergednodes[cnt]] *normalize_const)})
-=======
-            output_fp.append({"id": node["id"], "label": node["id"], "color": node["color"], "topLeft": [int(graph.room_x[node["id"]] * normalize_const), int(
-                graph.room_y[node["id"]] * normalize_const)], "width": int(graph.room_width[node["id"]] * normalize_const), "height": int(graph.room_height[node["id"]] * normalize_const)})
->>>>>>> 8f33378fe7f21bd81bde652065c1cf67a74882d4
         output_data.append(output_fp)
     elif(input_data['command'] == 'multiple'):
         graph.multiple_dual()
         for idx in range(graph.fpcnt):
             output_fp = []
             for node in input_data['nodes']:
-<<<<<<< HEAD
                 output_fp.append({"id": node["id"]
                                     ,"label": node["label"]
                                     ,"color": node["color"]
@@ -76,10 +70,6 @@ def dual_to_rfp(input_data):
                                 ,"topLeft": [int(graph.room_x[idx][graph.mergednodes[idx][cnt]] *normalize_const), int(graph.room_y[idx][graph.mergednodes[idx][cnt]] *normalize_const)]
                                 ,"width": int(graph.room_width[idx][graph.mergednodes[idx][cnt]] *normalize_const)
                                 ,"height": int(graph.room_height[idx][graph.mergednodes[idx][cnt]] *normalize_const)})
-=======
-                output_fp.append({"id": node["id"], "label": node["id"], "color": node["color"], "topLeft": [int(graph.room_x[idx][node["id"]] * normalize_const), int(
-                    graph.room_y[idx][node["id"]] * normalize_const)], "width": int(graph.room_width[idx][node["id"]] * normalize_const), "height": int(graph.room_height[idx][node["id"]] * normalize_const)})
->>>>>>> 8f33378fe7f21bd81bde652065c1cf67a74882d4
             output_data.append(output_fp)
     return output_data
 
@@ -96,11 +86,7 @@ if __name__ == "__main__":
             {"source": 2, "target": 0}],
         "command": "single"
     }
-<<<<<<< HEAD
     print(graph_to_rfp(input_data))
-=======
-    print(dual_to_rfp(input_data))
->>>>>>> 8f33378fe7f21bd81bde652065c1cf67a74882d4
 
     input_data = {
         "nodes": [
@@ -113,7 +99,6 @@ if __name__ == "__main__":
             {"source": 2, "target": 0}],
         "command": "multiple"
     }
-<<<<<<< HEAD
     print(graph_to_rfp(input_data))
 
     input_data = {
@@ -133,6 +118,3 @@ if __name__ == "__main__":
     }
 
     print(graph_to_rfp(input_data))
-=======
-    print(dual_to_rfp(input_data))
->>>>>>> 8f33378fe7f21bd81bde652065c1cf67a74882d4
