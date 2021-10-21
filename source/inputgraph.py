@@ -172,9 +172,6 @@ class InputGraph:
         else:
             bdy_ordered = opr.ordered_bdy(self.bdy_nodes, self.bdy_edges)
             cips = cip.find_cip(bdy_ordered, shortcuts)
-            print("Ordered boundary: ",bdy_ordered)
-            print("CIP: ", cips)
-            print("Modified CIP: ", news.find_bdy(cips) )
             if(len(cips) <= 4):
                 bdys = news.bdy_path(news.find_bdy(cips)
                                         , bdy_ordered)
