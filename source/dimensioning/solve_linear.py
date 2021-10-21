@@ -3,7 +3,7 @@ Dimensioning Module
 This module allows user to obtain optimised dimensions for height and width of each room from their inputs. This module handles symmetry constraints,
 aspect ratio constraints as well as plot size constraints.
 
-This module contains the following functions stored in separate files:
+This module contains the following functions stored in seperate files:
     * floorplan_to_st - Takes user inputs and converts them into encoded matrix form of horizontal and vertical st graphs. Calls solve_linear and
     					convert_adj_equ_sym.
 	* convert_adj_equ_sym - Converts encoded st graphs into linear equations.
@@ -23,7 +23,7 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 					equality constraint on widths.
 		   Beq_VER: The equality constraint vector. Each element of Aeq_VER @ width must equal
 					the corresponding element of Beq_VER.
-		   f_HOR: The coefficients of the linear objective function to be minimized for the height constraints.
+		   f_HOR: The coefficients of the linear objective function to be minimized for the height constraits.
 		   A_HOR: The inequality constraint matrix. Each row of A_HOR specifies the coefficients of a linear
 				  inequality constraints on heights.
 		   Aeq_HOR: The equality constraint matrix. Each row of Aeq_HOR specifies the coefficients of a
@@ -89,7 +89,7 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 			max_height_mod.append(max_AR_height[i])
 		else:
 			max_height_mod.append(max_height[i])
-	flag1 = 0
+	flag1 = 0;
 	for i in range(0, p):
 		if min_height_mod[i] > max_height_mod[i]:
 			flag1 = 1
