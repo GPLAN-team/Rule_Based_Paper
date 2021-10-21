@@ -48,7 +48,7 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
     dim =[0,0]
     origin = {'x': origin - 400, 'y': -100}
     for i in range(graph_data['room_x'].shape[0]):
-        if graph_data['room_width'][i] == 0 or i in graph_data['extranodes']:
+        if graph_data['room_width'][i] == 0 or i in graph_data['extranodes'][0]:
             continue
         if i in graph_data['mergednodes']:
             pen.fillcolor(color_list[graph_data['irreg_nodes'][graph_data['mergednodes'].index(i)]])
@@ -145,7 +145,7 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
     #         pen.penup()
     for i in range(graph_data['room_x'].shape[0]):
         print(i)
-        if i in graph_data['extranodes']:
+        if i in graph_data['extranodes'][0]:
             continue
         pen.color('black')
         if(i not in graph_data['mergednodes']):
@@ -165,10 +165,10 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
         pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30)
         pen.write('Area of Each Room' ,font=("Arial", 20, "normal"))
         for i in range(0,len(graph_data['area'])):
-            if i in graph_data['extranodes']:
+            if i in graph_data['extranodes'][0]:
                 continue
             pen.setposition(dim[0]* scale + origin['x']+50, dim[1]* scale + origin['y']-30-value*30)
-            pen.write('Room ' + str(i+1)+ ': '+ str(graph_data['area'][i]),font=("Arial", 15, "normal"))
+            pen.write('Room ' + str(i)+ ': '+ str(graph_data['area'][i]),font=("Arial", 15, "normal"))
             pen.penup()
             value+=1
 
