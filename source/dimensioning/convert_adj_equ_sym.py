@@ -12,11 +12,13 @@ This module contains the following functions stored in seperate files:
 """
 import numpy as np
 
-def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
+def convert_adj_equ_sym(DGPH, room_list, plot_dimension):
     """
        Args:
            DGPH: Encoded matrix form of vertical/horizontal adjacencies including the north/west node
-    	   symm_rooms: String of symmetric room constraints
+    	   room_list: List of symmetric room constraints i.e. list of rooms that form the widths and heights of the
+    	              symmetric rooms
+    	   plot_dimesnion: The total plot width/height
        Attributes:
     	   LINEQ: Matrix showing an edge, where 1 denotes the starting node and -1 denotes the ending node.
        Returns:
@@ -30,13 +32,7 @@ def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
        """
     N = len(DGPH)
     lineq_temp = np.zeros([N, N ** 2])
-
-    symm_rooms = symm_rooms.split(',')
-    symm_num = len(symm_rooms)
-    for i in range(0,symm_num):
-        symm_rooms[i] = symm_rooms[i].replace( '+', ' ')
-        symm_rooms[i] = symm_rooms[i].replace('(', '' )
-        symm_rooms[i] = symm_rooms[i].replace(')', '')
+    room_num = len(room_list)
 
     # starting Liner equalities as a matrix; 1 indicates starting vertex and -1 indicates the end vertex of an edge.
     for i in range(0, N):
@@ -65,7 +61,9 @@ def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
 
     for i in range(0, z):
         f[0][i] = 1
+        #need explanation, if we want to minimise inflow why dont we take all vertices adj to northor west
 
+    # print(f)
 
     # Linear inequalities (Dimensional Constraints)
     def ismember(d, k):
@@ -82,40 +80,25 @@ def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
     A = np.vstack((A_min, A_max))
 
     #symm
-    symm_eq_mat = np.zeros((int(symm_num/2),n))
+    symm_eq_mat = np.zeros((int(room_num/2),n))
 
-    for i in range(0,int(symm_num/2)):
-        temp1 = (symm_rooms[2 * i])
-        temp1 = temp1.split(' ')
-        temp1_sz = len(temp1);
-        temp1 = [int(i) for i in temp1]
-        add_mat = np.zeros((int(symm_num / 2), n))
-        if temp1_sz > 1:
-            if DGPH[temp1[0], temp1[1]] == 1:
-                temp1 = [temp1[0]]
-
+    for i in range(0,int(room_num/2)):
+        temp1 = room_list[2 * i]
         temp1_sz = len(temp1)
-        for j in range(0,temp1_sz):
+        add_mat = np.zeros((int(room_num/ 2), n))
+        for j in range(0, temp1_sz):
             add_mat[i] = add_mat[i] + A[temp1[j]]
 
-        temp2 = (symm_rooms[2 *i + 1]);
-        temp2 = temp2.split(' ')
-        temp2_sz = len(temp2);
-        temp2 = [int(i) for i in temp2]
-
-        subt_mat = np.zeros((int(symm_num/2),n))
-        if temp2_sz > 1:
-            if DGPH[temp2[0], temp2[1]] == 1:
-                temp2 = [temp2[0]]
-
+        temp2 = room_list[2 *i + 1]
         temp2_sz = len(temp2)
-        for k in range(0,temp2_sz):
-            subt_mat[i] = subt_mat[i] + A[temp2[k]];
+        subt_mat = np.zeros((int(room_num/2),n))
+        for k in range(0, temp2_sz):
+            subt_mat[i] = subt_mat[i] + A[temp2[k]]
 
         symm_eq_mat[i] = add_mat[i] - subt_mat[i]
 
-    def any(A):
-        for i in A:
+    def any(M):
+        for i in M:
             if i == 1:
                 return 1
         return 0
@@ -125,13 +108,10 @@ def convert_adj_equ_sym(DGPH, symm_rooms,plot_dimension):
         if any(ismember(LINEQ[i], 1)) != 0 and any(ismember(LINEQ[i], -1)) != 0:
             Aeq.append(LINEQ[i])
 
-    o = len(Aeq[0])
-
     #symm
-    for i in range(0,int(symm_num / 2)):
+    for i in range(0,int(room_num / 2)):
        Aeq = np.vstack((Aeq,symm_eq_mat[i]));
 
-    # arr = np.reshape(arr, (-1, o))
     Aeq = np.array(Aeq)
     Beq = np.zeros([1, len(Aeq)])
     if(plot_dimension!=-1):

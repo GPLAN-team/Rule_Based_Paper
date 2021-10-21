@@ -14,7 +14,7 @@ import numpy as np
 from source.dimensioning.solve_linear import solve_linear
 from source.dimensioning.convert_adj_equ_sym import convert_adj_equ_sym
 
-def floorplan_to_st(E, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
+def floorplan_to_st(E, min_width, min_height, max_width, max_height, ver_list, hor_list , min_ar, max_ar, plot_width, plot_height):
 	"""
 	   Args:
 		   E: Encoded matrix
@@ -41,7 +41,11 @@ def floorplan_to_st(E, min_width, min_height, max_width, max_height, symm_rooms,
 	rows = len(E)
 	columns = len(E[0])
 	E = np.array(E)
-
+	print(E)
+	# E=[[5,5,5,5,6],[3,3,4,4,4],[0,1,1,2,2]]
+	# E = np.array(E)
+	rows = len(E)
+	columns = len(E[0])
 	for i in range(0, rows):
 		for j in range(0, columns):
 			E[i][j] += 1
@@ -96,9 +100,12 @@ def floorplan_to_st(E, min_width, min_height, max_width, max_height, symm_rooms,
 
 	HOR = np.insert(HOR, 0, [0], axis=1)
 
-	[f_VER, A_VER, Aeq_VER, Beq_VER] = convert_adj_equ_sym(VER, symm_rooms, plot_width)
-	[f_HOR, A_HOR, Aeq_HOR, Beq_HOR] = convert_adj_equ_sym(HOR, symm_rooms, plot_height)
+	[f_VER, A_VER, Aeq_VER, Beq_VER] = convert_adj_equ_sym(VER, ver_list, plot_width)
+	[f_HOR, A_HOR, Aeq_HOR, Beq_HOR] = convert_adj_equ_sym(HOR, hor_list, plot_height)
 
 	[width, height, status] = solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR, min_width, max_width, min_height, max_height, min_ar, max_ar)
+
+	width = np.round(width,3)
+	height = np.round(height, 3)
 
 	return [ width, height, hor_dgph, status]

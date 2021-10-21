@@ -25,6 +25,7 @@ import source.floorplangen.transformation as transform
 import source.dimensioning.floorplan_to_st as fpts
 import source.floorplangen.flippable as flp
 import source.separatingtriangle.septri as st
+import source.dimensioning.block_checker as bc
 
 class InputGraph:
     """A InputGraph class for graph input by the user.
@@ -195,6 +196,7 @@ class InputGraph:
 
         self.matrix, self.edgecnt = news.add_news(bdys, self.matrix, self.nodecnt, self.edgecnt)
         self.nodecnt += 4
+
         self.degrees = cntr.degrees(self.matrix)
         goodnodes = cntr.goodnodes(self.matrix, self.degrees)
         self.matrix, self.degrees, goodnodes,cntrs = cntr.contract(self.matrix
@@ -219,7 +221,14 @@ class InputGraph:
                                                         , self.nodecnt
                                                         , self.mergednodes
                                                         , self.irreg_nodes1)
-        self.fpcnt = 1
+
+
+        encoded_matrix = opr.get_encoded_matrix(self.nodecnt-4
+                                                , self.room_x
+                                                , self.room_y
+                                                , self.room_width
+                                                , self.room_height)
+        print(encoded_matrix)
     
     def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
@@ -238,6 +247,19 @@ class InputGraph:
         Returns:
             None
         """
+
+        for i in range(0, len(self.mergednodes[0])):
+            min_width.append(0)
+            min_height.append(0)
+            max_width.append(0)
+            max_height.append(0)
+        for i in range(0, len(self.extranodes[0])):
+            min_width.append(0)
+            min_height.append(0)
+            max_height.append(10000)
+            max_width.append(10000)
+            min_ar.append(0)
+            max_ar.append(10000)
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(rel_matrix.shape[0]-4
@@ -246,16 +268,21 @@ class InputGraph:
                                     , self.room_width[i]
                                     , self.room_height[i])
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
-            [width,height,hor_dgph,status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
-                                                , min_width
-                                                , min_height
-                                                , max_width
-                                                , max_height
-                                                , symm_rooms
-                                                , min_ar
-                                                , max_ar
-                                                , plot_width
-                                                , plot_height)
+            [boolean, ver_list, hor_list] = bc.block_checker(encoded_matrix_deepcopy, symm_rooms)
+            if boolean:
+                [width, height, hor_dgph, status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
+                                                         , min_width
+                                                         , min_height
+                                                         , max_width
+                                                         , max_height
+                                                         , ver_list
+                                                         , hor_list
+                                                         , min_ar
+                                                         , max_ar
+                                                         , plot_width
+                                                         , plot_height)
+            else:
+                status = False
             if(status==False):
                 continue
             else:
@@ -419,6 +446,18 @@ class InputGraph:
         Returns:
             None
         """
+        for i in range(0, len(self.mergednodes[0])):
+            min_width.append(0)
+            min_height.append(0)
+            max_width.append(0)
+            max_height.append(0)
+        for i in range(0, len(self.extranodes[0])):
+            min_width.append(0)
+            min_height.append(0)
+            max_height.append(10000)
+            max_width.append(10000)
+            min_ar.append(0)
+            max_ar.append(10000)
         status_list = []
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
@@ -428,16 +467,21 @@ class InputGraph:
                                     , self.room_width[i]
                                     , self.room_height[i])
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
-            [width,height,hor_dgph,status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
-                                                , min_width
-                                                , min_height
-                                                , max_width
-                                                , max_height
-                                                , symm_rooms
-                                                , min_ar
-                                                , max_ar
-                                                , plot_width
-                                                , plot_height)
+            [boolean, ver_list, hor_list] = bc.block_checker(encoded_matrix_deepcopy, symm_rooms)
+            if boolean:
+                [width, height, hor_dgph, status] = fpts.floorplan_to_st(encoded_matrix_deepcopy
+                                                                         , min_width
+                                                                         , min_height
+                                                                         , max_width
+                                                                         , max_height
+                                                                         , ver_list
+                                                                         , hor_list
+                                                                         , min_ar
+                                                                         , max_ar
+                                                                         , plot_width
+                                                                         , plot_height)
+            else:
+                status = False
             status_list.append(status)
             if(status==False):
                 continue

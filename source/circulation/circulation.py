@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.algorithms.components import connected
 from networkx.classes import graph
 import numpy as np
 from networkx.readwrite.json_graph import adjacency
@@ -39,9 +40,9 @@ class circulation:
         self.graph = graph
         self.adjacency = {}
         self.circulation_graph = nx.Graph()
-        self.room1 = room1 #For testing common_edges
-        self.room2 = room2 #For testing common_edges
-        # self.RFP = RFP
+        # self.room1 = room1 #For testing common_edges
+        # self.room2 = room2 #For testing common_edges
+        self.RFP = []
 
     def circulation_algorithm(self,v1=1,v2=2):
         """
@@ -178,8 +179,62 @@ class circulation:
         
         return common_edge
 
-    # def find_directions_for_common_edges(room1,room2):
+    def find_common_neighbors(self,room1,room2):
+        common_edge = self.find_common_edge(room1, room2)
+        # neighbors is a list that contains tuples that contain the corresponding room eac eigbor is
+        # connected to and the direction in which we have to move to form corridors
+        neighbors = []
+        orientation = 'x'
+        height = 0
+        if(common_edge[1] == common_edge[3]):
+            height = common_edge[1]
+            orientation = 'x' #Common edge is parallel to x axis
+        
+        elif(common_edge[0] == common_edge[2]):
+            height = common_edge[1]
+            orientation = 'y' #Common edge is parallel to y axis
+        
+        # The axis wrt which we shift the room edges to form corridor
+        axis = (orientation, height)
+
+        flag = -1 #varible to terminate while
+        while(flag != 0):
+            for room in list(nx.common_neighbors(self.graph, room1.label, room2.label)):
+                common_edge1 = self.find_common_edges(self.RFP[room], self.RFP[room1])
+                common_edge2 = self.find_common_edges(self.RFP[room], self.RFP[room2])
+                
+                if(common_edge1[4][2] == "N" and axis[0] == 'x'):
+                    flag = 1
+                    neighbors.append((room.label, "S", room1.label, "N"))
+                elif(common_edge1[4][2] == "S" and axis[0] == 'x'):
+                    flag = 1
+                    neighbors.append((room.label, "N", room1.label, "S"))
+                elif(common_edge1[4][2] == "W" and axis[0] == 'y'):
+                    flag = 1
+                    neighbors.append((room.label, "E", room1.label, "W"))
+                elif(common_edge1[4][2] == "E" and axis[0] == 'y'):
+                    flag = 1
+                    neighbors.append((room.label, "W", room1.label, "E"))
+                
+                if(common_edge2[4][2] == "N" and axis[0] == 'x'):
+                    flag = 1
+                    neighbors.append((room.label, "S", room2.label, "N"))
+                elif(common_edge2[4][2] == "S" and axis[0] == 'x'):
+                    flag = 1
+                    neighbors.append((room.label, "N", room2.label, "S"))
+                elif(common_edge2[4][2] == "W" and axis[0] == 'y'):
+                    flag = 1
+                    neighbors.append((room.label, "E", room2.label, "W"))
+                elif(common_edge2[4][2] == "E" and axis[0] == 'y'):
+                    flag = 1
+                    neighbors.append((room.label, "W", room2.label, "E"))
+                
+                else:
+                    flag = 0
+
+
     # def find_neighboring_edges_other_than_one(edge, exclude_vertex):
+    # def find_directions_for_common_edges(room1,room2):
     # def Move_edge(room, shift_by, direction, shift_edge):
     # def remove_corridor_between_2_rooms(room1,room2):
 
@@ -288,7 +343,7 @@ def main():
         common_edge4 = circulation_obj4.find_common_edges(room7, room8)
         print("Common edge case4:", common_edge4)
 
-    test_comm_edges()
+    # test_comm_edges()
 
 if __name__ == "__main__":
     main()

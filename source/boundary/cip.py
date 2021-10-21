@@ -10,9 +10,10 @@ This module contains the following functions:
 import networkx as nx
 import warnings
 import numpy as np
-import source.graphoperations.operations as opr
+from ..graphoperations import operations as opr
 
-def find_cip(bdy_ordered,shortcuts):
+
+def find_cip(bdy_ordered, shortcuts):
     """Returns cips in the input graph.
 
     Args:
@@ -31,8 +32,8 @@ def find_cip(bdy_ordered,shortcuts):
         pos_1 = bdy_ordered.index(shortcut[0])
         pos_2 = bdy_ordered.index(shortcut[1])
         if(pos_1 > pos_2):
-            pos_1,pos_2 = pos_2,pos_1
-            shortcut[0],shortcut[1] = shortcut[1],shortcut[0]
+            pos_1, pos_2 = pos_2, pos_1
+            shortcut[0], shortcut[1] = shortcut[1], shortcut[0]
         path_1 = bdy_ordered[pos_1+1:pos_2]
         path_2 = bdy_ordered[pos_2+1:len(bdy_ordered)]
         path_2 = path_2 + bdy_ordered[0:pos_1]
@@ -47,11 +48,11 @@ def find_cip(bdy_ordered,shortcuts):
                 path_2_cip = 0
                 break
         if(path_1_cip == 1):
-            path_1.insert(0,shortcut[0])
+            path_1.insert(0, shortcut[0])
             path_1.append(shortcut[1])
             cip.append(path_1)
         if(path_2_cip == 1):
-            path_2.insert(0,shortcut[1])
+            path_2.insert(0, shortcut[1])
             path_2.append(shortcut[0])
             cip.append(path_2)
     return cip

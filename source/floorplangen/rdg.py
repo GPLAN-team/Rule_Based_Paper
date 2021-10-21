@@ -14,7 +14,7 @@ This module contains the following functions:
     * get_dimensions - returns dimension of each room.
 """
 import numpy as np 
-import source.floorplangen.dual as dual
+from . import dual as dual
 
 def get_rectangle_coordinates(room_x
                                 , room_y
