@@ -214,7 +214,6 @@ class InputGraph:
 
         encoded_matrix = opr.get_encoded_matrix(
             self.nodecnt-4, self.room_x, self.room_y, self.room_width, self.room_height)
-        print(encoded_matrix)
 
     def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
@@ -233,12 +232,13 @@ class InputGraph:
         Returns:
             None
         """
-
         for i in range(0, len(self.mergednodes[0])):
             min_width.append(0)
             min_height.append(0)
-            max_width.append(0)
-            max_height.append(0)
+            max_width.append(10)
+            max_height.append(10)
+            min_ar.append(0)
+            max_ar.append(10000)
         for i in range(0, len(self.extranodes[0])):
             min_width.append(0)
             min_height.append(0)
@@ -266,6 +266,7 @@ class InputGraph:
             height = np.transpose(height)
             self.room_width = width.flatten()
             self.room_height = height.flatten()
+            self.extranodes, self.mergednodes, self.irreg_nodes1 = self.extranodes[i], self.mergednodes[i], self.irreg_nodes1[i]
             [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom,
                 self.room_y_left_top, self.room_y_right_top] = rdg.construct_floorplan(encoded_matrix, self.nodecnt + 4, self.room_width, self.room_height, hor_dgph, self.mergednodes, self.irreg_nodes1)
             for j in range(0, len(self.room_x)):
@@ -274,6 +275,7 @@ class InputGraph:
                 self.room_y[j] = round(self.room_y[j], 3)
             self.area = opr.calculate_area(
                 self.room_x.shape[0], self.room_width, self.room_height, self.extranodes, self.mergednodes, self.irreg_nodes1)
+            
             break
 
     def multiple_dual(self):
@@ -373,7 +375,6 @@ class InputGraph:
             self.room_y_right_bottom.append(room_y_right_bottom)
             self.room_y_left_top.append(room_y_left_top)
             self.room_y_right_top.append(room_y_right_top)
-            self.area.append([])
 
     def multiple_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates multiple floorplans for a given input graph.
@@ -395,8 +396,10 @@ class InputGraph:
         for i in range(0, len(self.mergednodes[0])):
             min_width.append(0)
             min_height.append(0)
-            max_width.append(0)
-            max_height.append(0)
+            max_width.append(10000)
+            max_height.append(10000)
+            min_ar.append(0)
+            max_ar.append(10000)
         for i in range(0, len(self.extranodes[0])):
             min_width.append(0)
             min_height.append(0)
@@ -427,13 +430,13 @@ class InputGraph:
             self.room_width[i] = width.flatten()
             self.room_height[i] = height.flatten()
             [self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i], self.room_x_bottom_left[i], self.room_x_bottom_right[i], self.room_x_top_left[i], self.room_x_top_right[i], self.room_y_left_bottom[i],
-                self.room_y_right_bottom[i], self.room_y_left_top[i], self.room_y_right_top[i]] = rdg.construct_floorplan(encoded_matrix, self.nodecnt + 4, self.room_width[i], self.room_height[i], hor_dgph, self.mergednodes, self.irreg_nodes1)
+                self.room_y_right_bottom[i], self.room_y_left_top[i], self.room_y_right_top[i]] = rdg.construct_floorplan(encoded_matrix, self.nodecnt + 4, self.room_width[i], self.room_height[i], hor_dgph, self.mergednodes[i], self.irreg_nodes1[i])
             for j in range(0, len(self.room_x[i])):
                 self.room_x[i][j] = round(self.room_x[i][j], 3)
             for j in range(0, len(self.room_y[i])):
                 self.room_y[i][j] = round(self.room_y[i][j], 3)
             self.area.append(opr.calculate_area(
-                self.room_x[i].shape[0], self.room_width[i], self.room_height[i], self.extranodes, self.mergednodes, self.irreg_nodes1))
+                self.room_x[i].shape[0], self.room_width[i], self.room_height[i], self.extranodes[i], self.mergednodes[i], self.irreg_nodes1[i]))
 
         room_x = []
         room_y = []
