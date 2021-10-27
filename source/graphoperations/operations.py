@@ -270,7 +270,9 @@ def calculate_area(nodecnt, room_width, room_height, extranodes, mergednodes, ir
             continue
         area = room_width[i] * room_height[i]
         if(i in irreg_nodes):
-            area += room_width[mergednodes[irreg_nodes.index(i)]] * room_height[mergednodes[irreg_nodes.index(i)]]
+            merged_node_indices = [j for j, x in enumerate(irreg_nodes) if x == i]
+            for idx in merged_node_indices:
+                area += room_width[mergednodes[idx]] * room_height[mergednodes[idx]]
         rooms_area.append(round(area,3))
     return rooms_area
 
