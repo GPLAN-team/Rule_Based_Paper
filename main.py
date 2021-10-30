@@ -162,7 +162,11 @@ def run():
                             ,gclass.value[6]
                             ,[]
                             ,origin)
-                        origin += 1000
+                        # origin += 1000
+                        
+                        gclass.ocan.add_tab()
+                        gclass.pen = gclass.ocan.getpen()
+                        gclass.pen.speed(0)
                 else:
                     old_dims = [[0] * gclass.value[0]
                                 , [0] * gclass.value[0]
@@ -197,7 +201,7 @@ def run():
                             'mergednodes': graph.mergednodes[idx],
                             'irreg_nodes': graph.irreg_nodes1[idx]
                         }
-                        origin += 1000
+                        # origin += 1000
                         draw.draw_rdg(graph_data
                             ,idx+1
                             ,gclass.pen
@@ -205,13 +209,16 @@ def run():
                             ,gclass.value[6]
                             ,[]
                             ,origin)
+                        
+                        gclass.ocan.add_tab()
+                        gclass.pen = gclass.ocan.getpen()
+                        gclass.pen.speed(0)
         gclass.root.wait_variable(gclass.end)
         gclass.graph_ret()
         gclass.ocan.add_tab()
-
-        # gclass.ocan.tscreen.resetscreen()
         gclass.pen = gclass.ocan.getpen()
-        gclass.pen.speed(100000)
+        gclass.pen.speed(0)
+        # gclass.ocan.tscreen.resetscreen()
 
 
 
