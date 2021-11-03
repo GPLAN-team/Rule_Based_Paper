@@ -96,3 +96,4 @@ class App:
 if __name__ == "__main__":
     app = App()
     app.run()
+print("pip")
