@@ -18,4 +18,4 @@ canvas.create_image(
         anchor=NW, 
         image=img
         ) 
-ws.mainloop() 
+ws.mainloop()
