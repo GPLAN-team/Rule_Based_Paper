@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-import source.separatingtriangle.gen_septri as gst
+import source.separatingtriangle.septri as gst
 nodcnt = 4
 matrix = np.array([[0,1,1,1],[1,0,1,1],[1,1,0,1],[1,1,1,0]])
 print("Node count: ", matrix.shape[0])

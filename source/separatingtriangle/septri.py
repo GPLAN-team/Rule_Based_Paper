@@ -22,6 +22,11 @@ import numpy as np
 from shapely.geometry import Point, Polygon
 import random, copy
 
+from matplotlib import pyplot as plt
+
+node_positions = []
+choices = []
+
 def sign(x1, y1, x2, y2, x3, y3):
     """Calculates value of (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
 
@@ -51,18 +56,36 @@ def point_in_triangle(x1, y1, x2, y2, x3, y3, x, y):
 
     return not (has_neg and has_pos)
 
-def get_edges(cycle):
-    """Returns edges of a cycle.
+def point_in_triangle_wrapper_nodes(node1, node2, node3, node_inner):
 
-    Args:
-        cycle: A list containing vertices in a cycle.
+    x = node_positions[node_inner][0]
+    y = node_positions[node_inner][1]
+    x1 = node_positions[node1][0]
+    y1 = node_positions[node1][1]
+    x2 = node_positions[node2][0]
+    y2 = node_positions[node2][1]
+    x3 = node_positions[node3][0]
+    y3 = node_positions[node3][1]
+    
+    d1 = sign(x, y, x1, y1, x2, y2)
+    d2 = sign(x, y, x2, y2, x3, y3)
+    d3 = sign(x, y, x3, y3, x1, y1)
+    has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+    has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
 
-    Returns:
-        A list of tuples containing each edge's vertices in sorted order
-    """
-    return [tuple(sorted([cycle[i], cycle[(i+1)%3]])) for i in range(len(cycle))]
+    return not (has_neg and has_pos)
 
-def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles):
+def get_edges(cycle, containing = None):
+    
+    ## Return edges of a cycle as a list of tuples containing each edge's vertices in sorted order
+
+    edges = [tuple(sorted([cycle[i], cycle[(i+1)%len(cycle)]])) for i in range(len(cycle))]
+    if(containing != None):
+        containing_edges = [edge for edge in edges if containing in edge and edge[0] == containing] + [tuple(reversed(edge)) for edge in edges if containing in edge and edge[1] == containing]
+        return containing_edges
+    return edges
+
+def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles, force = False):
     """Add edge of separating triangle to edge cover.
 
     Args:
@@ -76,9 +99,15 @@ def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, 
         None
     """
     ## Add edge to edge_cover, update separating_triangles, separating_edges, separating_edge_to_triangles accordingly
-
     if(edge in edge_cover):
         return
+    
+    if(edge not in separating_edges and force == False):
+        return
+
+    edge_cover.append(edge)
+
+    edge = (min(edge), max(edge))
 
     for triangle in separating_edge_to_triangles[edge]:
         ## Prior to removing triangle from separating_edge_to_triangles, all references to it must be handled
@@ -89,14 +118,14 @@ def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, 
             separating_edge_to_triangles[other_edge].remove(triangle)
             if(separating_edge_to_triangles[other_edge] == []):
                 ## If other_edge is no longer a separating edge, remove it
-                del separating_edge_to_triangles[other_edge]
                 separating_edges.remove(other_edge)
         ## Remove triangle from consideration
         separating_triangles.remove(triangle)
+    separating_edge_to_triangles[edge] = []
     
     ## Edge has been handles and can be removed
-    separating_edges.remove(edge)
-    edge_cover.append(edge)
+    if(edge in separating_edges):
+        separating_edges.remove(edge)
 
 def generate_alternate_graph(separating_triangles, separating_edges, separating_edge_to_triangles):
     """Returns transformed graph for given graph.(Check algorithm)
@@ -172,7 +201,9 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     ## Greedily selects separating_edge that handles the most STs, and adds it to the cover
 
     alternate_graph = generate_alternate_graph(separating_triangles, separating_edges, separating_edge_to_triangles)
-    edge_cover = get_graph_cover(alternate_graph, [])
+    print(alternate_graph.edges)
+    edge_cover = get_graph_cover(alternate_graph, edge_cover)
+    print(edge_cover)
     return edge_cover
     
     # ## Recursive base case
@@ -193,7 +224,7 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     # ## Recursively call in order to repeat
     # get_separating_edge_cover(edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles)
 
-def get_multiple_separating_edge_covers(expected_count, separating_triangles, separating_edges, separating_edge_to_triangles):
+def get_multiple_separating_edge_covers(expected_count, separating_triangles, separating_edges, separating_edge_to_triangles, edges):
     """Returns smultiple eparating edge cover of the input graph.
 
     Args:
@@ -208,7 +239,21 @@ def get_multiple_separating_edge_covers(expected_count, separating_triangles, se
     covers = set()
     futility_counter = 0
     while(len(covers) < expected_count):
-        separating_edge_cover = frozenset(get_separating_edge_cover([], separating_triangles, separating_edges, separating_edge_to_triangles))
+        separating_triangles_copy = separating_triangles.copy()
+        separating_edges_copy = separating_edges.copy()
+        separating_edge_to_triangles_copy = copy.deepcopy(separating_edge_to_triangles)
+        edge_cover = []
+        edges = []
+        # edges = find_L_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_T_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_unknown_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_Z_shape(separating_triangles, separating_edges, separating_edge_to_triangles, edges)
+        # edges = find_F_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        for edge in edges:
+            add_edge_to_cover(edge, edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy, force=True)
+        separating_edge_cover = frozenset(get_separating_edge_cover(edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy))
         if(separating_edge_cover not in covers):
             futility_counter = 0
             covers.add(separating_edge_cover)
@@ -234,6 +279,7 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
     origin_pos = nx.get_node_attributes(graph, 'pos')
     total_no_of_vertices = graph.number_of_nodes()
     extra_nodes = {}
+    print("New try", separating_edges)
     for edge in separating_edges:
         ## Bisect edge
         graph.remove_edge(edge[0], edge[1])
@@ -242,6 +288,8 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
         graph.add_edges_from([(total_no_of_vertices, edge[0]), (total_no_of_vertices, edge[1])])
         extra_nodes[total_no_of_vertices] = [edge[0],edge[1]]
         
+        edge = (min(edge), max(edge))
+        print(edge_to_faces, edge)
         ## Handle triangulation and update edge_to_faces
         for triangle in edge_to_faces[edge]:
             ## Retriangulate graph after addition of new vertex total_no_of_vertices
@@ -269,6 +317,104 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
         total_no_of_vertices += 1
     return extra_nodes
 
+def find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    some_triangle = random.choice(separating_triangles)
+    edges = get_edges(some_triangle, some_triangle[0])
+    return edges
+
+def find_F_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    some_triangle = separating_edge_to_triangles[special_edge][0]
+    edges = get_edges(some_triangle, special_edge[0])
+    return edges
+
+def find_L_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    global choices
+    choices.append("L")
+    some_triangle = random.choice(separating_triangles)
+    edges = [get_edges(some_triangle)[0],]
+    return edges
+
+def find_T_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    global choices
+    choices.append("T")
+    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    edges = [special_edge,]
+    return edges
+
+def find_unknown_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    triangle1 = separating_edge_to_triangles[special_edge][0]
+    triangle2 = separating_edge_to_triangles[special_edge][1]
+    edges1 = get_edges(triangle1, special_edge[0])
+    edges2 = get_edges(triangle2, special_edge[0])
+    edges1.remove(special_edge)
+    edges2.remove(special_edge)
+    edges = edges1 + edges2
+    return edges
+
+def find_Z_shape(separating_triangles, separating_edges, separating_edge_to_triangles, edges):
+
+    vertices_count = dict()
+    for triangle in separating_triangles:
+        for node in triangle:
+            if(node not in vertices_count):
+                vertices_count[node] = 0
+            vertices_count[node] += 1
+    common_vertices = [node for node in vertices_count if vertices_count[node] > 1]
+    for common_vertex in common_vertices:
+        relevant_triangles = [triangle for triangle in separating_triangles if common_vertex in triangle]
+        relavant_other_nodes = []
+        for i in range(len(relevant_triangles)):
+            relavant_other_nodes.extend([edge[1] for edge in get_edges(relevant_triangles[i], common_vertex)])
+        relavant_other_nodes = list(set(relavant_other_nodes))
+        found = 0
+        print(separating_triangles)
+        for i in range(len(relavant_other_nodes)):
+            for j in range(i+1, len(relavant_other_nodes)):
+                print(sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex]))
+                print(i, j, relavant_other_nodes[i], relavant_other_nodes[j], sorted([relavant_other_nodes[i], relavant_other_nodes[j]]) in edges, sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex]) not in separating_triangles)
+                if(sorted([relavant_other_nodes[i], relavant_other_nodes[j]]) in edges and tuple(sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex])) not in separating_triangles):
+                    found = 1
+                    break
+            if(found):
+                break
+        print("relevant other nodes, i, j", relavant_other_nodes, i, j)
+        triangle1 = [triangle for triangle in relevant_triangles if relavant_other_nodes[i] in triangle][0]
+        triangle2 = [triangle for triangle in relevant_triangles if relavant_other_nodes[j] in triangle][0]
+        print("triangles", [triangle1, triangle2])
+        edge1 = [common_vertex, relavant_other_nodes[i]]
+        edge2 = [common_vertex, list(set(triangle2).difference(set([common_vertex, relavant_other_nodes[j]])))[0]]
+        print("edges", [edge1, edge2])
+    return [tuple(edge1), tuple(edge2)]
+
+def find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+    possible_edges = [edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1]
+    random.shuffle(possible_edges)
+    for special_edge in possible_edges:
+        triangle_pair = separating_edge_to_triangles[special_edge]
+        extra1 = list(set(triangle_pair[0]).difference(set(triangle_pair[1])))[0]
+        extra2 = list(set(triangle_pair[1]).difference(set(triangle_pair[0])))[0]
+        print(point_in_triangle_wrapper_nodes(triangle_pair[0][0], triangle_pair[0][1], triangle_pair[0][2], extra1), point_in_triangle_wrapper_nodes(triangle_pair[1][0], triangle_pair[1][1], triangle_pair[1][2], extra2))
+        if(point_in_triangle_wrapper_nodes(triangle_pair[0][0], triangle_pair[0][1], triangle_pair[0][2], extra2)):
+            continue
+        if(point_in_triangle_wrapper_nodes(triangle_pair[1][0], triangle_pair[1][1], triangle_pair[1][2], extra1)):
+            continue
+        break
+    possible1 = get_edges(triangle_pair[0], special_edge[0])
+    possible1.remove(special_edge)
+    possible2 = get_edges(triangle_pair[1], special_edge[0])
+    possible2.remove(special_edge)
+    edge1 = possible1[0]
+    edge2 = possible2[0]
+    edges = [edge1, edge2]
+    return edges
+
 def handle_STs(adjacency, positions, num_expected_outputs):
     """Handles separating triangles in a given adjacency matrix.
 
@@ -293,6 +439,12 @@ def handle_STs(adjacency, positions, num_expected_outputs):
             if(adjacency[row][column]):
                 graph.add_edge(row, column)
     origin_pos = positions
+    global node_positions
+    node_positions = nx.get_node_attributes(graph, 'pos')
+
+    print("Number of edges -", len(graph.edges))
+    nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), with_labels=True)
+    plt.show()
 
     ## Get all cycles of length 3
     all_cliques = list(nx.enumerate_all_cliques(graph))
@@ -341,8 +493,10 @@ def handle_STs(adjacency, positions, num_expected_outputs):
         
     ## Get unique separating edges, handle STs
     separating_edges = list(set(separating_edges))
+    edges = list(nx.edges(graph))
+    edges = [sorted(edge) for edge in edges]
 
-    covers = list(get_multiple_separating_edge_covers(num_expected_outputs, separating_triangles, separating_edges, separating_edge_to_triangles))
+    covers = list(get_multiple_separating_edge_covers(num_expected_outputs, separating_triangles, separating_edges, separating_edge_to_triangles, edges))
 
     graphs = []
     extra_nodes_pair = []
@@ -352,5 +506,78 @@ def handle_STs(adjacency, positions, num_expected_outputs):
         extra_nodes_pair.append(extra_nodes)
         graphs.append(graph_copy)
 
+    nx.draw(graph_copy, pos=nx.get_node_attributes(graph_copy, 'pos'), with_labels=True)
+    plt.show()
+
     adjacencies = [nx.to_numpy_array(graph).astype(int) for graph in graphs]
+    print(extra_nodes_pair)
     return adjacencies, extra_nodes_pair
+
+def filter_L(room_x, room_y, room_width, room_height, mergednodes, parents):
+    relevant_parents = [parent for parent in parents if parents.count(parent) == 1]
+    for parent in relevant_parents:
+        child = mergednodes[parents.index(parent)]
+
+        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child], room_x[child] + room_width[child]]))
+        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child], room_y[child] + room_height[child]]))
+        if(len(x) == 3 and len(y) == 3):
+            return True
+    return False
+
+def filter_T(room_x, room_y, room_width, room_height, mergednodes, parents):
+    relevant_parents = [parent for parent in parents if parents.count(parent) == 1]
+    for parent in relevant_parents:
+        child = mergednodes[parents.index(parent)]
+
+        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child], room_x[child] + room_width[child]]))
+        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child], room_y[child] + room_height[child]]))
+        if(len(x) == 4 and len(y) == 3):
+            return True
+        if(len(x) == 3 and len(y) == 4):
+            return True
+    return False
+
+def filter_F(room_x, room_y, room_width, room_height, mergednodes, parents):
+    relevant_parents = [parent for parent in parents if parents.count(parent) == 2]
+    for parent in relevant_parents:
+        child_indices = [index for index, parent_elem in enumerate(parents) if parent_elem == parent]
+        child1 = mergednodes[child_indices[0]]
+        child2 = mergednodes[child_indices[1]]
+
+        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]))
+        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]))
+        if(len(x) in [3,4] and len(y) == 5):
+            return True
+        if(len(x) == 5 and len(y) in [3,4]):
+            return True
+    return False
+
+def filter_C(room_x, room_y, room_width, room_height, mergednodes, parents):
+    relevant_parents = [parent for parent in parents if parents.count(parent) == 2]
+    for parent in relevant_parents:
+        child_indices = [index for index, parent_elem in enumerate(parents) if parent_elem == parent]
+        child1 = mergednodes[child_indices[0]]
+        child2 = mergednodes[child_indices[1]]
+
+        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]))
+        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]))
+        if(len(x) in [3] and len(y) == 4):
+            return True
+        if(len(x) == 4 and len(y) in [3]):
+            return True
+    return False
+
+def filter(room_x, room_y, room_width, room_height, mergednodes, parents):
+    choices = ["C"]
+    if("L" in choices):
+        present = filter_L(room_x, room_y, room_width, room_height, mergednodes, parents)
+        return present
+    if("T" in choices):
+        present = filter_T(room_x, room_y, room_width, room_height, mergednodes, parents)
+        return present
+    if("F" in choices):
+        present = filter_F(room_x, room_y, room_width, room_height, mergednodes, parents)
+        return present
+    if("C" in choices):
+        present = filter_C(room_x, room_y, room_width, room_height, mergednodes, parents)
+        return present
