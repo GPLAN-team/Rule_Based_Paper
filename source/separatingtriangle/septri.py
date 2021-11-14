@@ -224,6 +224,23 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     # ## Recursively call in order to repeat
     # get_separating_edge_cover(edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles)
 
+def get_choice(separating_triangles, separating_edges, separating_edge_to_triangles):
+
+    possibles = []
+    if(find_L_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("L")
+    if(find_T_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("T")
+    if(find_F_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("F")
+    if(find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("C")
+    if(find_weird_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("W")
+    if(find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+        possibles.append("S")
+    return possibles
+
 def get_multiple_separating_edge_covers(expected_count, separating_triangles, separating_edges, separating_edge_to_triangles, edges):
     """Returns smultiple eparating edge cover of the input graph.
 
@@ -244,15 +261,20 @@ def get_multiple_separating_edge_covers(expected_count, separating_triangles, se
         separating_edge_to_triangles_copy = copy.deepcopy(separating_edge_to_triangles)
         edge_cover = []
         edges = []
+
+        global choices
+        funcs = {"L": find_L_shape, "T": find_T_shape, "C": find_C_shape, "F": find_F_shape, "W": find_weird_shape, "S": find_stair_shape}
+        for choice in choices:
+            edges = funcs[choice](separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy)
+            for edge in edges:
+                add_edge_to_cover(edge, edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy, force=True)
         # edges = find_L_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
         # edges = find_T_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
-        # edges = find_unknown_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
+        # edges = find_weird_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
         # edges = find_Z_shape(separating_triangles, separating_edges, separating_edge_to_triangles, edges)
         # edges = find_F_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
         # edges = find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
         # edges = find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles)
-        for edge in edges:
-            add_edge_to_cover(edge, edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy, force=True)
         separating_edge_cover = frozenset(get_separating_edge_cover(edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy))
         if(separating_edge_cover not in covers):
             futility_counter = 0
@@ -279,7 +301,6 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
     origin_pos = nx.get_node_attributes(graph, 'pos')
     total_no_of_vertices = graph.number_of_nodes()
     extra_nodes = {}
-    print("New try", separating_edges)
     for edge in separating_edges:
         ## Bisect edge
         graph.remove_edge(edge[0], edge[1])
@@ -289,7 +310,6 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
         extra_nodes[total_no_of_vertices] = [edge[0],edge[1]]
         
         edge = (min(edge), max(edge))
-        print(edge_to_faces, edge)
         ## Handle triangulation and update edge_to_faces
         for triangle in edge_to_faces[edge]:
             ## Retriangulate graph after addition of new vertex total_no_of_vertices
@@ -319,13 +339,18 @@ def remove_separating_triangles(graph, separating_edges, edge_to_faces):
 
 def find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
 
+    if(separating_triangles == []):
+        return []
     some_triangle = random.choice(separating_triangles)
     edges = get_edges(some_triangle, some_triangle[0])
     return edges
 
 def find_F_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
 
-    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    possible_special_edges = [edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1]
+    if(possible_special_edges == []):
+        return []
+    special_edge = random.choice(possible_special_edges)
     some_triangle = separating_edge_to_triangles[special_edge][0]
     edges = get_edges(some_triangle, special_edge[0])
     return edges
@@ -333,7 +358,9 @@ def find_F_shape(separating_triangles, separating_edges, separating_edge_to_tria
 def find_L_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
 
     global choices
-    choices.append("L")
+    # choices.append("L")
+    if(separating_triangles == []):
+        return []
     some_triangle = random.choice(separating_triangles)
     edges = [get_edges(some_triangle)[0],]
     return edges
@@ -341,14 +368,20 @@ def find_L_shape(separating_triangles, separating_edges, separating_edge_to_tria
 def find_T_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
 
     global choices
-    choices.append("T")
-    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    # choices.append("T")
+    possible_special_edges = [edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1]
+    if(possible_special_edges == []):
+        return []
+    special_edge = random.choice(possible_special_edges)
     edges = [special_edge,]
     return edges
 
-def find_unknown_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+def find_weird_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
 
-    special_edge = random.choice([edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1])
+    possible_special_edges = [edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1]
+    if(possible_special_edges == []):
+        return []
+    special_edge = random.choice(possible_special_edges)
     triangle1 = separating_edge_to_triangles[special_edge][0]
     triangle2 = separating_edge_to_triangles[special_edge][1]
     edges1 = get_edges(triangle1, special_edge[0])
@@ -394,13 +427,15 @@ def find_Z_shape(separating_triangles, separating_edges, separating_edge_to_tria
     return [tuple(edge1), tuple(edge2)]
 
 def find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
+
     possible_edges = [edge for edge in separating_edges if len(separating_edge_to_triangles[edge]) > 1]
+    if(possible_edges == []):
+        return []
     random.shuffle(possible_edges)
     for special_edge in possible_edges:
         triangle_pair = separating_edge_to_triangles[special_edge]
         extra1 = list(set(triangle_pair[0]).difference(set(triangle_pair[1])))[0]
         extra2 = list(set(triangle_pair[1]).difference(set(triangle_pair[0])))[0]
-        print(point_in_triangle_wrapper_nodes(triangle_pair[0][0], triangle_pair[0][1], triangle_pair[0][2], extra1), point_in_triangle_wrapper_nodes(triangle_pair[1][0], triangle_pair[1][1], triangle_pair[1][2], extra2))
         if(point_in_triangle_wrapper_nodes(triangle_pair[0][0], triangle_pair[0][1], triangle_pair[0][2], extra2)):
             continue
         if(point_in_triangle_wrapper_nodes(triangle_pair[1][0], triangle_pair[1][1], triangle_pair[1][2], extra1)):
@@ -494,9 +529,38 @@ def handle_STs(adjacency, positions, num_expected_outputs):
     ## Get unique separating edges, handle STs
     separating_edges = list(set(separating_edges))
     edges = list(nx.edges(graph))
-    edges = [sorted(edge) for edge in edges]
+    graph_edges = [sorted(edge) for edge in edges]
 
-    covers = list(get_multiple_separating_edge_covers(num_expected_outputs, separating_triangles, separating_edges, separating_edge_to_triangles, edges))
+    separating_triangles_copy = separating_triangles.copy()
+    separating_edges_copy = separating_edges.copy()
+    separating_edge_to_triangles_copy = copy.deepcopy(separating_edge_to_triangles)
+    edge_cover = []
+    edges = []
+
+    global choices
+    choices = []
+
+    funcs = {"L": find_L_shape, "T": find_T_shape, "C": find_C_shape, "F": find_F_shape, "W": find_weird_shape, "S": find_stair_shape}
+    while(True):
+        possibles = get_choice(separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy)
+        for choice in choices:
+            if(choice in possibles):
+                possibles.remove(choice)
+        if(possibles == []):
+            print("Choices - ", choices)
+            break
+        print("Type a letter to filter including shape (S - Stair, W - Weird), or N for no further preference - ", possibles)
+        choice = input().upper()
+        if(choice in possibles):
+            edges = funcs[choice](separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy)
+            for edge in edges:
+                add_edge_to_cover(edge, edge_cover, separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy, force=True)
+            choices.append(choice)
+        else:
+            print("Choices - ", choices)
+            break
+
+    covers = list(get_multiple_separating_edge_covers(num_expected_outputs, separating_triangles, separating_edges, separating_edge_to_triangles, graph_edges))
 
     graphs = []
     extra_nodes_pair = []
@@ -559,25 +623,47 @@ def filter_C(room_x, room_y, room_width, room_height, mergednodes, parents):
         child1 = mergednodes[child_indices[0]]
         child2 = mergednodes[child_indices[1]]
 
-        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]))
-        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]))
-        if(len(x) in [3] and len(y) == 4):
+        x_s = [room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]
+        y_s = [room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]
+        x = list(set(x_s))
+        y = list(set(y_s))
+        x_counts = tuple([x_s.count(value) for value in sorted(x)])
+        y_counts = tuple([y_s.count(value) for value in sorted(y)])
+
+        valid_combinations = set([((2,1,1,2), (1,3,2)), ((2,1,1,2), (1,3,1,1)), ((1,2,1,2), (2,2,2)), ((1,2,1,2), (2,2,1,1)), ((1,2,2,1), (3,1,2)), ((1,2,2,1), (3,1,1,1))])
+        print(x_counts, y_counts)
+        if((x_counts, y_counts) in valid_combinations or (x_counts[::-1], y_counts) in valid_combinations or (x_counts, y_counts[::-1]) in valid_combinations or (x_counts[::-1], y_counts[::-1]) in valid_combinations):
             return True
-        if(len(x) == 4 and len(y) in [3]):
-            return True
+        # if(x_counts in [[1, 3, 2], [1, 3, 1, 1], [2, 3, 1], [1, 1, 3, 1]] and y_counts == [2, 1, 1, 2]):
+        #     return True
+        # if(y_counts in [[1, 3, 2], [1, 3, 1, 1], [2, 3, 1], [1, 1, 3, 1]] and x_counts == [2, 1, 1, 2]):
+        #     return True
+        # if(x_counts in [[2, 2, 2], [2, 2, 1, 1], [1, 1, 2, 2]] and y_counts in [[2, 1, 2, 1], [1, 2, 1, 2]]):
+        #     return True
+        # if(y_counts in [[2, 2, 2], [2, 2, 1, 1], [1, 1, 2, 2]] and x_counts == [[2, 1, 2, 1], [1, 2, 1, 2]]):
+        #     return True
     return False
 
 def filter(room_x, room_y, room_width, room_height, mergednodes, parents):
-    choices = ["C"]
-    if("L" in choices):
+    global choices
+    choices_copy = choices.copy()
+    if("L" in choices_copy):
         present = filter_L(room_x, room_y, room_width, room_height, mergednodes, parents)
-        return present
-    if("T" in choices):
+        if(present):
+            choices_copy = [choice for choice in choices_copy if choice != "L"]
+    if("T" in choices_copy):
         present = filter_T(room_x, room_y, room_width, room_height, mergednodes, parents)
-        return present
-    if("F" in choices):
+        if(present):
+            choices_copy = [choice for choice in choices_copy if choice != "T"]
+    if("F" in choices_copy):
         present = filter_F(room_x, room_y, room_width, room_height, mergednodes, parents)
-        return present
-    if("C" in choices):
+        if(present):
+            choices_copy = [choice for choice in choices_copy if choice != "F"]
+    if("C" in choices_copy):
         present = filter_C(room_x, room_y, room_width, room_height, mergednodes, parents)
-        return present
+        if(present):
+            choices_copy = [choice for choice in choices_copy if choice != "C"]
+    print("Bahaha", choices_copy)
+    if(choices_copy == []):
+        return True
+    return False

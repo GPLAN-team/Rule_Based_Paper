@@ -13,6 +13,7 @@ origin = {'x': 300, 'y': -150}
 
 # Draw rectangular dual of graph
 def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
+    color_list.extend(['#FFFFFF']*100)
     pen.width(1.5)
     pen.color('black')
     pen.hideturtle()
