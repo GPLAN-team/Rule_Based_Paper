@@ -201,9 +201,7 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     ## Greedily selects separating_edge that handles the most STs, and adds it to the cover
 
     alternate_graph = generate_alternate_graph(separating_triangles, separating_edges, separating_edge_to_triangles)
-    print(alternate_graph.edges)
     edge_cover = get_graph_cover(alternate_graph, edge_cover)
-    print(edge_cover)
     return edge_cover
     
     # ## Recursive base case
@@ -407,23 +405,17 @@ def find_Z_shape(separating_triangles, separating_edges, separating_edge_to_tria
             relavant_other_nodes.extend([edge[1] for edge in get_edges(relevant_triangles[i], common_vertex)])
         relavant_other_nodes = list(set(relavant_other_nodes))
         found = 0
-        print(separating_triangles)
         for i in range(len(relavant_other_nodes)):
             for j in range(i+1, len(relavant_other_nodes)):
-                print(sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex]))
-                print(i, j, relavant_other_nodes[i], relavant_other_nodes[j], sorted([relavant_other_nodes[i], relavant_other_nodes[j]]) in edges, sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex]) not in separating_triangles)
                 if(sorted([relavant_other_nodes[i], relavant_other_nodes[j]]) in edges and tuple(sorted([relavant_other_nodes[i], relavant_other_nodes[j], common_vertex])) not in separating_triangles):
                     found = 1
                     break
             if(found):
                 break
-        print("relevant other nodes, i, j", relavant_other_nodes, i, j)
         triangle1 = [triangle for triangle in relevant_triangles if relavant_other_nodes[i] in triangle][0]
         triangle2 = [triangle for triangle in relevant_triangles if relavant_other_nodes[j] in triangle][0]
-        print("triangles", [triangle1, triangle2])
         edge1 = [common_vertex, relavant_other_nodes[i]]
         edge2 = [common_vertex, list(set(triangle2).difference(set([common_vertex, relavant_other_nodes[j]])))[0]]
-        print("edges", [edge1, edge2])
     return [tuple(edge1), tuple(edge2)]
 
 def find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles):
@@ -477,7 +469,6 @@ def handle_STs(adjacency, positions, num_expected_outputs):
     global node_positions
     node_positions = nx.get_node_attributes(graph, 'pos')
 
-    print("Number of edges -", len(graph.edges))
     nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), with_labels=True)
     plt.show()
 
@@ -574,7 +565,6 @@ def handle_STs(adjacency, positions, num_expected_outputs):
     plt.show()
 
     adjacencies = [nx.to_numpy_array(graph).astype(int) for graph in graphs]
-    print(extra_nodes_pair)
     return adjacencies, extra_nodes_pair
 
 def filter_L(room_x, room_y, room_width, room_height, mergednodes, parents):
@@ -608,11 +598,15 @@ def filter_F(room_x, room_y, room_width, room_height, mergednodes, parents):
         child1 = mergednodes[child_indices[0]]
         child2 = mergednodes[child_indices[1]]
 
-        x = list(set([room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]))
-        y = list(set([room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]))
-        if(len(x) in [3,4] and len(y) == 5):
-            return True
-        if(len(x) == 5 and len(y) in [3,4]):
+        x_s = [room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]
+        y_s = [room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]
+        x = list(set(x_s))
+        y = list(set(y_s))
+        x_counts = tuple([x_s.count(value) for value in sorted(x)])
+        y_counts = tuple([y_s.count(value) for value in sorted(y)])
+
+        valid_combinations = set([((2,1,1,1,1), (1,3,2)), ((2,1,1,1,1), (1,3,1,1)), ((1,2,1,1,1), (2,2,2)), ((1,2,1,1,1), (2,2,1,1))])
+        if((x_counts, y_counts) in valid_combinations or (x_counts[::-1], y_counts) in valid_combinations or (x_counts, y_counts[::-1]) in valid_combinations or (x_counts[::-1], y_counts[::-1]) in valid_combinations):
             return True
     return False
 
@@ -631,17 +625,27 @@ def filter_C(room_x, room_y, room_width, room_height, mergednodes, parents):
         y_counts = tuple([y_s.count(value) for value in sorted(y)])
 
         valid_combinations = set([((2,1,1,2), (1,3,2)), ((2,1,1,2), (1,3,1,1)), ((1,2,1,2), (2,2,2)), ((1,2,1,2), (2,2,1,1)), ((1,2,2,1), (3,1,2)), ((1,2,2,1), (3,1,1,1))])
-        print(x_counts, y_counts)
         if((x_counts, y_counts) in valid_combinations or (x_counts[::-1], y_counts) in valid_combinations or (x_counts, y_counts[::-1]) in valid_combinations or (x_counts[::-1], y_counts[::-1]) in valid_combinations):
             return True
-        # if(x_counts in [[1, 3, 2], [1, 3, 1, 1], [2, 3, 1], [1, 1, 3, 1]] and y_counts == [2, 1, 1, 2]):
-        #     return True
-        # if(y_counts in [[1, 3, 2], [1, 3, 1, 1], [2, 3, 1], [1, 1, 3, 1]] and x_counts == [2, 1, 1, 2]):
-        #     return True
-        # if(x_counts in [[2, 2, 2], [2, 2, 1, 1], [1, 1, 2, 2]] and y_counts in [[2, 1, 2, 1], [1, 2, 1, 2]]):
-        #     return True
-        # if(y_counts in [[2, 2, 2], [2, 2, 1, 1], [1, 1, 2, 2]] and x_counts == [[2, 1, 2, 1], [1, 2, 1, 2]]):
-        #     return True
+    return False
+
+def filter_Stair(room_x, room_y, room_width, room_height, mergednodes, parents):
+    relevant_parents = [parent for parent in parents if parents.count(parent) == 2]
+    for parent in relevant_parents:
+        child_indices = [index for index, parent_elem in enumerate(parents) if parent_elem == parent]
+        child1 = mergednodes[child_indices[0]]
+        child2 = mergednodes[child_indices[1]]
+
+        x_s = [room_x[parent], room_x[parent] + room_width[parent], room_x[child1], room_x[child1] + room_width[child1], room_x[child2], room_x[child2] + room_width[child2]]
+        y_s = [room_y[parent], room_y[parent] + room_height[parent], room_y[child1], room_y[child1] + room_height[child1], room_y[child2], room_y[child2] + room_height[child2]]
+        x = list(set(x_s))
+        y = list(set(y_s))
+        x_counts = tuple([x_s.count(value) for value in sorted(x)])
+        y_counts = tuple([y_s.count(value) for value in sorted(y)])
+
+        valid_combinations = set([((1,1,3,1), (1,1,2,2)), ((1,2,1,2), (1,2,1,2))])
+        if((x_counts, y_counts) in valid_combinations or (x_counts[::-1], y_counts) in valid_combinations or (x_counts, y_counts[::-1]) in valid_combinations or (x_counts[::-1], y_counts[::-1]) in valid_combinations):
+            return True
     return False
 
 def filter(room_x, room_y, room_width, room_height, mergednodes, parents):
@@ -663,7 +667,16 @@ def filter(room_x, room_y, room_width, room_height, mergednodes, parents):
         present = filter_C(room_x, room_y, room_width, room_height, mergednodes, parents)
         if(present):
             choices_copy = [choice for choice in choices_copy if choice != "C"]
-    print("Bahaha", choices_copy)
+    if("S" in choices_copy):
+        present = filter_Stair(room_x, room_y, room_width, room_height, mergednodes, parents)
+        if(present):
+            choices_copy = [choice for choice in choices_copy if choice != "S"]
+    choices_copy = [choice for choice in choices_copy if choice != "W"]
+    # if("W" in choices_copy):
+    #     present = 1
+    #     if(present):
+    #         choices_copy = [choice for choice in choices_copy if choice != "W"]
+    # print("Choices not found -", choices_copy)
     if(choices_copy == []):
         return True
     return False
