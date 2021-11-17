@@ -302,7 +302,9 @@ class InputGraph:
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
-            ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, self.coordinates, 20)
+            origin_pos = nx.planar_layout(nx.from_numpy_matrix(self.matrix))
+            pos = [origin_pos[i] for i in range(0, self.nodecnt)]
+            ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, pos, 20)
 
             for cnt in range(len(ptpg_matrices)):
                 self.matrix = ptpg_matrices[cnt]
@@ -361,9 +363,6 @@ class InputGraph:
         for cnt in range(self.fpcnt):
             [room_x, room_y, room_width, room_height, room_x_bottom_left, room_x_bottom_right, room_x_top_left, room_x_top_right, room_y_left_bottom, room_y_right_bottom,
                 room_y_left_top, room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
-            acceptable = st.filter(room_x, room_y, room_width, room_height, self.mergednodes[cnt], self.irreg_nodes1[cnt])
-            if(not(acceptable)):
-                continue
             self.room_x.append(room_x)
             self.room_y.append(room_y)
             self.room_width.append(room_width)
@@ -376,7 +375,6 @@ class InputGraph:
             self.room_y_right_bottom.append(room_y_right_bottom)
             self.room_y_left_top.append(room_y_left_top)
             self.room_y_right_top.append(room_y_right_top)
-        self.fpcnt = len(self.room_x)
 
     def multiple_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates multiple floorplans for a given input graph.
