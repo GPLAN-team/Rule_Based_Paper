@@ -21,6 +21,7 @@ import networkx as nx
 import numpy as np
 from shapely.geometry import Point, Polygon
 import random, copy
+from pythongui.filter_shape_gui import filter_shape
 
 from matplotlib import pyplot as plt
 
@@ -233,8 +234,8 @@ def get_choice(separating_triangles, separating_edges, separating_edge_to_triang
         possibles.append("F")
     if(find_C_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
         possibles.append("C")
-    if(find_weird_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
-        possibles.append("W")
+    # if(find_weird_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
+    #     possibles.append("W")
     if(find_stair_shape(separating_triangles, separating_edges, separating_edge_to_triangles)):
         possibles.append("S")
     return possibles
@@ -469,8 +470,8 @@ def handle_STs(adjacency, positions, num_expected_outputs):
     global node_positions
     node_positions = nx.get_node_attributes(graph, 'pos')
 
-    nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), with_labels=True)
-    plt.show()
+    # nx.draw(graph, pos=nx.get_node_attributes(graph, 'pos'), with_labels=True)
+    # plt.show()
 
     ## Get all cycles of length 3
     all_cliques = list(nx.enumerate_all_cliques(graph))
@@ -540,8 +541,9 @@ def handle_STs(adjacency, positions, num_expected_outputs):
         if(possibles == []):
             print("Choices - ", choices)
             break
-        print("Type a letter to filter including shape (S - Stair, W - Weird), or N for no further preference - ", possibles)
-        choice = input().upper()
+        choice = filter_shape(possibles)
+        # print("Type a letter to filter including shape (S - Stair, W - Weird), or N for no further preference - ", possibles)
+        # choice = input().upper()
         if(choice in possibles):
             edges = funcs[choice](separating_triangles_copy, separating_edges_copy, separating_edge_to_triangles_copy)
             for edge in edges:
@@ -561,8 +563,8 @@ def handle_STs(adjacency, positions, num_expected_outputs):
         extra_nodes_pair.append(extra_nodes)
         graphs.append(graph_copy)
 
-    nx.draw(graph_copy, pos=nx.get_node_attributes(graph_copy, 'pos'), with_labels=True)
-    plt.show()
+    # nx.draw(graph_copy, pos=nx.get_node_attributes(graph_copy, 'pos'), with_labels=True)
+    # plt.show()
 
     adjacencies = [nx.to_numpy_array(graph).astype(int) for graph in graphs]
     return adjacencies, extra_nodes_pair
