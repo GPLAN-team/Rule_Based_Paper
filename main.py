@@ -261,7 +261,6 @@ def make_graph_circulation(G,gclass):
     parameters= [len(spanned), spanned.size() , spanned.edges() , 0,0 ,rnames,colors]
     C = ptpg.PTPG(parameters)
     # C.create_single_dual(1,gclass.pen,gclass.textbox)
-    print(G.graph.edges())
     G.create_circulation_dual(1,gclass.pen,gclass.textbox)
     # draw.draw_rdg(G,1,gclass.pen,G.to_be_merged_vertices,G.rdg_vertices,0,gclass.value[6],gclass.value[5])
     G.circulation(gclass.pen,gclass.ocan.canvas, C, 1, 2)

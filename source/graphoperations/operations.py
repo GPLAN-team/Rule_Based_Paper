@@ -218,7 +218,6 @@ def get_encoded_matrix(nodecnt, room_x, room_y, room_width, room_height):
 
     mat_width = int(max(a + b for a, b in zip(room_x, room_width)))
     mat_height = int(max(a + b for a, b in zip(room_y, room_height)))
-    print(mat_width, mat_height)
     encoded_matrix =  np.zeros((mat_height, mat_width), int)
     room_width_arr = np.array(room_width, dtype='int')
     room_height_arr = np.array(room_height, dtype='int')

@@ -93,7 +93,6 @@ class gui_class:
         self.frame3.grid(row=1,column=0)
         self.Buttons(self.frame1,self)
         self.menu(self)
-        print(self.app.rnames)
         self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.tbox = self.output_text(self.frame3)
         self.ocan = self.output_canvas(self.frame2)
@@ -109,7 +108,6 @@ class gui_class:
         
 
         while((self.value[0] == 0) and done):
-            # print(done)
             self.root.wait_variable(self.end)
             self.value=self.app.return_everything()
             tk.messagebox.showinfo("error","The graph is empty , please draw a graph")
@@ -250,7 +248,6 @@ class gui_class:
                     return 
                 
                 else:
-                    print("evalue=",evalue)
                     self.toggle_edge_connectivity(evalue)
                 return
             else:
@@ -271,10 +268,6 @@ class gui_class:
                 self.edges.append(self.connection)
                 self.connect_circles(self.connection)
 
-            # for i in self.nodes_data:
-            #   print("id: ",i.circle_id)
-            #   print("x,y: ",i.pos_x,i.pos_y)
-            #   print("adj list: ",i.adj_list)
             
         def connect_circles(self,connections):
             node1_id=connections[0]
@@ -285,7 +278,6 @@ class gui_class:
             node2_y=self.nodes_data[node2_id].pos_y
             edge = self.canvas.create_line(node1_x,node1_y,node2_x,node2_y,width=3)
             self.elines.append([edge,connections])
-            print("edges",type(self.elines[0][0]))
 
         def toggle_edge_connectivity(self,evalue):
             for node1_id, node2_id in evalue:
@@ -309,7 +301,6 @@ class gui_class:
             self.hex_list.append(hex_number)
             node=self.master.Nodes(id_node,x,y)
             self.nodes_data.append(node)
-            # print("names", self.name_circle)
             self.rframe = tk.Frame(self._root,width=20,height=20)
             self.rname= tk.StringVar(self._root)
             self.rnames.append(self.rname)
@@ -325,10 +316,7 @@ class gui_class:
 
         def retreive_graph(self,node_data,edge_data,con_data):
             
-            print("retrieve graph func")
-            print(self.nodes_data)
             for node in node_data:
-                print(node)
                 x = node[0]
                 y = node[1]
                 id_node = node[2]
@@ -357,9 +345,6 @@ class gui_class:
             for i in range(len(self.nodes_data),100):
                 self.name_circle.append( str(i))
 
-            print("names", self.name_circle)
-            print("retrieved value",len(self.nodes_data),self.edge_count,self.edges,self.command,self.master.checkvar1.get(),list(filter(None, [row[1].get() for row in self.table._data_vars])),self.hex_list)
-
 
 
 
@@ -370,8 +355,6 @@ class gui_class:
                     if i_no == j_no:
                         continue
                     epsi = (x - i.pos_x ) * ( i.pos_y - j.pos_y) / (i.pos_x - j.pos_x) + i.pos_y - y
-                    print( "epsis", i_no, j_no, epsi)
-                    print("---------")
                     if ((x <= j.pos_x and x >= i.pos_x) or (x >= i.pos_x and x <= i.pos_x)) and ((y <= i.pos_y and y >= j.pos_y) or (y >= i.pos_y and y <= j.pos_y)) and epsi < 10 and epsi > -10:
                         ans.append((i_no,j_no))
             if not ans:
@@ -773,14 +756,14 @@ class gui_class:
                         canvas.create_rectangle(current.d1,current.d2+(v1*scale),current.d3,current.d4, fill='white')
                         current.d4 = current.d4-((current.height*scale)-(v1*scale))
                         canvas.create_text((current.d1+current.d3)/2,(current.d2+current.d4)/2, fill = 'black', font="Times 14 bold",text='R'+str(rooms))
-                        print("Yes")
+                        
                         
                     elif var1 == 1 and var2 == 0:
                         canvas.create_rectangle(current.d1,current.d2+((current.height*scale)-(v1*scale)),current.d3,current.d4, fill='snow3')
                         canvas.create_rectangle(current.d1,current.d2,current.d3,current.d4-(v1*scale), fill='white')
                         current.d2 = current.d2+((current.height*scale)-(v1*scale))
                         canvas.create_text((current.d1+current.d3)/2,(current.d2+current.d4)/2, fill = 'black', font="Times 14 bold",text='R'+str(rooms))
-                        print("Yes")
+                        
                 
                 elif v2!=current.width and v2!=0 and current.width!=0:
                     self.getHorInfo('left','right','for the block')
@@ -789,14 +772,14 @@ class gui_class:
                         canvas.create_rectangle(current.d1+(v2*scale),current.d2,current.d3,current.d4, fill='white')
                         current.d3 = current.d3-((current.width*scale)-(v2*scale))
                         canvas.create_text((current.d1+current.d3)/2,(current.d2+current.d4)/2, fill = 'black', font="Times 14 bold",text='R'+str(rooms))
-                        print("Yes")
+                        
                         
                     elif var3 == 1 and var4 == 0:
                         canvas.create_rectangle(current.d1+((current.width*scale)-(v2*scale)),current.d2,current.d3,current.d4, fill='snow3')
                         canvas.create_rectangle(current.d1,current.d2,current.d3-(v2*scale),current.d4, fill='white')
                         current.d1 = current.d1+((current.width*scale)-(v2*scale))
                         canvas.create_text((current.d1+current.d3)/2,(current.d2+current.d4)/2, fill = 'black', font="Times 14 bold",text='R'+str(rooms))
-                        print("Yes")
+                        
                 
                 elif v1 == current.height and v2 == current.width:
                     canvas.create_rectangle(current.d1,current.d2,current.d3,current.d4, fill='snow3')
@@ -1052,12 +1035,7 @@ class gui_class:
                             if dim_mat[i,j] == 0:
                                 dim_mat[i,j] = -1
                                 dim_mat[j,i] = -1
-                print("helo")
-                print(mat)
                 
-                print("helo")
-                print(dim_mat)
-                print("helo")
                 self.mat = mat
                 self.dim_mat = dim_mat
                 # self.done= TRUE
@@ -1094,10 +1072,7 @@ class gui_class:
             e1  = self.master.e1.get()
             e2  = self.master.e2.get()
             
-            print(e1,e2)
-
-            print("hi")
-            print(mat)
+            
             i = 0
             leaves = self.leaves
             for room in leaves:
@@ -1105,24 +1080,18 @@ class gui_class:
                 canvas.create_rectangle(room.d1,room.d2, room.d3, room.d4, fill = colors[i])
 
             num_corridors = len(mat) - len(leaves)
-            print("No of corridors are ",num_corridors)
             # for cor in range( 0, num_corridors):
             n = len(leaves)
 
-            # print(room1.d1,'r1')
-            # print(room2.d1,'r2')
 
             self.make_corridor(e1 - 1 ,e2 - 1,canvas,0)
             # self.make_corridor(2,3,canvas)
             mat = np.squeeze(np.asarray(mat))
 
             for cor in range(n+1,len(mat)):
-                print(cor, "row", len(mat[cor]), "sz")
                 for itr in range(n,cor):
-                    print(itr,"col")
                     if( mat[cor][itr] == 1):
                         rms = self.intersect(mat[cor], mat[itr], n)
-                        print(rms , "rms")
                         self.make_corridor(rms[0] , rms[1], canvas,1)
                         break
 
@@ -1134,7 +1103,6 @@ class gui_class:
             pts = self.common_points(room1, room2,num)
             if len(pts) != 4:
                 pts = self.common_points(room2,room1,num)
-            # print(pts)
             canvas.create_rectangle(pts[0],pts[1],pts[2],pts[3],fill="white", outline = "white")
 
         def intersect(self,row1, row2, n):
@@ -1474,7 +1442,6 @@ class gui_class:
             self.dclass.root.destory()
         except:
             pass
-        print("ending")
         # self.saver = tk.Toplevel()
         # saverlabel = tk.Label(self.saver,text="hwakeoa")
         # saverlabel.pack()
@@ -1499,17 +1466,12 @@ class gui_class:
         else:
             self.file = open(filename,'r')
         f = self.file.read()
-        print(f)
-        # print("hjio")
         fname = self.file.name
-        print(fname)
         fname = fname[:-3]
         fname+="png"
-        print(fname)
         self.open_ret = ast.literal_eval(f)
         i = 0
         for val in self.open_ret:
-            print("val",i,"- ", val)
             i+=1
         value = self.open_ret[0]
         node_data = self.open_ret[1]
@@ -1529,7 +1491,6 @@ class gui_class:
             f.write(json.dumps(self.json_data))
             fauto = open(".\saved_files\RFP_latest.txt", "w")
             jstr = json.dumps(self.json_data,indent=4)
-            print(jstr)
             fauto.write(jstr)
             fauto.close()
             f.close()
@@ -1556,7 +1517,6 @@ class gui_class:
         self.app.command="circulation"
         self.command = "circulation"
         self.end.set(self.end.get()+1)
-        print("are you here atleast?")
 
     def save_file(self,filename = "Rectangular Dual Graph.txt"):
         # self.root.filename = self.value

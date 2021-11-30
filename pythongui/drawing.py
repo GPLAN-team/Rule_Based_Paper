@@ -25,15 +25,10 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
         height = 1
     if(width < height):
         width = height
-    print(width)
-    print(height)
     scale = 100*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
-    print(scale)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim =[0,0]
     origin = {'x': origin - 400, 'y': -100}
-    print("----------------------------")
-    print(graph_data['extranodes'])
     for i in range(graph_data['room_x'].shape[0]):
         if graph_data['room_width'][i] == 0 or i in graph_data['extranodes']:
             continue
@@ -131,7 +126,6 @@ def draw_rdg(graph_data,count,pen,mode,color_list,room_names,origin):
     #         pen.setposition(graph_data[room_x][i] * scale + origin['x'], graph_data[room_y][i] * scale + origin['y'])
     #         pen.penup()
     for i in range(graph_data['room_x'].shape[0]):
-        print(i)
         if i in graph_data['extranodes']:
             continue
         pen.color('black')
@@ -168,8 +162,6 @@ def draw_rfp(graph,pen,count):
     # scale = 75
     scale = 20
     origin = {'x': graph.origin, 'y': -400}
-    # print(graph.room_x)
-    # print(graph.room_y)
     for i in range(graph.room_x.shape[0]):
         if graph.room_width[i] == 0:
             continue
@@ -211,10 +203,7 @@ def draw_rdg_circulation(graph,count,pen,to_be_merged_vertices,orig):
         height = 1
     if(width < height):
         width = height
-    print(width)
-    print(height)
     scale = 70*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
-    print(scale)
     # origin = {'x': graph.origin, 'y': -550}
     dim =[0,0]
     origin = {'x': graph.origin - 400, 'y': -100}
