@@ -11,13 +11,12 @@ This module contains the following functions:
     * is_goodvertex - finds if a vertex is a good vertex.
     * cntr_nbr - finds contractible neighbour of given vertex.
     * update_adjmat - updates adjacency matrix post contraction.
-    * update_degreea - updates degree post contraction.
+    * update_degrees - updates degree post contraction.
     * check - checks if a vertex is good vertex post contraction.
     * contract - performs contraction on the graph.
 
 """
 
-import networkx as nx 
 import numpy as np 
 
 def degrees(matrix):

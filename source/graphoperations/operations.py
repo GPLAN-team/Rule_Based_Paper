@@ -1,6 +1,7 @@
 """Graph Theoretical Operations Module
 
-This module allows user to perform different graph theoretical operations.
+This module allows the user to perform different graph theoretical
+operations.
 
 This module contains the following functions:
     * intersection - returns intersection of two lists.

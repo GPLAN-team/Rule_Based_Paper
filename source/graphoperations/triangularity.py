@@ -1,6 +1,6 @@
 """Triangularity Module
 
-This module allows user to triangulate a given biconnected
+This module allows the user to triangulate a given biconnected
 planar graph.
 
 This module contains the following functions:
@@ -57,8 +57,7 @@ def chk_chordality(nxgraph):
         nxgraph: An instance of NetworkX Graph object.
 
     Returns:
-        boolean: A boolean representing if graph
-                 requires triangulation.
+        boolean: A boolean representing if graph requires triangulation.
     """
     if nx.is_chordal(nxgraph):
         return True
@@ -76,7 +75,7 @@ def triangulate(matrix):
         matrix: A matrix representing the adjacency matrix of the graph.
 
     Returns:
-        trng_edges: Edges to be added to make the graph triangulated.
+        trng_edges: A list of edges to be added to make the graph triangulated.
     """
     nxgraph = nx.from_numpy_matrix(matrix)
     trng_edges = []

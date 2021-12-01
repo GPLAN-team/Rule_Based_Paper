@@ -177,7 +177,7 @@ def handle_orig_nbrs(matrix, nbr, node, mut_nbr1, mut_nbr2, node_nbrs):
         node: An integer representing node in contraction.
         mut_nbr1: An integer representing mut_nbr1 in contraction.
         mut_nbr2: An integer representing mut_nbr2 in contraction.
-        node_nbrs: A list representing node_nbrs in contraction
+        node_nbrs: A list representing node_nbrs in contraction.
 
     Returns:
         matrix: An updated matrix representing the adjacency matrix of the graph.

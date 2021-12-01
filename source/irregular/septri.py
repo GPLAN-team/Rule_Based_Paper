@@ -1,7 +1,7 @@
 """Shortcut Resolver Module
 
-This module allows user to identify shortcuts (refer Documentation) in
-the graph and helps in removing shortcuts if required.
+This module allows user to identify separating triangle (refer Documentation) in
+the graph and helps in removing separating triangle if required.
 
 This module contains the following functions:
 
@@ -26,7 +26,7 @@ def sign(x1, y1, x2, y2, x3, y3):
     """Calculates value of (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
 
     Args:
-        x1, x2, x3, y1, y2, y3
+        x1, x2, x3, y1, y2, y3: Coordinates of triangle vertices.
 
     Returns:
         (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3)
@@ -58,18 +58,18 @@ def get_edges(cycle):
         cycle: A list containing vertices in a cycle.
 
     Returns:
-        A list of tuples containing each edge's vertices in sorted order
+        A list of tuples containing each edge's vertices in sorted order.
     """
     return [tuple(sorted([cycle[i], cycle[(i+1)%3]])) for i in range(len(cycle))]
 
 def add_edge_to_cover(edge, edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles):
-    """Add edge of separating triangle to edge cover.
+    """Add the edge of separating triangle to edge cover.
 
     Args:
         edge: A list representing the edge to be removed.
         edge_cover: A list containing the edge cover.
         separating_triangles: A list of separating triangles.
-        separating_edges: A list of separating triangles.
+        separating_edges: A list of separating edges.
         separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
 
     Returns:
@@ -103,11 +103,11 @@ def generate_alternate_graph(separating_triangles, separating_edges, separating_
 
     Args:
         separating_triangles: A list of separating triangles.
-        separating_edges: A list of separating triangles.
+        separating_edges: A list of separating edges.
         separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
 
     Returns:
-        alternate_graph: A NxGraph containing the transformed graph.
+        alternate_graph: A NxGraph object containing the transformed graph.
     """
     ## Generate a transformed graph where edges of STs form nodes, and each ST is represented by at least 1 edge between such nodes
     ## A node cover on this graph generates a cover of separating edges
@@ -140,7 +140,7 @@ def get_graph_cover(graph, cover):
     """Returns edge cover of a graph.
 
     Args:
-        graph. A networkx graph object representing the graph.
+        graph. A NetworkX graph object representing the graph.
         cover: A list containing the cover.
 
     Returns:
@@ -161,7 +161,7 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     Args:
         edge_cover: A list containing the edge cover.
         separating_triangles: A list of separating triangles.
-        separating_edges: A list of separating triangles.
+        separating_edges: A list of separating edges.
         separating_edge_to_triangles:  A dictionary of separating triangles and their edge.
 
     Returns:
@@ -194,7 +194,7 @@ def get_separating_edge_cover(edge_cover, separating_triangles, separating_edges
     # get_separating_edge_cover(edge_cover, separating_triangles, separating_edges, separating_edge_to_triangles)
 
 def get_multiple_separating_edge_covers(expected_count, separating_triangles, separating_edges, separating_edge_to_triangles):
-    """Returns smultiple eparating edge cover of the input graph.
+    """Returns multiple eparating edge cover of the input graph.
 
     Args:
         expected_count: An integer indicating the expected number of solutions.

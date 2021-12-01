@@ -14,7 +14,7 @@ import networkx as nx
 from random import randint
 from .graphoperations import biconnectivity as bcn
 from .graphoperations import operations as opr
-from .separatingtriangle import shortcutresolver as sr
+from .irregular import shortcutresolver as sr
 from .boundary import cip as cip
 from .boundary import news as news
 from .floorplangen import contraction as cntr
@@ -24,7 +24,7 @@ from .graphoperations import triangularity as trng
 from .floorplangen import transformation as transform
 from .dimensioning import floorplan_to_st as fpts
 from .floorplangen import flippable as flp
-from .separatingtriangle import septri as st
+from .irregular import septri as st
 from .dimensioning import block_checker as bc
 
 
@@ -219,15 +219,15 @@ class InputGraph:
         """Generates a single floorplan for a given input graph.
 
         Args:
-            min_width: A list containing min width constraint of each room.
-            min_height: A list containing min height constraint of each room.
-            max_width: A list containing max width constraint of each room.
-            max_height: A list containing max height constraint of each room.
+            min_width: A list containing the minimum width constraint of each room.
+            min_height: A list containing the minimum height constraint of each room.
+            max_width: A list containing the maximum width constraint of each room.
+            max_height: A list containing the maximum height constraint of each room.
             symm_rooms: A string representing symmetric room constraint.
-            min_ar: A list containing min ar constraint of each room.
-            max_ar: A list containing max ar constraint of each room.
+            min_ar: A list containing the minimum aspect ratio constraint of each room.
+            max_ar: A list containing the maximum aspect ratio constraint of each room.
             plot_width: An integer representing plot width constraint.
-            plot_height: An integer representing plot height constraint.
+            plot_height: An integer representing plot height constraint
 
         Returns:
             None
@@ -380,13 +380,13 @@ class InputGraph:
         """Generates multiple floorplans for a given input graph.
 
         Args:
-            min_width: A list containing min width constraint of each room.
-            min_height: A list containing min height constraint of each room.
-            max_width: A list containing max width constraint of each room.
-            max_height: A list containing max height constraint of each room.
+            min_width: A list containing the minimum width constraint of each room.
+            min_height: A list containing the minimum height constraint of each room.
+            max_width: A list containing the maximum width constraint of each room.
+            max_height: A list containing the maximum height constraint of each room.
             symm_rooms: A string representing symmetric room constraint.
-            min_ar: A list containing min ar constraint of each room.
-            max_ar: A list containing max ar constraint of each room.
+            min_ar: A list containing the minimum aspect ratio constraint of each room.
+            max_ar: A list containing the maximum aspect ratio constraint of each room.
             plot_width: An integer representing plot width constraint.
             plot_height: An integer representing plot height constraint.
 

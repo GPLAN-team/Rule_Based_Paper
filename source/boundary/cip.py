@@ -7,11 +7,6 @@ This module contains the following functions:
 
     * find_cip - finds corner implying paths in the graph.
 """
-import networkx as nx
-import warnings
-import numpy as np
-from ..graphoperations import operations as opr
-
 
 def find_cip(bdy_ordered, shortcuts):
     """Returns cips in the input graph.

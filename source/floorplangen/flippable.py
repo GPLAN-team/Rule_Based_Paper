@@ -22,8 +22,8 @@ def get_flippable_edges(orig_matrix, news_matrix, nodecnt):
 
 Args:
     orig_matrix: A matrix representing the adjacency matrix.
-            news_matrix: A matrix representing the REL of 4-completed graph.
-            nodecnt: An integer representing the node count of the graph.
+    news_matrix: A matrix representing the REL of 4-completed graph.
+    nodecnt: An integer representing the node count of the graph.
 Returns:
     flippable_edge: A list containing the flippable edges.
 """
@@ -68,11 +68,11 @@ def get_flippable_vertices(matrix, news_matrix, nodecnt):
 
 Args:
     matrix: A matrix representing the adjacency matrix.
-            news_matrix: A matrix representing the REL of 4-completed graph.
-            nodecnt: An integer representing the node count of the graph.
+    news_matrix: A matrix representing the REL of 4-completed graph.
+    nodecnt: An integer representing the node count of the graph.
 Returns:
     flippable_vertex: A list containing flippable vertex.
-            flippable_vertex_neighbours: A list containing neighbours of flippable vertex.
+    flippable_vertex_neighbours: A list containing neighbours of flippable vertex.
 """
     degrees = [np.count_nonzero(news_matrix[node])
                for node in range(news_matrix.shape[0])]
@@ -122,7 +122,7 @@ def resolve_flippable_edge(edge, rel):
 
 Args:
     edge: A list representing the flippable edge.
-            rel: A matrix representing the REL to be transformed.
+    rel: A matrix representing the REL to be transformed.
 Returns:
     new_rel: A matrix representing the new REL.
 """
@@ -149,8 +149,8 @@ def resolve_flippable_vertex(vertex, neighbours, rel):
 
 Args:
     vertex: An integer representing the flippable node.
-            neighbours: A list representing the neighbours of flippable vertex.
-            rel: A matrix representing the REL to be transformed.
+    neighbours: A list representing the neighbours of flippable vertex.
+    rel: A matrix representing the REL to be transformed.
 Returns:
     new_rel: A matrix representing the new REL.
 """

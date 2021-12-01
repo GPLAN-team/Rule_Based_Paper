@@ -46,16 +46,14 @@ def run():
     while (gclass.command!="end"):
         if(gclass.command=="dissection"):
             make_dissection_corridor(gclass)
-        # if ( gclass.command =="checker"):
-        #     tests.tester(gclass.value,gclass.textbox)
         else:
             graph = inputgraph.InputGraph(gclass.value[0]
                 ,gclass.value[1]
                 ,gclass.value[2]
                 ,gclass.value[7])
             origin = 0
-            if(gclass.command == "single"):
-                if(gclass.value[4] == 0):
+            if(gclass.command == "single"): #Single Dual/Floorplan
+                if(gclass.value[4] == 0): #Non-Dimensioned single dual
                     start = time.time()
                     graph.single_dual()
                     end = time.time()
@@ -85,7 +83,7 @@ def run():
                             ,gclass.value[6]
                             ,[]
                             ,origin)
-                else:
+                else: #Dimensioned single floorplan
                     old_dims = [[0] * gclass.value[0]
                                 , [0] * gclass.value[0]
                                 , [0] * gclass.value[0]
@@ -129,8 +127,8 @@ def run():
                             ,gclass.value[6]
                             ,[]
                             ,origin)
-            elif(gclass.command == "multiple"):
-                if(gclass.value[4] == 0):
+            elif(gclass.command == "multiple"):#Multiple Dual/Floorplan
+                if(gclass.value[4] == 0):#Non-Dimensioned multiple dual
                     start = time.time()
                     graph.multiple_dual()
                     end = time.time()
@@ -167,7 +165,7 @@ def run():
                         gclass.ocan.add_tab()
                         gclass.pen = gclass.ocan.getpen()
                         gclass.pen.speed(0)
-                else:
+                else:#Dimensioned multiple floorplans
                     old_dims = [[0] * gclass.value[0]
                                 , [0] * gclass.value[0]
                                 , [0] * gclass.value[0]
@@ -219,9 +217,6 @@ def run():
         gclass.pen = gclass.ocan.getpen()
         gclass.pen.speed(0)
         # gclass.ocan.tscreen.resetscreen()
-
-
-
 
 def make_dissection_corridor(gclass):
     dis =nx.Graph()

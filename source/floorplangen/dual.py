@@ -14,7 +14,6 @@ This module contains the following functions:
     * get_coordinates: returns corner coordinates for each room in the floorplan. 
 
 """
-import networkx as nx
 import numpy as np
 from ..graphoperations import operations as opr
 
@@ -69,7 +68,7 @@ def get_n_s_paths(matrix, nodecnt, source, path, nspaths, t1longestdist, t1longe
         nodecnt: An integer representing the node count of the graph.
         source: An integer representing the source node.
         path: A list representing the path.
-        nspaths: A list containing different north-south paths
+        nspaths: A list containing different north-south paths.
         t1longestdist: A list representing the longest distance in t1 matrix for each node.
         t1longestdistval: An integer representing max value in t1longestdist.
 
@@ -201,7 +200,7 @@ def get_w_e_paths(matrix, nodecnt, source, path, wepaths, t2longestdist, t2longe
 
 
 def get_t2_ordered_children(matrix, nodecnt, centre):
-    """Obtains children of the node in south-north direction for t2 matrix.
+    """Obtains children of the node in west-east direction for t2 matrix.
 
     Args:
         matrix: A matrix representing the adjacency matrix of the graph.
@@ -230,7 +229,7 @@ def get_coordinates(encoded_matrix, nodecnt, room_width, room_height, hor_dgph):
     """Returns corner coordinates for each room in the floorplan. 
 
     Args:
-        encoded_matrix: A matrix representing the encode matrix for the floorplan.
+        encoded_matrix: A matrix representing the encoded matrix for the floorplan.
         nodecnt: An integer representing the node count of the graph.
         room_width: An integer representing the width of each room.
         room_height: An integer representing the height of each room.

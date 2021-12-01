@@ -14,7 +14,6 @@ This module contains the following functions:
     * connect_news - connects exterior vertices to each other.
     * add_news - adds north, east, west and south vertices.
 """
-import copy
 import itertools
 import numpy as np
 from random import randint
@@ -124,7 +123,7 @@ def all_boundaries(paths, boundary):
 
     Args:
         paths: A list containing multiple corner points.
-        boundary: A list containing the outerboundary of the graph.
+        boundary: A list containing the outer boundary of the graph.
 
     Returns:
         paths: A list containing all combinations of corner points.
@@ -214,10 +213,9 @@ def news_edges(matrix, cip, source_node):
     """Connects given cip to given exterior vertex.
 
     Args:
-        graph: An instance of InputGraph object.
         matrix: A matrix containing adjacency matrix of graph.
         cip: A list containing cip.
-        source_node: An integer indicating node number
+        source_node: An integer indicating node number.
 
     Returns:
         None
@@ -229,12 +227,12 @@ def news_edges(matrix, cip, source_node):
         matrix[node][source_node] = 1
     return edgecnt
 
-def connect_news(matrix,nodecnt):
+def connect_news(matrix, nodecnt):
     """Connects exterior vertices to each other.
 
     Args:
-        graph: An instance of InputGraph object.
         matrix: A matrix representing adjacency list of the graph.
+        nodecnt: An integer representing the node count of the graph.
 
     Returns:
         None
@@ -254,9 +252,12 @@ def add_news(bdy,matrix,nodecnt,edgecnt):
     Args:
         bdy: A list containing 4 outer boundaries of the graph.
         matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        edgecnt: An integer representing the edge count of the graph.
 
     Returns:
-        None
+        adjmatrix: A matrix representing the modified adjacency matrix of the graph.
+        edgecnt: An integer representing the edge count of the graph.
     """
     
     adjmatrix = np.zeros([matrix.shape[0] + 4, matrix.shape[0] + 4], int)

@@ -30,7 +30,7 @@ def floorplan_to_st(E, min_width, min_height, max_width, max_height, ver_list, h
                ver_dgph: Encoded matrix form of vertical adjacencies of the internal nodes
                north_adj: Encoded matrix form of vertical adjacencies of the north node
                VER: Encoded matrix form of vertical adjacencies including the north node
-           hor_dgph: Encoded matrix form of horizontal adjacencies of the internal nodes
+               hor_dgph: Encoded matrix form of horizontal adjacencies of the internal nodes
                west_adj: Encoded matrix form of horizontal adjacencies of the west node
                HOR: Encoded matrix form of horizontal adjacencies including the west node
        Returns:
