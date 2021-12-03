@@ -50,7 +50,7 @@ def run():
             graph = inputgraph.InputGraph(gclass.value[0]
                 ,gclass.value[1]
                 ,gclass.value[2]
-                ,gclass.value[7])
+                ,gclass.value[7],[])
             origin = 0
             if(gclass.command == "single"): #Single Dual/Floorplan
                 if(gclass.value[4] == 0): #Non-Dimensioned single dual

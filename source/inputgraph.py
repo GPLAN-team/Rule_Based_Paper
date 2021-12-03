@@ -13,6 +13,7 @@ import numpy as np
 import networkx as nx
 from random import randint
 from .graphoperations import biconnectivity as bcn
+from .graphoperations import oneconnectivity as onc
 from .graphoperations import operations as opr
 from .irregular import shortcutresolver as sr
 from .boundary import cip as cip
@@ -27,7 +28,8 @@ from .floorplangen import flippable as flp
 from .irregular import septri as st
 from .dimensioning import block_checker as bc
 
-
+class OCError(Exception):
+    pass
 class InputGraph:
     """A InputGraph class for graph input by the user.
     This class provides methods to generate single or
@@ -88,13 +90,17 @@ class InputGraph:
         coordinates: A list containing the coordinates of each node.
     """
 
-    def __init__(self, nodecnt, edgecnt, edgeset, node_coordinates):
+    def __init__(self, nodecnt, edgecnt, edgeset, node_coordinates, matrix):
         self.nodecnt = nodecnt
         self.edgecnt = edgecnt
         self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
-        for edges in (edgeset):
-            self.matrix[edges[0]][edges[1]] = 1
-            self.matrix[edges[1]][edges[0]] = 1
+        if (matrix == []):
+            self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
+            for edges in (edgeset):
+                self.matrix[edges[0]][edges[1]] = 1
+                self.matrix[edges[1]][edges[0]] = 1
+        else:
+            self.matrix = matrix
         self.bdy_nodes = []
         self.bdy_edges = []
         self.irreg_nodes1 = []
@@ -122,8 +128,8 @@ class InputGraph:
         self.fpcnt = 0
         self.coordinates = [np.array(x) for x in node_coordinates]
 
-    def single_dual(self):
-        """Generates a single dual for a given input graph.
+    def irreg_single_dual(self):
+        """Generates an irregular single dual for a given input graph.
 
         Args:
             None
@@ -131,20 +137,26 @@ class InputGraph:
         Returns:
             None
         """
+        #Biconnectivity Augmentation
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
             bcn_edges = bcn.biconnect(self.matrix)
-        trng_edges = trng.triangulate(self.matrix)
-        if(len(bcn_edges) != 0 or len(trng_edges) != 0):
-            self.nonrect = True
         for edge in bcn_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
+        
+        #Triangularity
+        trng_edges = trng.triangulate(self.matrix)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
+        
+        if(len(bcn_edges) != 0 or len(trng_edges) != 0):
+            self.nonrect = True
+        
+        #Separating Triangle Elimination
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
             ptpg_matrices, extra_nodes = st.handle_STs(
                 self.matrix, self.coordinates, 1)
@@ -155,6 +167,8 @@ class InputGraph:
                 self.mergednodes.append(key)
                 self.irreg_nodes1.append(extra_nodes[0][key][0])
                 self.irreg_nodes2.append(extra_nodes[0][key][1])
+
+        #Edge Transformation        
         for edge in bcn_edges:
             self.extranodes.append(self.nodecnt)
             self.matrix, extra_edges_cnt = transform.transform_edges(
@@ -167,6 +181,8 @@ class InputGraph:
                 self.matrix, edge)
             self.nodecnt += 1  # Extra node added
             self.edgecnt += extra_edges_cnt
+        
+        #Boundary Identification
         triangular_cycles = opr.get_trngls(self.matrix)
         digraph = opr.get_directed(self.matrix)
         self.bdy_nodes, self.bdy_edges = opr.get_bdy(
@@ -197,23 +213,23 @@ class InputGraph:
                 cips = cip.find_cip(bdy_ordered, shortcuts)
                 bdys = news.bdy_path(news.find_bdy(cips), bdy_ordered)
 
+        #4-completion
         self.matrix, self.edgecnt = news.add_news(
             bdys, self.matrix, self.nodecnt, self.edgecnt)
         self.nodecnt += 4
 
+        #Contraction
         self.degrees = cntr.degrees(self.matrix)
         goodnodes = cntr.goodnodes(self.matrix, self.degrees)
         self.matrix, self.degrees, goodnodes, cntrs = cntr.contract(
             self.matrix, goodnodes, self.degrees)
 
+        #Expansion
         self.matrix = exp.basecase(self.matrix, self.nodecnt)
         while len(cntrs) != 0:
             self.matrix = exp.expand(self.matrix, self.nodecnt, cntrs)
         [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right,
             self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top] = rdg.construct_dual(self.matrix, self.nodecnt, self.mergednodes, self.irreg_nodes1)
-
-        encoded_matrix = opr.get_encoded_matrix(
-            self.nodecnt-4, self.room_x, self.room_y, self.room_width, self.room_height)
 
     def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
@@ -278,8 +294,8 @@ class InputGraph:
             
             break
 
-    def multiple_dual(self):
-        """Generates multiple duals for a given input graph.
+    def irreg_multiple_dual(self):
+        """Generates multiple irregular duals for a given input graph.
 
         Args:
             None
@@ -287,20 +303,25 @@ class InputGraph:
         Returns:
             None
         """
+        #Biconnectivity Augmentation
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
             bcn_edges = bcn.biconnect(self.matrix)
-        trng_edges = trng.triangulate(self.matrix)
-        if(len(bcn_edges) != 0 or len(trng_edges) != 0):
-            self.nonrect = True
         for edge in bcn_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
+
+        #Triangulation
+        trng_edges = trng.triangulate(self.matrix)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1
+        
+        if(len(bcn_edges) != 0 or len(trng_edges) != 0):
+            self.nonrect = True
+        
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
             origin_pos = nx.planar_layout(nx.from_numpy_matrix(self.matrix))
             pos = [origin_pos[i] for i in range(0, self.nodecnt)]
@@ -477,6 +498,196 @@ class InputGraph:
         self.room_y_left_top = room_y_left_top
         self.room_y_right_top = room_y_right_top
 
+    def oneconnected_dual(self, string):
+        """Generates oneconnected rectangular duals for a given input graph.
+
+        Args:
+            string: A string representing single or multiple dual.
+
+        Returns:
+            None
+        """
+        #Identifying cut-vertices
+        matrix = copy.deepcopy(self.matrix)
+        matrix = np.array(matrix)
+        nodes = len(matrix)
+        nxgraph = nx.from_numpy_matrix(matrix)
+        cutvertices = bcn.get_cutvertices(nxgraph)
+        components = onc.get_biconnected_components(nxgraph)
+        adj_mats = []
+        dicts = []
+        corners = []
+
+        #Creating dictionary map
+        for i in range(0, len(components)):
+            adj_mats.append(onc.get_adj_matrix(matrix, components[i]))
+            dicts.append(onc.get_dict(components[i]))
+        ems = []
+
+        #Generating multiple floorplans for each component
+        for i in range(0, len(components)):
+            matrix1 = adj_mats[i]
+            nodecnt = len(matrix1[0])
+            edgecnt = int(np.sum(matrix1) / 2)
+            graph = InputGraph(nodecnt
+                                   , edgecnt
+                                   ,[],[], matrix1)
+
+            corners = []
+            graph.irreg_multiple_dual()
+            #Identifying corners
+            for j in range(len(graph.rel_matrix_list)):
+                m = graph.rel_matrix_list[j]
+                n = len(m)
+                for x in range(0, n):
+                    if (m[n - 1][x] == 3 and m[x][n - 4] == 2):
+                        nw = x
+                    if (m[x][n - 4] == 2 and m[x][n - 3] == 3):
+                        ne = x
+                    if (m[x][n - 3] == 3 and m[n - 2][x] == 2):
+                        se = x
+                    if (m[n - 2][x] == 2 and m[n - 1][x] == 3):
+                        sw = x
+                corners.append([nw, ne, se, sw])
+
+            #Checking if the floorplan matches the requirement
+            idx = []
+            em = []
+            cmpt_cv = {}
+
+            for key in dicts[i].keys():
+                if key in cutvertices:
+                    cmpt_cv[dicts[i][key]] = 0
+            for j in range(0, len(corners)):
+                for key in cmpt_cv.keys():
+                    cmpt_cv[key] = 0
+                for k in range(0, 4):
+                    if corners[j][k] in cmpt_cv:
+                        cmpt_cv[corners[j][k]] = cmpt_cv[corners[j][k]] + 1
+                flag = 1
+                for value in cmpt_cv.values():
+                    if value != 2:
+                        flag = 0
+                        break
+                if flag:
+                    idx.append(j)
+
+
+            res = dict((v, k) for k, v in dicts[i].items())
+
+            for i in range(len(idx)):
+                rel_matrix = graph.rel_matrix_list[idx[i]]
+                encoded_matrix = opr.get_encoded_matrix(rel_matrix.shape[0] - 4
+                                                        , graph.room_x[idx[i]]
+                                                        , graph.room_y[idx[i]]
+                                                        , graph.room_width[idx[i]]
+                                                        , graph.room_height[idx[i]])
+                rows = encoded_matrix.shape[0]
+                cols = encoded_matrix.shape[1]
+
+                for x in range(0, rows):
+                    for y in range(0, cols):
+                        encoded_matrix[x][y] = res[encoded_matrix[x][y]]
+
+                em.append(encoded_matrix)
+            ems.append(em)
+
+        #Error condition: No encoded matrix present for any component        
+        for i in range(0, len(ems)):
+            if len(ems[i])== 0:
+                raise OCError
+
+        #Merging encoded matrices to form multiple rels
+        final = []
+        individual = []
+        onc.recurse(ems, 0, final, individual)
+        final_em = []
+        for i in range(0, len(final)):
+            final_em.append(onc.merge(final[i]))
+        for i in range(len(final_em)):
+            rel = onc.convert_to_rel(final_em[i], nodes)
+            self.rel_matrix_list.append(rel)
+
+        #Returning floorplans as per string
+        if(string == "single"):
+            [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right,
+            self.room_x_top_left, self.room_x_top_right,
+            self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top,
+            self.room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[0], nodes + 4, [], [])
+        elif(string == "multiple"):
+            self.fpcnt = len(self.rel_matrix_list)
+            self.room_x = []
+            self.room_y = []
+            self.room_width = []
+            self.room_height = []
+            self.room_x_bottom_left = []
+            self.room_x_bottom_right = []
+            self.room_x_top_left = []
+            self.room_x_top_right = []
+            self.room_y_left_bottom = []
+            self.room_y_right_bottom = []
+            self.room_y_left_top = []
+            self.room_y_right_top = []
+            self.area = []
+            self.extranodes = []
+            self.mergednodes = []
+            self.irreg_nodes1 = []
+            self.irreg_nodes2 = []
+            
+            
+            for cnt in range(self.fpcnt):
+                [room_x, room_y, room_width, room_height, room_x_bottom_left, room_x_bottom_right, room_x_top_left, room_x_top_right, room_y_left_bottom, room_y_right_bottom,
+                    room_y_left_top, room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[cnt], nodes + 4, [], [])
+                self.room_x.append(room_x)
+                self.room_y.append(room_y)
+                self.room_width.append(room_width)
+                self.room_height.append(room_height)
+                self.room_x_bottom_left.append(room_x_bottom_left)
+                self.room_x_bottom_right.append(room_x_bottom_right)
+                self.room_x_top_left.append(room_x_top_left)
+                self.room_x_top_right.append(room_x_top_right)
+                self.room_y_left_bottom.append(room_y_left_bottom)
+                self.room_y_right_bottom.append(room_y_right_bottom)
+                self.room_y_left_top.append(room_y_left_top)
+                self.room_y_right_top.append(room_y_right_top)
+                self.mergednodes.append([])
+                self.irreg_nodes1.append([])
+                self.irreg_nodes2.append([])
+                self.extranodes.append([])
+
+    def single_dual(self):
+        """Generates a single dual for a given input graph.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        if (not bcn.is_biconnected(self.matrix)):
+            try:
+                self.oneconnected_dual("single")
+            except OCError:
+                self.irreg_single_dual()
+        else:
+            self.irreg_single_dual()
+    
+    def multiple_dual(self):
+        """Generates multiple duals for a given input graph.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        if (not bcn.is_biconnected(self.matrix)):
+            try:
+                self.oneconnected_dual("multiple")
+            except OCError:
+                self.irreg_multiple_dual()
+        else:
+            self.irreg_multiple_dual()
 
 def generate_multiple_rel(bdys, matrix, nodecnt, edgecnt):
     """Generates multiple RELs for given matrix and boundary.
@@ -517,7 +728,6 @@ def generate_multiple_rel(bdys, matrix, nodecnt, edgecnt):
             if(not any(np.array_equal(new_rel, i) for i in rel_matrix)):
                 rel_matrix.append(new_rel)
     return rel_matrix
-
 
 def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges):
     """Generates multiple boundary for given matrix and extra edges.
