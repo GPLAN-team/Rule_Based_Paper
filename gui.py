@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import font
 from PIL import ImageTk, Image
+from input import Input
+import json
 
 helv36 = ("Helvetica", 15, "bold")
 
@@ -12,8 +14,6 @@ helv36 = ("Helvetica", 15, "bold")
 
 
 class App:
-    New_win = 0
-
     def __init__(self) -> None:
         self.initialise_root()
         self.add_logo()
@@ -26,6 +26,7 @@ class App:
         self.room_freq = []
         self.value = []
         self.freqbox = []
+        self.input = Input()
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -54,9 +55,9 @@ class App:
         self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv36,
                                          command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
-        self.customBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="Custom", font=helv36,
-                                          command=self.customBHK_Button_click)
-        self.customBHK_Button.grid(row=0, column=3, padx=10, pady=10)
+        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv36,
+                                          command=self.reset_Button_click)
+        self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
     def properties_section(self):
         pass
@@ -83,57 +84,82 @@ class App:
     def oneBHK_Button_click(self):
         print("[LOG] One BHK Button Clicked")
 
+        
+        self.input.reset()
+        with open('./one_bhk.json') as one_file:
+            one_bhk_data = json.load(one_file)
+
+        new_rooms = one_bhk_data['rooms']
+        new_adj_list = one_bhk_data['adjacency_constraints']
+
+
+        self.input.add_rooms_from(room_list = new_rooms)
+        self.input.add_rules_from(adjcancy_list = new_adj_list)
+
+        print(self.input.rooms)
+        print(self.input.adjacencies)
+
+
+
+
     def twoBHK_Button_click(self):
         print("[LOG] two BHK Button Clicked")
+
+        self.input.reset()
+        with open('./two_bhk.json') as one_file:
+            one_bhk_data = json.load(one_file)
+
+        new_rooms = one_bhk_data['rooms']
+        new_adj_list = one_bhk_data['adjacency_constraints']
+
+
+        self.input.add_rooms_from(room_list = new_rooms)
+        self.input.add_rules_from(adjcancy_list = new_adj_list)
+
+        print(self.input.rooms)
+        print(self.input.adjacencies)
 
     def threeBHK_Button_click(self):
         print("[LOG] three BHK Button Clicked")
 
-    def customBHK_Button_click(self):
-        print("[LOG] custom BHK Button Clicked")
+        self.input.reset()
+        with open('./three_bhk.json') as one_file:
+            one_bhk_data = json.load(one_file)
+
+        new_rooms = one_bhk_data['rooms']
+        new_adj_list = one_bhk_data['adjacency_constraints']
+
+
+        self.input.add_rooms_from(room_list = new_rooms)
+        self.input.add_rules_from(adjcancy_list = new_adj_list)
+
+        print(self.input.rooms)
+        print(self.input.adjacencies)
+
+    def reset_Button_click(self):
+        print("[LOG] Reset Button Clicked")
+        self.input.reset()
+
 
     def modify_rooms_Button_click(self):
         print("[LOG] Modify Rooms Button Clicked")
-        if self.New_win == 0:
-            self.openNewWindow()
-            self.New_win = 1
+
+        room_win = tk.Toplevel(self.root)
+
+
+        room_win.title("Room Modifier")
+
+        room_win.wait_window()
+
 
     def modify_rules_Button_click(self):
         print("[LOG] Modify Rules Button Clicked")
 
+
+
     def run(self):
         self.root.mainloop()
 
-    def openNewWindow(self):
-        self.newWindow = tk.Toplevel(self.root)
-        self.newWindow.title("Choose Rooms:")
-        self.newWindow.geometry(str(400) + 'x' + str(400))
-        Room_names = ['Living room', 'Master room', 'Kitchen ', 'Bathroom', 'Dining room', 'Child room', 'Study room',
-                      'Second room', 'Guest room', 'Balcony', 'Entrance', 'Storage']
-        # mp = {}
-        for i in range(0, 12):
-            self.room_checkobj.append(tk.IntVar())
-            self.room_freq.append(tk.IntVar())
-            # mp[self.room_checkobj[i]] = i
-        checkList = []
-
-        for i in range(0, 12):
-            label = tk.Label(self.newWindow, text=Room_names[i])
-            label.grid(row=i, column=0)
-            self.freqbox.append(tk.Entry(self.newWindow, textvariable=self.room_freq[i]))
-            self.freqbox[i].grid(row=i, column=2)
-            checkList.append(tk.Checkbutton(self.newWindow, variable=self.room_checkobj[i], onvalue=1, offvalue=0))
-            checkList[i].grid(row=i, column=1)
-
-        button = tk.Button(self.newWindow, text='Submit', padx=5, command=lambda: self.Submit_clicked())  # Submit_clicked to be implemented
-        button.grid()
-        self.newWindow.wait_window(self.newWindow)
-
-        # self.newWindow.protocol("WM_DELETE_WINDOW", self.Val1)
-
-    def Val1(self):
-        self.New_win = 0
-        self.newWindow.destroy()
 
 if __name__ == "__main__":
     app = App()
