@@ -1,14 +1,19 @@
 class Input:
     def __init__(self) -> None:
-        self.rooms = []
+        self.rooms = {}
         self.adjacencies = []
 
     def reset(self):
-        self.rooms = []
+        self.rooms = {}
         self.adjacencies = []
 
     def add_rooms_from(self, room_list):
-        self.rooms.extend(room_list)
+        pre = len(self.rooms)
+        for i, each_room in enumerate(room_list):
+            self.rooms[pre+i] = each_room
+
+
+        # self.rooms.extend(room_list)
 
     def add_rules_from(self, adjcancy_list):
         for each_list in adjcancy_list:

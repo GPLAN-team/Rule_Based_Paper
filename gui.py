@@ -141,6 +141,27 @@ class App:
         self.input.reset()
 
 
+    def recall_room_list_frame(self, frame):
+        
+        head = tk.Label(frame, text="Room List")
+        head.grid(row=0,column=0, padx=5, pady=5)
+
+        self.room_label_list = []
+        self.remove_room_btn_list = []
+
+        for i, each_room in self.input.rooms.items():
+            print(each_room)
+            each_room_label = tk.Label(frame, text=each_room)
+            each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
+            self.room_label_list.append(each_room_label)
+
+
+            each_remove_room_btn = tk.Button(frame, text="Remove",command= lambda i=i: self.handle_remove_room_btn(i))
+            each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
+
+            self.remove_room_btn_list.append(each_remove_room_btn)
+
+
     def modify_rooms_Button_click(self):
         print("[LOG] Modify Rooms Button Clicked")
 
@@ -148,9 +169,45 @@ class App:
 
 
         room_win.title("Room Modifier")
+        room_win.geometry(str(1000) + 'x' + str(400))
+
+        
+
+        prev_room_list_frame = tk.Frame(room_win)
+
+        prev_room_list_frame.grid()
+
+        self.recall_room_list_frame(prev_room_list_frame)
+
+        new_room_frame = tk.Frame(room_win)
+        new_room_frame.grid(row=1, column=0)
+
+        number_of_new_rooms = 0
+
+        new_room_text = tk.Text(new_room_frame, height=1, width=8)
+        new_room_text.grid(row=number_of_new_rooms, column=0, padx=5, pady=5)
+
+        add_new_room_btn = tk.Button(new_room_frame, text="Add Room", command = lambda i = new_room_text: self.handle_add_new_room_btn(i,prev_room_list_frame))
+        add_new_room_btn.grid(row=number_of_new_rooms, column=1)
+
 
         room_win.wait_window()
 
+
+    def handle_add_new_room_btn(self, new_room, prev_room_list_frame):
+        idx = len(self.input.rooms)
+        self.input.rooms[idx] = new_room.get("1.0","end")
+
+        self.recall_room_list_frame(prev_room_list_frame)
+
+
+
+    def handle_remove_room_btn(self,room_id):
+        print(f"room to remove is {room_id}")
+        self.input.rooms.pop(room_id)
+        self.room_label_list[room_id].destroy()
+        self.remove_room_btn_list[room_id].destroy()
+        print(f"current room list = {self.input.rooms}")
 
     def modify_rules_Button_click(self):
         print("[LOG] Modify Rules Button Clicked")
