@@ -1,3 +1,4 @@
+from os import add_dll_directory
 import tkinter as tk
 from tkinter import font
 from PIL import ImageTk, Image
@@ -182,13 +183,11 @@ class App:
         new_room_frame = tk.Frame(room_win)
         new_room_frame.grid(row=1, column=0)
 
-        number_of_new_rooms = 0
-
         new_room_text = tk.Text(new_room_frame, height=1, width=8)
-        new_room_text.grid(row=number_of_new_rooms, column=0, padx=5, pady=5)
+        new_room_text.grid(row=0, column=0, padx=5, pady=5)
 
         add_new_room_btn = tk.Button(new_room_frame, text="Add Room", command = lambda i = new_room_text: self.handle_add_new_room_btn(i,prev_room_list_frame))
-        add_new_room_btn.grid(row=number_of_new_rooms, column=1)
+        add_new_room_btn.grid(row=0, column=1)
 
 
         room_win.wait_window()
@@ -211,6 +210,68 @@ class App:
 
     def modify_rules_Button_click(self):
         print("[LOG] Modify Rules Button Clicked")
+        
+        rules_win = tk.Toplevel(self.root)
+        
+        rules_win.title("Rules Modifier")
+        rules_win.geometry(str(1000) + 'x' + str(400))
+
+
+        adj_frame = tk.Frame(rules_win)
+        adj_frame.grid(row=0)
+
+        self.recall_adj_constraints_frame(adj_frame)
+
+        add_new_adj_frame = tk.Frame(rules_win)
+        add_new_adj_frame.grid(row=1)
+
+
+
+
+
+        new_adj_text = tk.Text(add_new_adj_frame, height=1, width=8)
+        new_adj_text.grid(row=0, column=0, padx=5, pady=5)
+
+        add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add adj", command = lambda i = new_adj_text: self.handle_add_new_adj_btn(i,prev_adj_list_frame))
+        add_new_adj_btn.grid(row=0, column=1)
+
+
+
+
+        rules_win.wait_variable()
+
+
+
+    def recall_adj_constraints_frame(self, frame):
+        adj_cons_label = tk.Label(frame, text=" Door Connections")
+        adj_cons_label.grid(row=0, padx=5, pady=5)
+
+        self.adj_cons_frame_list = []
+
+        for i, each_rule in enumerate(self.input.adjacencies):
+            each_frame = tk.Frame(frame)
+            each_frame.grid(row=i+1)
+
+            if each_rule[0] in self.input.rooms.keys() and each_rule[1] in self.input.rooms.keys():
+                left_label = tk.Label(each_frame,text=self.input.rooms[each_rule[0]])
+                left_label.grid(row = 0, column=0, padx=5, pady=5)
+
+                door_sign = tk.Label(each_frame, text="<=>")
+                door_sign.grid(row = 0,column=1, padx=5, pady=5)
+
+                right_label = tk.Label(each_frame, text=self.input.rooms[each_rule[1]])
+                right_label.grid(row = 0,column=2, padx=5, pady=5)
+
+            else:
+                self.input.adjacencies.remove(each_rule)
+
+             
+
+
+
+
+
+
 
 
 
