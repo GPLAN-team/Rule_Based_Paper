@@ -12,9 +12,6 @@ class Input:
         for i, each_room in enumerate(room_list):
             self.rooms[pre+i] = each_room
 
-
-        # self.rooms.extend(room_list)
-
     def add_rules_from(self, adjcancy_list):
         for each_list in adjcancy_list:
             int_list = []
