@@ -1,6 +1,4 @@
 import tkinter as tk
-from tkinter import font
-from PIL import ImageTk, Image
 from input import Input
 import json
 
@@ -185,7 +183,6 @@ class App:
 
         add_new_room_btn = tk.Button(new_room_frame, text="Add Room", command = lambda i = new_room_text: self.handle_add_new_room_btn(i,prev_room_list_frame))
         add_new_room_btn.grid(row=0, column=1)
-
 
         room_win.wait_window()
 
