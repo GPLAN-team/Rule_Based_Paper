@@ -111,7 +111,7 @@ def merge(em_list):
         if crnrs[0] == crnrs[1]:  # first row
             em = np.rot90(em, 3)
         aligned_ems.append(em)
-
+    
     while ctrs!=[]:
         if len(st_end) == 2:
             em = st_end.pop(0)
