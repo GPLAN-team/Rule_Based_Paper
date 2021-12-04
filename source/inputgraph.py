@@ -137,6 +137,21 @@ class InputGraph:
         Returns:
             None
         """
+        if(self.nodecnt == 2 and self.edgecnt == 1):
+            self.room_x = np.array([0.0, 1.0])
+            self.room_y = np.array([0.0, 0.0])
+            self.room_width = np.array([1.0, 1.0])
+            self.room_height = np.array([1.0, 1.0])
+            self.room_x_bottom_left = np.array([0.0, 1.0])
+            self.room_x_bottom_right = np.array([0.0, 1.0])
+            self.room_x_top_left = np.array([1.0, 2.0])
+            self.room_x_top_right = np.array([1.0, 2.0])
+            self.room_y_left_bottom = np.array([1.0, 1.0])
+            self.room_y_right_bottom = np.array([0.0, 0.0])
+            self.room_y_left_top = np.array([1.0, 1.0])
+            self.room_y_right_top = np.array([0.0, 0.0])
+
+            return 
         #Biconnectivity Augmentation
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
@@ -262,6 +277,7 @@ class InputGraph:
             max_width.append(10000)
             min_ar.append(0)
             max_ar.append(10000)
+        print(self.rel_matrix_list)
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
@@ -304,6 +320,27 @@ class InputGraph:
             None
         """
         #Biconnectivity Augmentation
+        if(self.nodecnt == 2 and self.edgecnt == 1):
+            self.fpcnt = 1
+            self.room_x = np.array([[0.0, 1.0]])
+            self.room_y = np.array([[0.0, 0.0]])
+            self.room_width = np.array([[1.0, 1.0]])
+            self.room_height = np.array([[1.0, 1.0]])
+            self.room_x_bottom_left = np.array([[0.0, 1.0]])
+            self.room_x_bottom_right = np.array([[0.0, 1.0]])
+            self.room_x_top_left = np.array([[1.0, 2.0]])
+            self.room_x_top_right = np.array([[1.0, 2.0]])
+            self.room_y_left_bottom = np.array([[1.0, 1.0]])
+            self.room_y_right_bottom = np.array([[0.0, 0.0]])
+            self.room_y_left_top = np.array([[1.0, 1.0]])
+            self.room_y_right_top = np.array([[0.0, 0.0]])
+            self.area = [[1.0,1.0]]
+            self.mergednodes = [[]]
+            self.irreg_nodes1 = [[]]
+            self.irreg_nodes2 = [[]]
+            self.extranodes = [[]]
+            self.rel_matrix_list = [np.array([[0,3,2,0,0,0],[0,0,2,3,0,0],[0,0,0,1,0,1],[0,0,1,0,1,0],[2,2,0,1,0,1],[3,0,1,0,1,0]])]
+            return 
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
             bcn_edges = bcn.biconnect(self.matrix)
