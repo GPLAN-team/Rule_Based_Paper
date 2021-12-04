@@ -53,7 +53,7 @@ def recurse(list, i, final, individual):
     if i == len(list):
         final.append(individual)
         return
-    temp = list[i];
+    temp = list[i]
     for j in range(0, len(temp)):
         temp_individual = copy.deepcopy(individual)
         temp_individual.append(temp[j])
@@ -66,87 +66,122 @@ def merge(em_list):
     Returns:
         
     """
-    rowsEncodedMatrices = []  # variable stores the no. of rows in each encoded matrix after changing its orientation
-    alignedEncodedMatrices = []  # stores encoded matrix in changed orientation
-    equiDimensionedEncodedMatrices = []  # stores encoded matrix which are ready to be merged
+    st_end = []
+    ctrs = []
+    rows_ems = [] #variable stores the no. of rows in each encoded matrix after changing its orientation
+    aligned_ems = [] #stores encoded matrix in changed orientation
+    merge_ems = [] #stores encoded matrix which are ready to be merged
 
-    # Sample inputs
-    # encodedMatrices = [np.array([[2,2],[1,0]]), np.array([[2,2, 2,2],[12,11,13,15], [5,5,5,5]]), np.array([[6,5],[7,5]])]
-    encodedMatrices = em_list
+    ems = em_list
 
-    # loop changes the orientation of the received encoded matrices and stores them in alignedEncodedMatrices
-    for i in range(len(encodedMatrices)):
-        encodedMatrix = encodedMatrices[i]
+    crnrs_st_end = []
+    crnrs_ctrs = []
+    for i in range(len(ems)):
+        em = ems[i]
+        row = len(em)
+        col = len(em[0])
+        tl  = em[0][0]
+        tr = em[0][col-1]
+        bl = em[row-1][0]
+        br = em[row-1][col-1]
+        cnt = 0
 
-        if i == 0:
-            if len(np.unique(encodedMatrix[:, -1])) == 1:  # Last col
-                val = encodedMatrix[0][-1]  # variable helps in checking the orientation of 1 to n-1 components
-                alignedEncodedMatrices.append(encodedMatrix)
-            if len(np.unique(encodedMatrix[:, 0])) == 1:  # First col
-                val = encodedMatrix[0][0]
-                alignedEncodedMatrices.append(np.fliplr(encodedMatrix))  # fliplr flips the matrix vertically
-            if len(np.unique(encodedMatrix[0])) == 1:  # First row
-                val = encodedMatrix[0][0]
-                encodedMatrix = np.transpose(encodedMatrix)
-                alignedEncodedMatrices.append(np.fliplr(encodedMatrix))
-            if len(np.unique(encodedMatrix[-1])) == 1:  # Last row
-                val = encodedMatrix[-1][0]
-                encodedMatrix = np.transpose(encodedMatrix)
-                alignedEncodedMatrices.append(encodedMatrix)
-
-        elif i == len(encodedMatrices) - 1:
-            if len(np.unique(encodedMatrix[:, -1])) == 1:  # Last col
-                alignedEncodedMatrices.append(np.fliplr(encodedMatrix))
-            if len(np.unique(encodedMatrix[:, 0])) == 1:  # First col
-                alignedEncodedMatrices.append(encodedMatrix)
-            if len(np.unique(encodedMatrix[0])) == 1:  # First row
-                encodedMatrix = np.transpose(encodedMatrix)
-                alignedEncodedMatrices.append(encodedMatrix)
-            if len(np.unique(encodedMatrix[-1])) == 1:  # Last row
-                encodedMatrix = np.transpose(encodedMatrix)
-                alignedEncodedMatrices.append(np.fliplr(encodedMatrix))
-
+        if tl == tr or tl == bl:
+            cnt = cnt+1
+        if tr == tl or tr == br:
+            cnt = cnt+1
+        if bl == br or bl == tl:
+            cnt = cnt+1
+        if br == bl or br == tr:
+            cnt = cnt+1
+        if cnt/2 == 1:
+            st_end.append(em)
+            crnrs_st_end.append([tl, tr, bl, br])
         else:
-            # Assuming both cut vertices occupy opposite row/column in encoded matrix
-            if len(np.unique(encodedMatrix[:, -1])) == 1:
-                if val == encodedMatrix[0][0]:
-                    alignedEncodedMatrices.append(encodedMatrix)
+            ctrs.append(em)
+            crnrs_ctrs.append([tl, tr, bl, br])
+    
+    if ctrs == []:
+        em = st_end.pop(0)
+        crnrs = crnrs_st_end.pop(0)
+        if crnrs[2] == crnrs[3]:  # last row
+            em = np.rot90(em, 1)
+        if crnrs[3] == crnrs[0]:  # First col
+            em = np.rot90(em, 2)
+        if crnrs[0] == crnrs[1]:  # first row
+            em = np.rot90(em, 3)
+        aligned_ems.append(em)
+
+    while ctrs!=[]:
+        if len(st_end) == 2:
+            em = st_end.pop(0)
+            crnrs = crnrs_st_end.pop(0)
+            if crnrs[1] == crnrs[2]: #last col
+                continue
+            if crnrs[2] == crnrs[3]:  # last row
+                em = np.rot90(em,1)
+            if crnrs[3] == crnrs[0]: #First col
+                em = np.rot90(em,2)
+            if crnrs[0] == crnrs[1]:  #first row
+                em = np.rot90(em,3)
+            val = em[0][-1]
+            aligned_ems.append(em)
+        else:
+            l = len(ctrs)
+            i=0
+            while i< l:
+                if val in crnrs_ctrs[i]:
+                    em = ctrs.pop(i)
+                    crnrs = crnrs_ctrs.pop(i)
+                    l = len(ctrs)
+                    i= 0
+                    if crnrs[3] == crnrs[0] == val:  # First col
+                        continue
+                    if crnrs[0] == crnrs[1] == val:  # first row
+                        em = np.rot90(em, 1)
+                    if crnrs[1] == crnrs[2] == val:  # last col
+                        em = np.rot90(em, 2)
+                    if crnrs[2] == crnrs[3] == val:  # last row
+                        em = np.rot90(em, 3)
+                    val = em[0][-1]
+                    aligned_ems.append(em)
                 else:
-                    encodedMatrix = np.fliplr(encodedMatrix)
-                    alignedEncodedMatrices.append(encodedMatrix)
-            elif len(np.unique(encodedMatrix[-1])) == 1:
-                encodedMatrix = np.transpose(encodedMatrix)
-                if val == encodedMatrix[0][0]:
-                    alignedEncodedMatrices.append(encodedMatrix)
-                else:
-                    encodedMatrix = np.fliplr(encodedMatrix)
-                    alignedEncodedMatrices.append(encodedMatrix)
-            val = encodedMatrix[0][-1]
+                    i = i+1
 
-    for matrix in alignedEncodedMatrices:
-        rowsEncodedMatrices.append(len(matrix))
+    em = st_end.pop(0)
+    crnrs = crnrs_st_end.pop(0)
+    if crnrs[0] == crnrs[1]:  # first row
+        em = np.rot90(em, 1)
+    if crnrs[1] == crnrs[2]:  # last col
+        em = np.rot90(em, 2)
+    if crnrs[2] == crnrs[3]:  # last row
+        em = np.rot90(em, 3)
 
-    maxRows = max(rowsEncodedMatrices)
+    aligned_ems.append(em)
 
-    # loop adds extra rows in encoded matrix to make all the EMs of the same height
-    for i in range(len(rowsEncodedMatrices)):
-        encodedMatrix = alignedEncodedMatrices[i]
-        j = len(encodedMatrix)
-        while j < maxRows:
-            encodedMatrix = np.append(encodedMatrix, [encodedMatrix[-1]], axis=0)
-            j = j + 1
-        equiDimensionedEncodedMatrices.append(encodedMatrix)
+    for matrix in aligned_ems:
+        rows_ems.append(len(matrix))
 
-    # finalEncodedMatrix stores the merged EM
-    finalEncodedMatrix = equiDimensionedEncodedMatrices[0]
+    max_rows = max(rows_ems)
 
-    # loop merges all the encoded matrices
-    for i in range(1, len(equiDimensionedEncodedMatrices)):
-        encodedMatrix = equiDimensionedEncodedMatrices[i]
-        finalEncodedMatrix = np.concatenate((finalEncodedMatrix, encodedMatrix[:, 1:]), axis=1)
+    #loop adds extra rows in encoded matrix to make all the EMs of the same height
+    for i in range(len(rows_ems)):
+        em = aligned_ems[i]
+        j = rows_ems[i]
+        while j < max_rows:
+            em = np.append(em, [em[-1]], axis=0)
+            j = j+1
+        merge_ems.append(em)
 
+    #finalEncodedMatrix stores the merged EM
+    final_em = merge_ems[0]
 
-    return finalEncodedMatrix
+    #loop merges all the encoded matrices
+    for i in range(1, len(merge_ems)):
+        em = merge_ems[i]
+        final_em = np.concatenate((final_em, em[:,1:]), axis=1)
+
+    return final_em
 
 def convert_to_rel(em,nodecnt):
     """
