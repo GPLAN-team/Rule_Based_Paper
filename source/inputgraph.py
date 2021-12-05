@@ -554,6 +554,29 @@ class InputGraph:
         adj_mats = []
         dicts = []
         corners = []
+        cutvertices_dict = {}
+        components_dict = {}
+
+        for i in range(0,len(cutvertices)):
+            cutvertices_dict[cutvertices[i]] = 0
+        for j in range(0, len(components)):
+            components_dict[j] = 0
+        
+        for i in range(0,len(cutvertices)):
+            for j in range(0, len(components)):
+                if cutvertices[i] in components[j]:
+                    cutvertices_dict[cutvertices[i]] = cutvertices_dict[cutvertices[i]] +1
+                    components_dict[j] = components_dict[j] +1
+
+        for key in cutvertices_dict.keys():
+            if cutvertices_dict[key]>2:
+                raise OCError
+        print(components_dict)
+        for key in components_dict.keys():
+            print(components_dict[key])
+            if components_dict[key]>2:
+                raise OCError
+
 
         #Creating dictionary map
         for i in range(0, len(components)):
