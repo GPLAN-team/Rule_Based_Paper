@@ -277,7 +277,7 @@ class InputGraph:
             max_width.append(10000)
             min_ar.append(0)
             max_ar.append(10000)
-        print(self.rel_matrix_list)
+        #print(self.rel_matrix_list)
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
@@ -612,6 +612,7 @@ class InputGraph:
 
             res = dict((v, k) for k, v in dicts[i].items())
 
+
             for i in range(len(idx)):
                 rel_matrix = graph.rel_matrix_list[idx[i]]
                 encoded_matrix = opr.get_encoded_matrix(rel_matrix.shape[0] - 4
@@ -628,6 +629,8 @@ class InputGraph:
 
                 em.append(encoded_matrix)
             ems.append(em)
+        
+        
 
         #Error condition: No encoded matrix present for any component        
         for i in range(0, len(ems)):

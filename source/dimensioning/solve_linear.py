@@ -61,8 +61,6 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 	b_max_VER = b_max_VER.astype(float)
 	b_VER = np.hstack((b_min_VER, b_max_VER))
 
-	print("*************")
-	print(type(Aeq_VER))
 
 
 	if not Aeq_VER.tolist():

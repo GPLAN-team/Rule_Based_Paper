@@ -75,15 +75,20 @@ def merge(em_list):
     ems = em_list
 
     for i in range(len(ems)):
-        em = ems[i]
-        row = len(em)
-        col = len(em[0])
-        tl  = em[0][0]
-        tr = em[0][col-1]
-        bl = em[row-1][0]
-        br = em[row-1][col-1]
+        row = len(ems[i])
+        col = len(ems[i][0])
+        if row == 1:
+            ems[i] = np.append(ems[i], [ems[i][-1]], axis=0)
+            row=row+1
+        if col == 1:
+            ems[i] = np.append(ems[i], [ems[i][:,-1]], axis=0)
+            col=col+1
+        tl  = ems[i][0][0]
+        tr = ems[i][0][col-1]
+        bl = ems[i][row-1][0]
+        br = ems[i][row-1][col-1]
 
-        crnrs.append([tl, tr, bl, br])
+        crnrs.append([tl, tr, br, bl])
 
     em = ems.pop(0)
     crnr = crnrs.pop(0)
