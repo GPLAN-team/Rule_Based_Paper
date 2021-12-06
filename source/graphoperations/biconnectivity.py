@@ -66,6 +66,26 @@ def same_component(nxgraph, node1, node2):
             return True
     return False
 
+def sort_list(nxgraph, neighbors):
+    """Sorts the neighbors list such that neigbours in same components appear consecutively
+    Args:
+        nxgraph: An instance of Networkx graph object
+        neighbors: List containing neighbors of an articulation point.
+    
+    Returns:
+        neighbors_sorted: Required list with neighbors in same components appearing consecutively.
+    """
+    neighbors_sorted = []
+    components = list(get_biconnected_components(nxgraph))
+    for component in range(len(components)):
+        temp_list = []
+        for vertex in neighbors:
+            if vertex in components[component]:
+                if (vertex not in neighbors_sorted) and (vertex not in temp_list):
+                    temp_list.append(vertex)
+        neighbors_sorted.extend(temp_list)
+    return neighbors_sorted
+
 def biconnect(matrix):
     """Returns the edges to be added to make graph biconnected.
     Args:
@@ -81,6 +101,7 @@ def biconnect(matrix):
     removed_edges = set()
     for i in range(len(articulation_points)): 
         neighbors = list(nx.neighbors(nxgraph,articulation_points[i]))
+        neighbors = sort_list(nxgraph, neighbors)
         for j in range(0,len(neighbors)-1):
             if not same_component(nxgraph,neighbors[j],neighbors[j+1]):
                 added_edges.add((neighbors[j],neighbors[j+1]))
