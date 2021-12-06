@@ -277,7 +277,6 @@ class InputGraph:
             max_width.append(10000)
             min_ar.append(0)
             max_ar.append(10000)
-        #print(self.rel_matrix_list)
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
@@ -571,9 +570,7 @@ class InputGraph:
         for key in cutvertices_dict.keys():
             if cutvertices_dict[key]>2:
                 raise OCError
-        print(components_dict)
         for key in components_dict.keys():
-            print(components_dict[key])
             if components_dict[key]>2:
                 raise OCError
 

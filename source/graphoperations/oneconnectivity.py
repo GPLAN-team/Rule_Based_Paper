@@ -114,8 +114,6 @@ def merge(em_list):
                 crnr = crnrs.pop(i)
                 l = len(ems)
                 i= 0
-                if crnr[3] == crnr[0] == val_right:  # First col
-                    continue
                 if crnr[0] == crnr[1] == val_right:  # first row
                     em = np.rot90(em, 1)
                 if crnr[1] == crnr[2] == val_right:  # last col
@@ -129,8 +127,6 @@ def merge(em_list):
                 crnr = crnrs.pop(i)
                 l = len(ems)
                 i = 0
-                if crnr[1] == crnr[2] == val_left:  # last col
-                    continue
                 if crnr[2] == crnr[3] == val_left:  # last row
                     em = np.rot90(em, 1)
                 if crnr[3] == crnr[0] == val_left:  # First col
