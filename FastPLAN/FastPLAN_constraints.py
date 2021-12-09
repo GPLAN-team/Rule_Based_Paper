@@ -22,6 +22,8 @@ def applyConstraints(graph, vertex_dictlist):
     return updated_graph
 
 def applyKitchenBath(graph, vertex_dictlist):
+    """Constraint stating kitchen and bathroom mustn't be adjacent.
+    """
     updated_graph = nx.Graph(graph)
     kitchenlist = []
     bathroomlist = []
