@@ -29,6 +29,17 @@ from .irregular import septri as st
 from .dimensioning import block_checker as bc
 
 class OCError(Exception):
+    """One-connected Error
+
+    Raised when one-connected code can not generate rectangular floorplan.
+    """
+    pass
+
+class BCNError(Exception):
+    """Bi-connected Error
+
+    Raised when one-connected code gets biconnected graph as input.
+    """
     pass
 class InputGraph:
     """A InputGraph class for graph input by the user.
@@ -160,9 +171,12 @@ class InputGraph:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
-        
+        bcn_edges_added = len(bcn_edges) > 0
+
         #Triangularity
-        trng_edges = trng.triangulate(self.matrix)
+        trng_edges,positions = trng.triangulate(self.matrix
+                                                ,bcn_edges_added
+                                                ,self.coordinates)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
@@ -174,7 +188,7 @@ class InputGraph:
         #Separating Triangle Elimination
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
             ptpg_matrices, extra_nodes = st.handle_STs(
-                self.matrix, self.coordinates, 1)
+                self.matrix, positions, 1)
             self.matrix = ptpg_matrices[0]
             self.nodecnt = self.matrix.shape[0]
             self.edgecnt = int(np.count_nonzero(self.matrix == 1)/2)
@@ -347,9 +361,12 @@ class InputGraph:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
+        bcn_edges_added = len(bcn_edges) > 0
 
         #Triangulation
-        trng_edges = trng.triangulate(self.matrix)
+        trng_edges,positions = trng.triangulate(self.matrix
+                                                ,bcn_edges_added
+                                                ,self.coordinates)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
@@ -543,6 +560,9 @@ class InputGraph:
         Returns:
             None
         """
+        if (bcn.is_biconnected(self.matrix)):
+            raise BCNError
+
         #Identifying cut-vertices
         matrix = copy.deepcopy(self.matrix)
         matrix = np.array(matrix)
@@ -715,39 +735,7 @@ class InputGraph:
                 self.irreg_nodes2.append([])
                 self.extranodes.append([])
 
-    def single_dual(self):
-        """Generates a single dual for a given input graph.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        if (not bcn.is_biconnected(self.matrix)):
-            try:
-                self.oneconnected_dual("single")
-            except OCError:
-                self.irreg_single_dual()
-        else:
-            self.irreg_single_dual()
     
-    def multiple_dual(self):
-        """Generates multiple duals for a given input graph.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        if (not bcn.is_biconnected(self.matrix)):
-            try:
-                self.oneconnected_dual("multiple")
-            except OCError:
-                self.irreg_multiple_dual()
-        else:
-            self.irreg_multiple_dual()
 
 def generate_multiple_rel(bdys, matrix, nodecnt, edgecnt):
     """Generates multiple RELs for given matrix and boundary.

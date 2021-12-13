@@ -1207,27 +1207,32 @@ class gui_class:
         def __init__(self,root,master):
             
             button_details={'wraplength':'150','bg':col[1],'fg':'white','font':('lato','14') , 'padx':5 ,'pady':5,'activebackground' : col[2] }
-            b1 = tk.Button(master.frame1,width=15,text='A Floor Plan',relief='flat',**button_details,command=master.single_floorplan)
+            b1 = tk.Button(master.frame1,width=15,text='Irregular Floor Plan',relief='flat',**button_details,command=master.single_floorplan)
             b1.grid(row=1,column=0,padx=5,pady=5)
             
-            b2 = tk.Button(master.frame1,width=15, text='Multiple Floor Plans',relief='flat',**button_details,command=master.multiple_floorplan)
+            b2 = tk.Button(master.frame1,width=15, text='Multiple Irregular Floor Plans',relief='flat',**button_details,command=master.multiple_floorplan)
             b2.grid(row=2,column=0,padx=5,pady=5)
             
             c1 = tk.Checkbutton(master.frame1, text = "Dimensioned",relief='flat',**button_details,selectcolor='#4A4E69',width=13 ,variable = master.checkvar1,onvalue = 1, offvalue = 0)
-            c1.grid(row=3,column=0,padx=5,pady=5)
+            c1.grid(row=5,column=0,padx=5,pady=5)
            
-            b3 = tk.Button(master.frame1,width=15, text='Circulation',relief='flat',**button_details,command=master.change_entry_gui)
-            b3.grid(row=4,column=0,padx=5,pady=5)
+            b3 = tk.Button(master.frame1,width=15,text='Rectangular Floor Plan',relief='flat',**button_details,command=master.single_oc_floorplan)
+            b3.grid(row=3,column=0,padx=5,pady=5)
+            
+            b4 = tk.Button(master.frame1,width=15, text='Multiple Rectangular Floor Plans',relief='flat',**button_details,command=master.multiple_oc_floorplan)
+            b4.grid(row=4,column=0,padx=5,pady=5)
+            # b3 = tk.Button(master.frame1,width=15, text='Circulation',relief='flat',**button_details,command=master.change_entry_gui)
+            # b3.grid(row=4,column=0,padx=5,pady=5)
 
             # b32 = tk.Button(master.frame1,width=15, text='Change entry',relief='flat',**button_details,command=master.change_entry_gui)
             # b32.grid(row=5,column=0,padx=5,pady=5)
 
             
-            b4 = tk.Button(master.frame1,width=15, text='RFPchecker' ,relief='flat',**button_details,command=master.checker)
-            b4.grid(row=6,column=0,padx=5,pady=5)
+            # b4 = tk.Button(master.frame1,width=15, text='RFPchecker' ,relief='flat',**button_details,command=master.checker)
+            # b4.grid(row=6,column=0,padx=5,pady=5)
 
-            b7 = tk.Button(master.frame1,width=15, text='Dissection' ,relief='flat',**button_details,command=master.dissection)
-            b7.grid(row=7,column=0,padx=5,pady=5)
+            # b7 = tk.Button(master.frame1,width=15, text='Dissection' ,relief='flat',**button_details,command=master.dissection)
+            # b7.grid(row=7,column=0,padx=5,pady=5)
             
             # b6 = tk.Button(master.frame1,width=15, text='Restart',relief='flat', **button_details,command=master.restart)
             # b6.grid(row=6,column=0,padx=5,pady=5)
@@ -1306,7 +1311,7 @@ class gui_class:
             imname = "./assets/close1.png"
             im1 = Image.open(imname).convert("1")
             size = (im1.width // 24, im1.height // 24)
-            # im1.resize(size)
+            im1.resize(size)
             # # im1.show()
             # im1 = ImageTk.BitmapImage(im1.resize(size)) 
             im2 = ImageTk.PhotoImage(Image.open(imname).resize(size))
@@ -1374,7 +1379,6 @@ class gui_class:
             self.textbox.grid(row=0,column=0 ,padx=10,pady=10)
             self.textbox.insert('insert',"\t         Output\n")
    
-
     def graph_ret(self):
         
         self.value = self.app.return_everything()
@@ -1391,6 +1395,20 @@ class gui_class:
         self.app.command="multiple"
         self.command = "multiple"
         self.end.set(self.end.get()+1)
+        # root.destroy()
+    
+    def single_oc_floorplan(self):
+        self.app.command="single_oc"
+        self.command = "single_oc"
+        self.end.set(self.end.get()+1)
+        # self.root.state('zoomed')
+        # root.destroy()
+    
+    def multiple_oc_floorplan(self):
+        self.app.command="multiple_oc"
+        self.command = "multiple_oc"
+        self.end.set(self.end.get()+1)
+        # self.root.state('zoomed')
         # root.destroy()
     
     def circulation(self):
@@ -1548,7 +1566,8 @@ class gui_class:
         l.close()
         f.close()
 
-        
+    def show_warning(self,str):
+        tk.messagebox.showinfo("Warning",str)    
 
             
 if __name__ == '__main__':
