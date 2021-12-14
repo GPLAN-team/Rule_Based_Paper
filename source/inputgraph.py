@@ -199,17 +199,37 @@ class InputGraph:
 
         #Edge Transformation        
         for edge in bcn_edges:
-            self.extranodes.append(self.nodecnt)
-            self.matrix, extra_edges_cnt = transform.transform_edges(
-                self.matrix, edge)
-            self.nodecnt += 1  # Extra node added
-            self.edgecnt += extra_edges_cnt
+            if(self.matrix[edge[0]][edge[1]]==0):
+                for idx in range(len(self.irreg_nodes1)):
+                    if(self.irreg_nodes1[idx]==edge[0] and self.irreg_nodes2[idx]==edge[1]) or (self.irreg_nodes1[idx]==edge[1] and self.irreg_nodes2[idx]==edge[0]):
+                        extra_node = self.mergednodes[idx]
+                        self.extranodes.append(extra_node)
+                        self.mergednodes.pop(idx)
+                        self.irreg_nodes1.pop(idx)
+                        self.irreg_nodes2.pop(idx)
+                        break
+            else:
+                self.extranodes.append(self.nodecnt)
+                self.matrix, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
         for edge in trng_edges:
-            self.extranodes.append(self.nodecnt)
-            self.matrix, extra_edges_cnt = transform.transform_edges(
-                self.matrix, edge)
-            self.nodecnt += 1  # Extra node added
-            self.edgecnt += extra_edges_cnt
+            if(self.matrix[edge[0]][edge[1]]==0):
+                for idx in range(len(self.irreg_nodes1)):
+                    if(self.irreg_nodes1[idx]==edge[0] and self.irreg_nodes2[idx]==edge[1]) or (self.irreg_nodes1[idx]==edge[1] and self.irreg_nodes2[idx]==edge[0]):
+                        extra_node = self.mergednodes[idx]
+                        self.extranodes.append(extra_node)
+                        self.mergednodes.pop(idx)
+                        self.irreg_nodes1.pop(idx)
+                        self.irreg_nodes2.pop(idx)
+                        break
+            else:
+                self.extranodes.append(self.nodecnt)
+                self.matrix, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
         
         #Boundary Identification
         triangular_cycles = opr.get_trngls(self.matrix)
@@ -376,9 +396,7 @@ class InputGraph:
             self.nonrect = True
         
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
-            origin_pos = nx.planar_layout(nx.from_numpy_matrix(self.matrix))
-            pos = [origin_pos[i] for i in range(0, self.nodecnt)]
-            ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, pos, 20)
+            ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, positions, 20)
 
             for cnt in range(len(ptpg_matrices)):
                 self.matrix = ptpg_matrices[cnt]
@@ -391,8 +409,8 @@ class InputGraph:
                     mergednodes.append(key)
                     irreg_nodes1.append(extra_nodes[cnt][key][0])
                     irreg_nodes2.append(extra_nodes[cnt][key][1])
-                self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes = generate_multiple_bdy(
-                    self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges)
+                self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+                    self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
                 for bdys in cip_list:
                     matrix = copy.deepcopy(self.matrix)
                     rel_matrices = generate_multiple_rel(
@@ -406,8 +424,11 @@ class InputGraph:
                         self.extranodes.append(extranodes)
                         self.nodecnt_list.append(self.nodecnt)
         else:
-            self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes = generate_multiple_bdy(
-                self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges)
+            mergednodes = []
+            irreg_nodes1 = []
+            irreg_nodes2 = []
+            self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+                    self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
             for bdys in cip_list:
                 matrix = copy.deepcopy(self.matrix)
                 rel_matrices = generate_multiple_rel(
@@ -606,9 +627,12 @@ class InputGraph:
             matrix1 = adj_mats[i]
             nodecnt = len(matrix1[0])
             edgecnt = int(np.sum(matrix1) / 2)
+            nxgraph = nx.from_numpy_matrix(matrix)
+            planar_embedding = nx.planar_layout(nxgraph)
+            positions = [planar_embedding[key] for key in planar_embedding]
             graph = InputGraph(nodecnt
                                    , edgecnt
-                                   ,[],[], matrix1)
+                                   ,[],positions, matrix1)
 
             corners = []
             graph.irreg_multiple_dual()
@@ -777,7 +801,7 @@ def generate_multiple_rel(bdys, matrix, nodecnt, edgecnt):
                 rel_matrix.append(new_rel)
     return rel_matrix
 
-def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges):
+def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2):
     """Generates multiple boundary for given matrix and extra edges.
 
     Args:
@@ -795,15 +819,35 @@ def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges):
     """
     extranodes = []
     for edge in bcn_edges:
-        extranodes.append(nodecnt)
-        matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
-        nodecnt += 1  # Extra node added
-        edgecnt += extra_edges_cnt
+        if(matrix[edge[0]][edge[1]]==0):
+            for idx in range(len(irreg_nodes1)):
+                if(irreg_nodes1[idx]==edge[0] and irreg_nodes2[idx]==edge[1]) or (irreg_nodes1[idx]==edge[1] and irreg_nodes2[idx]==edge[0]):
+                    extra_node = mergednodes[idx]
+                    extranodes.append(extra_node)
+                    mergednodes.pop(idx)
+                    irreg_nodes1.pop(idx)
+                    irreg_nodes2.pop(idx)
+                    break
+        else:
+            extranodes.append(nodecnt)
+            matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
+            nodecnt += 1  # Extra node added
+            edgecnt += extra_edges_cnt
     for edge in trng_edges:
-        extranodes.append(nodecnt)
-        matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
-        nodecnt += 1  # Extra node added
-        edgecnt += extra_edges_cnt
+        if(matrix[edge[0]][edge[1]]==0):
+            for idx in range(len(irreg_nodes1)):
+                if(irreg_nodes1[idx]==edge[0] and irreg_nodes2[idx]==edge[1]) or (irreg_nodes1[idx]==edge[1] and irreg_nodes2[idx]==edge[0]):
+                    extra_node = mergednodes[idx]
+                    extranodes.append(extra_node)
+                    mergednodes.pop(idx)
+                    irreg_nodes1.pop(idx)
+                    irreg_nodes2.pop(idx)
+                    break
+        else:
+            extranodes.append(nodecnt)
+            matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
+            nodecnt += 1  # Extra node added
+            edgecnt += extra_edges_cnt
     triangular_cycles = opr.get_trngls(matrix)
     digraph = opr.get_directed(matrix)
     bdy_nodes, bdy_edges = opr.get_bdy(triangular_cycles, digraph)
@@ -818,4 +862,4 @@ def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges):
         outer_boundary = opr.ordered_bdy(bdy_nodes, bdy_edges)
         cip_list = news.find_multiple_boundary(
             news.all_boundaries(corner_pts, outer_boundary), outer_boundary)
-    return matrix, cip_list, nodecnt, edgecnt, extranodes
+    return matrix, cip_list, nodecnt, edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2
