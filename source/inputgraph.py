@@ -101,17 +101,14 @@ class InputGraph:
         coordinates: A list containing the coordinates of each node.
     """
 
-    def __init__(self, nodecnt, edgecnt, edgeset, node_coordinates, matrix):
+    def __init__(self, nodecnt, edgecnt, edgeset, node_coordinates):
         self.nodecnt = nodecnt
         self.edgecnt = edgecnt
         self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
-        if (matrix == []):
-            self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
-            for edges in (edgeset):
-                self.matrix[edges[0]][edges[1]] = 1
-                self.matrix[edges[1]][edges[0]] = 1
-        else:
-            self.matrix = matrix
+        self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
+        for edges in (edgeset):
+            self.matrix[edges[0]][edges[1]] = 1
+            self.matrix[edges[1]][edges[0]] = 1
         self.bdy_nodes = []
         self.bdy_edges = []
         self.irreg_nodes1 = []
@@ -627,12 +624,13 @@ class InputGraph:
             matrix1 = adj_mats[i]
             nodecnt = len(matrix1[0])
             edgecnt = int(np.sum(matrix1) / 2)
-            nxgraph = nx.from_numpy_matrix(matrix)
+            nxgraph = nx.from_numpy_matrix(matrix1)
             planar_embedding = nx.planar_layout(nxgraph)
             positions = [planar_embedding[key] for key in planar_embedding]
             graph = InputGraph(nodecnt
                                    , edgecnt
-                                   ,[],positions, matrix1)
+                                   ,nxgraph.edges
+                                   ,positions)
 
             corners = []
             graph.irreg_multiple_dual()
