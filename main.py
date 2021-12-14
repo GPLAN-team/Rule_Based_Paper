@@ -98,7 +98,7 @@ def run():
                     while(graph.floorplan_exist == False):
                         old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
                         min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                        graph.multiple_dual()
+                        graph.irreg_multiple_dual()
                         graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
