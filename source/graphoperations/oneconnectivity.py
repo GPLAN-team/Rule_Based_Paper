@@ -66,98 +66,77 @@ def merge(em_list):
     Returns:
         
     """
-    st_end = []
-    ctrs = []
+
     rows_ems = [] #variable stores the no. of rows in each encoded matrix after changing its orientation
     aligned_ems = [] #stores encoded matrix in changed orientation
     merge_ems = [] #stores encoded matrix which are ready to be merged
+    crnrs = []
 
     ems = em_list
 
-    crnrs_st_end = []
-    crnrs_ctrs = []
     for i in range(len(ems)):
-        em = ems[i]
-        row = len(em)
-        col = len(em[0])
-        tl  = em[0][0]
-        tr = em[0][col-1]
-        bl = em[row-1][0]
-        br = em[row-1][col-1]
-        cnt = 0
+        row = len(ems[i])
+        col = len(ems[i][0])
+        if row == 1:
+            ems[i] = np.append(ems[i], [ems[i][-1]], axis=0)
+            row=row+1
+        if col == 1:
+            ems[i] = np.append(ems[i], [ems[i][:,-1]], axis=0)
+            col=col+1
+        tl  = ems[i][0][0]
+        tr = ems[i][0][col-1]
+        bl = ems[i][row-1][0]
+        br = ems[i][row-1][col-1]
 
-        if tl == tr or tl == bl:
-            cnt = cnt+1
-        if tr == tl or tr == br:
-            cnt = cnt+1
-        if bl == br or bl == tl:
-            cnt = cnt+1
-        if br == bl or br == tr:
-            cnt = cnt+1
-        if cnt/2 == 1:
-            st_end.append(em)
-            crnrs_st_end.append([tl, tr, bl, br])
-        else:
-            ctrs.append(em)
-            crnrs_ctrs.append([tl, tr, bl, br])
-    
-    if ctrs == []:
-        em = st_end.pop(0)
-        crnrs = crnrs_st_end.pop(0)
-        if crnrs[2] == crnrs[3]:  # last row
-            em = np.rot90(em, 1)
-        if crnrs[3] == crnrs[0]:  # First col
-            em = np.rot90(em, 2)
-        if crnrs[0] == crnrs[1]:  # first row
-            em = np.rot90(em, 3)
-        aligned_ems.append(em)
-    
-    while ctrs!=[]:
-        if len(st_end) == 2:
-            em = st_end.pop(0)
-            crnrs = crnrs_st_end.pop(0)
-            if crnrs[1] == crnrs[2]: #last col
-                continue
-            if crnrs[2] == crnrs[3]:  # last row
-                em = np.rot90(em,1)
-            if crnrs[3] == crnrs[0]: #First col
-                em = np.rot90(em,2)
-            if crnrs[0] == crnrs[1]:  #first row
-                em = np.rot90(em,3)
-            val = em[0][-1]
-            aligned_ems.append(em)
-        else:
-            l = len(ctrs)
-            i=0
-            while i< l:
-                if val in crnrs_ctrs[i]:
-                    em = ctrs.pop(i)
-                    crnrs = crnrs_ctrs.pop(i)
-                    l = len(ctrs)
-                    i= 0
-                    if crnrs[3] == crnrs[0] == val:  # First col
-                        continue
-                    if crnrs[0] == crnrs[1] == val:  # first row
-                        em = np.rot90(em, 1)
-                    if crnrs[1] == crnrs[2] == val:  # last col
-                        em = np.rot90(em, 2)
-                    if crnrs[2] == crnrs[3] == val:  # last row
-                        em = np.rot90(em, 3)
-                    val = em[0][-1]
-                    aligned_ems.append(em)
-                else:
-                    i = i+1
+        crnrs.append([tl, tr, br, bl])
 
-    em = st_end.pop(0)
-    crnrs = crnrs_st_end.pop(0)
-    if crnrs[0] == crnrs[1]:  # first row
+    em = ems.pop(0)
+    crnr = crnrs.pop(0)
+    if crnr[2] == crnr[3]:  # last row
         em = np.rot90(em, 1)
-    if crnrs[1] == crnrs[2]:  # last col
+    elif crnr[3] == crnr[0]:  # First col
         em = np.rot90(em, 2)
-    if crnrs[2] == crnrs[3]:  # last row
+    elif crnr[0] == crnr[1]:  # first row
         em = np.rot90(em, 3)
-
+    val_right = em[0][-1]
+    if(em[0][0] == em[-1][0]):
+        val_left = em[0][0]
+    else:
+        val_left = -1
     aligned_ems.append(em)
+
+    while ems!=[]:
+        l = len(ems)
+        i=0
+        while i< l:
+            if val_right in crnrs[i]:
+                em = ems.pop(i)
+                crnr = crnrs.pop(i)
+                l = len(ems)
+                i= 0
+                if crnr[0] == crnr[1] == val_right:  # first row
+                    em = np.rot90(em, 1)
+                if crnr[1] == crnr[2] == val_right:  # last col
+                    em = np.rot90(em, 2)
+                if crnr[2] == crnr[3] == val_right:  # last row
+                    em = np.rot90(em, 3)
+                val_right = em[0][-1]
+                aligned_ems.append(em)
+            elif val_left in crnrs[i]:
+                em = ems.pop(i)
+                crnr = crnrs.pop(i)
+                l = len(ems)
+                i = 0
+                if crnr[2] == crnr[3] == val_left:  # last row
+                    em = np.rot90(em, 1)
+                if crnr[3] == crnr[0] == val_left:  # First col
+                    em = np.rot90(em, 2)
+                if crnr[0] == crnr[1] == val_left:  # first row
+                    em = np.rot90(em, 3)
+                val_left = em[0][0]
+                aligned_ems.insert(0,em)
+            else:
+                i = i+1
 
     for matrix in aligned_ems:
         rows_ems.append(len(matrix))

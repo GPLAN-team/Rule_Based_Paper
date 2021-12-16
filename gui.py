@@ -1,8 +1,12 @@
 import tkinter as tk
 from input import Input
 import json
+from FastPLAN.FastPLAN import runner
+from api import multigraph_to_rfp
 
 helv36 = ("Helvetica", 15, "bold")
+
+INPUTGRAPH_JSON_PATH = ("./FastPLAN/inputgraph.json")
 
 class App:
     def __init__(self) -> None:
@@ -81,6 +85,33 @@ class App:
 
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Rules List is {self.input.adjacencies}")
+        self.create_inputgraph_json()
+        graphs = runner()
+
+        print(f"{len(graphs)} output_graphs = {str(graphs)}")
+
+        output_rfps = multigraph_to_rfp(graphs)
+
+        print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+
+        print(f"one rfp = {output_rfps[0]}")
+
+
+
+    
+    def create_inputgraph_json(self):
+        input = {}
+        input["nodes"] = list(self.input.rooms.values())
+        input["edges"] = self.input.adjacencies
+
+        inputgraph_object = json.dumps(input, indent=4)
+
+        with open(INPUTGRAPH_JSON_PATH, "w") as outfile:
+            outfile.write(inputgraph_object)
+
+
+
+
 
     def oneBHK_Button_click(self):
         print("[LOG] One BHK Button Clicked")

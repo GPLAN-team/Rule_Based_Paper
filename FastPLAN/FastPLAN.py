@@ -22,9 +22,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 from random import randint
-from FastPLAN_constraints import applyConstraints
+from .FastPLAN_constraints import applyConstraints
 
-JSON_PATH = ('inputgraph.json')
+JSON_PATH = ('./FastPLAN/inputgraph.json')
 
 def planner(str="1BHK", store_rooms = 0, custom = False, distinct_rooms = 4):
     """
