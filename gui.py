@@ -1,10 +1,12 @@
 import tkinter as tk
+from FastPLAN import FastPLAN
 from input import Input
 import json
 from FastPLAN.FastPLAN import runner
 from api import multigraph_to_rfp
 
-helv36 = ("Helvetica", 15, "bold")
+helv15 = ("Helvetica", 15, "bold")
+helv8 = ("Helvetica", 8, "bold")
 
 INPUTGRAPH_JSON_PATH = ("./FastPLAN/inputgraph.json")
 
@@ -22,6 +24,8 @@ class App:
         self.value = []
         self.freqbox = []
         self.input = Input()
+        self.output_found = False
+        self.curr_rfp = -1
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -35,21 +39,21 @@ class App:
         self.logo_frame.grid(row=0, column=0)
         logo_canvas = tk.Canvas(self.logo_frame, width=100, height=100)
         logo_canvas.pack()
-        logo_canvas.create_text(50, 50, text="GPLAN", font=helv36)
+        logo_canvas.create_text(50, 50, text="GPLAN", font=helv15)
 
     def custom_rfp_section(self):
         self.custom_rfp_choice_frame = tk.Frame(self.root)
         self.custom_rfp_choice_frame.grid(row=0, column=1, padx=10, pady=10)
-        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv36,
+        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15,
                                        command=self.oneBHK_Button_click)
         self.oneBHK_Button.grid(row=0, column=0, padx=10, pady=10)
-        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv36,
+        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv15,
                                        command=self.twoBHK_Button_click)
         self.twoBHK_Button.grid(row=0, column=1, padx=10, pady=10)
-        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv36,
+        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv15,
                                          command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
-        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv36,
+        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15,
                                           command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
@@ -60,18 +64,27 @@ class App:
         self.modify_frame = tk.Frame(self.root)
         self.modify_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        self.modify_rooms_button = tk.Button(self.modify_frame, text="Modify Rooms", font=helv36,
+        self.modify_rooms_button = tk.Button(self.modify_frame, text="Modify Rooms", font=helv15,
                                              command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_rules_button = tk.Button(self.modify_frame, text="Modify Rules", font=helv36,
+        self.modify_rules_button = tk.Button(self.modify_frame, text="Modify Rules", font=helv15,
                                              command=self.modify_rules_Button_click)
         self.modify_rules_button.grid(row=3, column=0, padx=10, pady=10)
 
         
-        self.run_button = tk.Button(self.modify_frame, text="Run", font=helv36,
+        self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
                                              command=self.run_Button_click)
         self.run_button.grid(row=4, column=0, padx=10, pady=10)
+
+        
+        self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
+        self.prev_btn.grid(row=5, column=0, padx=10, pady=10)
+        
+        self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
+        self.next_btn.grid(row=6, column=0, padx=10, pady=10)
+
+
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
@@ -79,6 +92,34 @@ class App:
 
         self.rfp_canvas = tk.Canvas(self.rfp_draw_frame, background="#FFFFFF", width=1000, height=800)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
+
+
+    def handle_prev_btn(self):
+        self.curr_rfp -= 1
+        if self.curr_rfp == 0:
+            tk.messagebox.showwarning("The Start", "Please try new options")
+            return
+
+        self.draw_one_rfp(self.output_rfps[self.curr_rfp])
+
+        
+
+    def handle_next_btn(self):
+        if self.curr_rfp == len(self.output_rfps) - 1:
+            tk.messagebox.showwarning("The End", "You have exhausted all the options")
+            return
+
+        self.curr_rfp += 1
+
+        self.draw_one_rfp(self.output_rfps[self.curr_rfp])
+
+    def draw_one_rfp(self, rfp, origin = (200, 200), scale = 1):
+        x, y = origin
+        self.rfp_canvas.delete("all")
+        for each_room in rfp:
+            print(f"each room {each_room}")
+            self.rfp_canvas.create_rectangle(x + scale* each_room['left'], y + scale * each_room['top'], x +  scale * (each_room['left'] + each_room['width']) , y + scale * (each_room['top'] + each_room['height']))
+            # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
 
     def run_Button_click(self):
         print("[LOG] Run Button Clicked")
@@ -91,10 +132,18 @@ class App:
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
         output_rfps = multigraph_to_rfp(graphs)
+        self.output_rfps = output_rfps
+
+        self.output_found = True
+        self.curr_rfp = 0
 
         print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
         print(f"one rfp = {output_rfps[0]}")
+
+        self.handle_next_btn()
+
+
 
 
 
