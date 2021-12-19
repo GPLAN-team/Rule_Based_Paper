@@ -9,12 +9,14 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
-def applyConstraints(graph, vertex_dictlist):
+def applyConstraints(graph, vertex_dictlist, biconnected = True):
     updated_graph = nx.Graph(graph)
     
     #Applying Biconnectivity (could be done better)
-    updated_graph.add_edges_from(nx.k_edge_augmentation(updated_graph, k = 3))
-    
+    if (biconnected):
+        updated_graph.add_edges_from(nx.k_edge_augmentation(updated_graph, k = 3))
+    else:
+        updated_graph.add_edges_from(nx.k_edge_augmentation(updated_graph, k = 1))
     #Applying constraints:
     updated_graph = applyKitchenBath(updated_graph, vertex_dictlist)
     

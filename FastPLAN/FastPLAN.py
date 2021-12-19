@@ -87,7 +87,7 @@ def createGraph(room_dict,total_rooms):
     # nx.draw_kamada_kawai(G_default, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10) #Uncomment to see default graph.
     return g_default, vertex_dictlist
 
-def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False, default_components = None):
+def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False, default_components = None, is_biconnected = True):
     """Returns required list of graphs.
         Inputs:
             1. room_dict - a dictionary with {room_name: number of rooms}
@@ -95,6 +95,7 @@ def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False
             3. number - (fixed) Number of random graphs to generate
             4. defaultGraph - Is default graph given?(False by default)
             5. default_components - Tuple containing default graph and its vertex dictlist.
+            6. is_biconnected - Do you want the graph list to be biconnected graphs? (True by default)
         Output:
             1. graphs - list of required random networkx graphs
     """
@@ -108,9 +109,13 @@ def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False
         g = nx.Graph()
         g = getRandomGraph(g_def, total_rooms)
         # print(g.edges())        #uncomment to print edges in the random graph.
-        g = applyConstraints(g,vertex_dictlist)
-        if(nx.is_biconnected(g) and nx.check_planarity(g)[0]):
-            graphs.append(g)
+        g = applyConstraints(g,vertex_dictlist,is_biconnected)
+        if (is_biconnected):
+            if(nx.is_biconnected(g) and nx.check_planarity(g)[0]):
+                graphs.append(g)
+        else:
+            if(nx.is_connected(g) and nx.check_planarity(g)[0]):
+                graphs.append(g)
     # We now have a list of graphs
     return graphs
 
@@ -176,7 +181,7 @@ def data_from_json():
     f.close()
     return roomdict, total_rooms, defaultComponents
 
-def runner():
+def runner(is_biconnected):
     """
     Input: 
         nxgraph: A networkx Graph object
@@ -188,7 +193,7 @@ def runner():
 
     graphs = []
     roomdict, total_rooms, defaultComponents = data_from_json()
-    graphs = getRandomGraphlist(roomdict, total_rooms, number = 50, defaultGraph = True, default_components = defaultComponents)
+    graphs = getRandomGraphlist(roomdict, total_rooms, number = 50, defaultGraph = True, default_components = defaultComponents, is_biconnected = is_biconnected)
 
     return graphs
 
@@ -230,8 +235,9 @@ def driver():
 def runner_test():
     """
     Tests runner API function.
+    (pass is_biconnected = True to get biconnected graphlist, false to also allow one-connected graphs in graph list.)
     """
-    graphs = runner()
+    graphs = runner(False)
     my_plot(graphs)
     plt.show()
 
