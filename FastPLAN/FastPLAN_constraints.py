@@ -15,8 +15,7 @@ def applyConstraints(graph, vertex_dictlist, biconnected = True):
     #Applying Biconnectivity (could be done better)
     if (biconnected):
         updated_graph.add_edges_from(nx.k_edge_augmentation(updated_graph, k = 3))
-    # else:
-        # updated_graph.add_edges_from(nx.k_edge_augmentation(updated_graph, k = 1))
+        
     #Applying constraints:
     updated_graph = applyKitchenBath(updated_graph, vertex_dictlist)
     
