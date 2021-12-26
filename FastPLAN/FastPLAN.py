@@ -87,6 +87,21 @@ def createGraph(room_dict,total_rooms):
     # nx.draw_kamada_kawai(G_default, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10) #Uncomment to see default graph.
     return g_default, vertex_dictlist
 
+def is_Unique(graphlist,graph):
+    """Checks if the graph or any of its isomorphic versions is in the graphlist.
+        Inputs:
+            1. graphlist - The graphlist to be checked into
+            2. graph - The graph to be added to the graphlist.
+        Returns:
+            1. check - A boolean representing if the graph is unique or not.
+    """
+    check = True
+    for g in graphlist:
+        if (nx.is_isomorphic(g,graph) == True):
+            check = False    
+
+    return check
+
 def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False, default_components = None, is_biconnected = True):
     """Returns required list of graphs.
         Inputs:
@@ -112,10 +127,12 @@ def getRandomGraphlist(room_dict, total_rooms, number = 50, defaultGraph = False
         g = applyConstraints(g,vertex_dictlist,is_biconnected)
         if (is_biconnected):
             if(nx.is_biconnected(g) and nx.check_planarity(g)[0]):
-                graphs.append(g)
+                if is_Unique(graphs, g):
+                    graphs.append(g)
         else:
             if(nx.is_connected(g) and nx.check_planarity(g)[0]):
-                graphs.append(g)
+                if is_Unique(graphs, g):
+                    graphs.append(g)
     # We now have a list of graphs
     return graphs
 
