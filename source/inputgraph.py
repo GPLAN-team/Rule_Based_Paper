@@ -169,11 +169,16 @@ class InputGraph:
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
         bcn_edges_added = len(bcn_edges) > 0
+        print("Biconnected_edges",bcn_edges)
+        print("After biconnectivity: ",self.matrix)
 
         #Triangularity
-        trng_edges,positions = trng.triangulate(self.matrix
+        trng_edges,positions,tri_faces = trng.triangulate(self.matrix
                                                 ,bcn_edges_added
                                                 ,self.coordinates)
+        print("Triangular edges",trng_edges)
+        print("Faces: ", tri_faces)
+        print("After triangularity: ",self.matrix)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
@@ -181,6 +186,19 @@ class InputGraph:
         
         if(len(bcn_edges) != 0 or len(trng_edges) != 0):
             self.nonrect = True
+        
+        for edge in bcn_edges:
+            self.extranodes.append(self.nodecnt)
+            self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                self.matrix, edge, tri_faces, positions)
+            self.nodecnt += 1  # Extra node added
+            self.edgecnt += extra_edges_cnt
+        for edge in trng_edges:
+            self.extranodes.append(self.nodecnt)
+            self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                self.matrix, edge, tri_faces, positions)
+            self.nodecnt += 1  # Extra node added
+            self.edgecnt += extra_edges_cnt
         
         #Separating Triangle Elimination
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
@@ -194,40 +212,13 @@ class InputGraph:
                 self.irreg_nodes1.append(extra_nodes[0][key][0])
                 self.irreg_nodes2.append(extra_nodes[0][key][1])
 
+        print("Irregular nodes 1: ", self.irreg_nodes1)
+        print("Irregular nodes 2: ", self.irreg_nodes2)
+        print("After sep tri: ",self.matrix)
         #Edge Transformation        
-        for edge in bcn_edges:
-            if(self.matrix[edge[0]][edge[1]]==0):
-                for idx in range(len(self.irreg_nodes1)):
-                    if(self.irreg_nodes1[idx]==edge[0] and self.irreg_nodes2[idx]==edge[1]) or (self.irreg_nodes1[idx]==edge[1] and self.irreg_nodes2[idx]==edge[0]):
-                        extra_node = self.mergednodes[idx]
-                        self.extranodes.append(extra_node)
-                        self.mergednodes.pop(idx)
-                        self.irreg_nodes1.pop(idx)
-                        self.irreg_nodes2.pop(idx)
-                        break
-            else:
-                self.extranodes.append(self.nodecnt)
-                self.matrix, extra_edges_cnt = transform.transform_edges(
-                    self.matrix, edge)
-                self.nodecnt += 1  # Extra node added
-                self.edgecnt += extra_edges_cnt
-        for edge in trng_edges:
-            if(self.matrix[edge[0]][edge[1]]==0):
-                for idx in range(len(self.irreg_nodes1)):
-                    if(self.irreg_nodes1[idx]==edge[0] and self.irreg_nodes2[idx]==edge[1]) or (self.irreg_nodes1[idx]==edge[1] and self.irreg_nodes2[idx]==edge[0]):
-                        extra_node = self.mergednodes[idx]
-                        self.extranodes.append(extra_node)
-                        self.mergednodes.pop(idx)
-                        self.irreg_nodes1.pop(idx)
-                        self.irreg_nodes2.pop(idx)
-                        break
-            else:
-                self.extranodes.append(self.nodecnt)
-                self.matrix, extra_edges_cnt = transform.transform_edges(
-                    self.matrix, edge)
-                self.nodecnt += 1  # Extra node added
-                self.edgecnt += extra_edges_cnt
         
+        
+        # print("After transformation: ",self.matrix)
         #Boundary Identification
         triangular_cycles = opr.get_trngls(self.matrix)
         digraph = opr.get_directed(self.matrix)
