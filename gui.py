@@ -127,7 +127,7 @@ class App:
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Rules List is {self.input.adjacencies}")
         self.create_inputgraph_json()
-        graphs = runner()
+        graphs = runner(True)
 
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
