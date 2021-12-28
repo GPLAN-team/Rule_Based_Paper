@@ -105,7 +105,6 @@ class InputGraph:
         self.nodecnt = nodecnt
         self.edgecnt = edgecnt
         self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
-        self.matrix = np.zeros((self.nodecnt, self.nodecnt), int)
         for edges in (edgeset):
             self.matrix[edges[0]][edges[1]] = 1
             self.matrix[edges[1]][edges[0]] = 1
@@ -117,14 +116,6 @@ class InputGraph:
         self.degrees = None
         self.room_x = np.zeros(self.nodecnt)
         self.room_y = np.zeros(self.nodecnt)
-        self.room_x_bottom_right = np.zeros(self.nodecnt)
-        self.room_x_bottom_left = np.zeros(self.nodecnt)
-        self.room_x_top_right = np.zeros(self.nodecnt)
-        self.room_x_top_left = np.zeros(self.nodecnt)
-        self.room_y_right_top = np.zeros(self.nodecnt)
-        self.room_y_left_top = np.zeros(self.nodecnt)
-        self.room_y_right_bottom = np.zeros(self.nodecnt)
-        self.room_y_left_bottom = np.zeros(self.nodecnt)
         self.room_height = np.zeros(self.nodecnt)
         self.room_width = np.zeros(self.nodecnt)
         self.nodecnt_list = []
@@ -150,15 +141,6 @@ class InputGraph:
             self.room_y = np.array([0.0, 0.0])
             self.room_width = np.array([1.0, 1.0])
             self.room_height = np.array([1.0, 1.0])
-            self.room_x_bottom_left = np.array([0.0, 1.0])
-            self.room_x_bottom_right = np.array([0.0, 1.0])
-            self.room_x_top_left = np.array([1.0, 2.0])
-            self.room_x_top_right = np.array([1.0, 2.0])
-            self.room_y_left_bottom = np.array([1.0, 1.0])
-            self.room_y_right_bottom = np.array([0.0, 0.0])
-            self.room_y_left_top = np.array([1.0, 1.0])
-            self.room_y_right_top = np.array([0.0, 0.0])
-
             return 
         #Biconnectivity Augmentation
         bcn_edges = []
@@ -169,16 +151,11 @@ class InputGraph:
             self.matrix[edge[1]][edge[0]] = 1
             self.edgecnt += 1  # Extra edge added
         bcn_edges_added = len(bcn_edges) > 0
-        print("Biconnected_edges",bcn_edges)
-        print("After biconnectivity: ",self.matrix)
 
         #Triangularity
         trng_edges,positions,tri_faces = trng.triangulate(self.matrix
                                                 ,bcn_edges_added
                                                 ,self.coordinates)
-        print("Triangular edges",trng_edges)
-        print("Faces: ", tri_faces)
-        print("After triangularity: ",self.matrix)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
@@ -187,6 +164,7 @@ class InputGraph:
         if(len(bcn_edges) != 0 or len(trng_edges) != 0):
             self.nonrect = True
         
+        #Edge to vertex transformation
         for edge in bcn_edges:
             self.extranodes.append(self.nodecnt)
             self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
@@ -212,13 +190,6 @@ class InputGraph:
                 self.irreg_nodes1.append(extra_nodes[0][key][0])
                 self.irreg_nodes2.append(extra_nodes[0][key][1])
 
-        print("Irregular nodes 1: ", self.irreg_nodes1)
-        print("Irregular nodes 2: ", self.irreg_nodes2)
-        print("After sep tri: ",self.matrix)
-        #Edge Transformation        
-        
-        
-        # print("After transformation: ",self.matrix)
         #Boundary Identification
         triangular_cycles = opr.get_trngls(self.matrix)
         digraph = opr.get_directed(self.matrix)
@@ -265,8 +236,7 @@ class InputGraph:
         self.matrix = exp.basecase(self.matrix, self.nodecnt)
         while len(cntrs) != 0:
             self.matrix = exp.expand(self.matrix, self.nodecnt, cntrs)
-        [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right,
-            self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top, self.room_y_right_top] = rdg.construct_dual(self.matrix, self.nodecnt, self.mergednodes, self.irreg_nodes1)
+        [self.room_x, self.room_y, self.room_width, self.room_height] = rdg.construct_dual(self.matrix, self.nodecnt, self.mergednodes, self.irreg_nodes1)
 
     def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
@@ -320,8 +290,6 @@ class InputGraph:
             self.room_width = width.flatten()
             self.room_height = height.flatten()
             self.extranodes, self.mergednodes, self.irreg_nodes1 = self.extranodes[i], self.mergednodes[i], self.irreg_nodes1[i]
-            [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right, self.room_x_top_left, self.room_x_top_right, self.room_y_left_bottom, self.room_y_right_bottom,
-                self.room_y_left_top, self.room_y_right_top] = rdg.construct_floorplan(encoded_matrix, self.nodecnt + 4, self.room_width, self.room_height, hor_dgph, self.mergednodes, self.irreg_nodes1)
             for j in range(0, len(self.room_x)):
                 self.room_x[j] = round(self.room_x[j], 3)
             for j in range(0, len(self.room_y)):
@@ -347,14 +315,6 @@ class InputGraph:
             self.room_y = np.array([[0.0, 0.0]])
             self.room_width = np.array([[1.0, 1.0]])
             self.room_height = np.array([[1.0, 1.0]])
-            self.room_x_bottom_left = np.array([[0.0, 1.0]])
-            self.room_x_bottom_right = np.array([[0.0, 1.0]])
-            self.room_x_top_left = np.array([[1.0, 2.0]])
-            self.room_x_top_right = np.array([[1.0, 2.0]])
-            self.room_y_left_bottom = np.array([[1.0, 1.0]])
-            self.room_y_right_bottom = np.array([[0.0, 0.0]])
-            self.room_y_left_top = np.array([[1.0, 1.0]])
-            self.room_y_right_top = np.array([[0.0, 0.0]])
             self.area = [[1.0,1.0]]
             self.mergednodes = [[]]
             self.irreg_nodes1 = [[]]
@@ -372,7 +332,7 @@ class InputGraph:
         bcn_edges_added = len(bcn_edges) > 0
 
         #Triangulation
-        trng_edges,positions = trng.triangulate(self.matrix
+        trng_edges,positions,tri_faces = trng.triangulate(self.matrix
                                                 ,bcn_edges_added
                                                 ,self.coordinates)
         for edge in trng_edges:
@@ -384,6 +344,19 @@ class InputGraph:
             self.nonrect = True
         
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
+            extranodes = []
+            for edge in bcn_edges:
+                extranodes.append(self.nodecnt)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge, tri_faces, positions)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
+            for edge in trng_edges:
+                extranodes.append(self.nodecnt)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge, tri_faces, positions)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
             ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, positions, 20)
 
             for cnt in range(len(ptpg_matrices)):
@@ -397,7 +370,7 @@ class InputGraph:
                     mergednodes.append(key)
                     irreg_nodes1.append(extra_nodes[cnt][key][0])
                     irreg_nodes2.append(extra_nodes[cnt][key][1])
-                self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+                self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
                     self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
                 for bdys in cip_list:
                     matrix = copy.deepcopy(self.matrix)
@@ -415,7 +388,20 @@ class InputGraph:
             mergednodes = []
             irreg_nodes1 = []
             irreg_nodes2 = []
-            self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+            extranodes = []
+            for edge in bcn_edges:
+                extranodes.append(self.nodecnt)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge, tri_faces, positions)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
+            for edge in trng_edges:
+                extranodes.append(self.nodecnt)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                    self.matrix, edge, tri_faces, positions)
+                self.nodecnt += 1  # Extra node added
+                self.edgecnt += extra_edges_cnt
+            self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
                     self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
             for bdys in cip_list:
                 matrix = copy.deepcopy(self.matrix)
@@ -434,30 +420,13 @@ class InputGraph:
         self.room_y = []
         self.room_width = []
         self.room_height = []
-        self.room_x_bottom_left = []
-        self.room_x_bottom_right = []
-        self.room_x_top_left = []
-        self.room_x_top_right = []
-        self.room_y_left_bottom = []
-        self.room_y_right_bottom = []
-        self.room_y_left_top = []
-        self.room_y_right_top = []
         self.area = []
         for cnt in range(self.fpcnt):
-            [room_x, room_y, room_width, room_height, room_x_bottom_left, room_x_bottom_right, room_x_top_left, room_x_top_right, room_y_left_bottom, room_y_right_bottom,
-                room_y_left_top, room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
+            [room_x, room_y, room_width, room_height] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
             self.room_x.append(room_x)
             self.room_y.append(room_y)
             self.room_width.append(room_width)
             self.room_height.append(room_height)
-            self.room_x_bottom_left.append(room_x_bottom_left)
-            self.room_x_bottom_right.append(room_x_bottom_right)
-            self.room_x_top_left.append(room_x_top_left)
-            self.room_x_top_right.append(room_x_top_right)
-            self.room_y_left_bottom.append(room_y_left_bottom)
-            self.room_y_right_bottom.append(room_y_right_bottom)
-            self.room_y_left_top.append(room_y_left_top)
-            self.room_y_right_top.append(room_y_right_top)
 
     def multiple_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates multiple floorplans for a given input graph.
@@ -512,8 +481,6 @@ class InputGraph:
             height = np.transpose(height)
             self.room_width[i] = width.flatten()
             self.room_height[i] = height.flatten()
-            [self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i], self.room_x_bottom_left[i], self.room_x_bottom_right[i], self.room_x_top_left[i], self.room_x_top_right[i], self.room_y_left_bottom[i],
-                self.room_y_right_bottom[i], self.room_y_left_top[i], self.room_y_right_top[i]] = rdg.construct_floorplan(encoded_matrix, self.nodecnt + 4, self.room_width[i], self.room_height[i], hor_dgph, self.mergednodes[i], self.irreg_nodes1[i])
             for j in range(0, len(self.room_x[i])):
                 self.room_x[i][j] = round(self.room_x[i][j], 3)
             for j in range(0, len(self.room_y[i])):
@@ -806,37 +773,6 @@ def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges, merge
         edgecnt: An integer representing the edge count of the graph.
         extranodes: A list containing the extra nodes added to the graph.
     """
-    extranodes = []
-    for edge in bcn_edges:
-        if(matrix[edge[0]][edge[1]]==0):
-            for idx in range(len(irreg_nodes1)):
-                if(irreg_nodes1[idx]==edge[0] and irreg_nodes2[idx]==edge[1]) or (irreg_nodes1[idx]==edge[1] and irreg_nodes2[idx]==edge[0]):
-                    extra_node = mergednodes[idx]
-                    extranodes.append(extra_node)
-                    mergednodes.pop(idx)
-                    irreg_nodes1.pop(idx)
-                    irreg_nodes2.pop(idx)
-                    break
-        else:
-            extranodes.append(nodecnt)
-            matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
-            nodecnt += 1  # Extra node added
-            edgecnt += extra_edges_cnt
-    for edge in trng_edges:
-        if(matrix[edge[0]][edge[1]]==0):
-            for idx in range(len(irreg_nodes1)):
-                if(irreg_nodes1[idx]==edge[0] and irreg_nodes2[idx]==edge[1]) or (irreg_nodes1[idx]==edge[1] and irreg_nodes2[idx]==edge[0]):
-                    extra_node = mergednodes[idx]
-                    extranodes.append(extra_node)
-                    mergednodes.pop(idx)
-                    irreg_nodes1.pop(idx)
-                    irreg_nodes2.pop(idx)
-                    break
-        else:
-            extranodes.append(nodecnt)
-            matrix, extra_edges_cnt = transform.transform_edges(matrix, edge)
-            nodecnt += 1  # Extra node added
-            edgecnt += extra_edges_cnt
     triangular_cycles = opr.get_trngls(matrix)
     digraph = opr.get_directed(matrix)
     bdy_nodes, bdy_edges = opr.get_bdy(triangular_cycles, digraph)
@@ -851,4 +787,4 @@ def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges, merge
         outer_boundary = opr.ordered_bdy(bdy_nodes, bdy_edges)
         cip_list = news.find_multiple_boundary(
             news.all_boundaries(corner_pts, outer_boundary), outer_boundary)
-    return matrix, cip_list, nodecnt, edgecnt, extranodes, mergednodes, irreg_nodes1, irreg_nodes2
+    return matrix, cip_list, nodecnt, edgecnt, mergednodes, irreg_nodes1, irreg_nodes2

@@ -156,7 +156,6 @@ def get_nontriangular_face(positions, G):
         nbr_sorted = [x[0] for x in nbr_sorted]
         nodes_ordered_nbr[node] = nbr_sorted
     faces = get_faces(G.edges,nodes_ordered_nbr)
-    print(faces)
     non_tri_faces = [face for face in faces if len(face) > 3]
     non_tri_faces = sorted(non_tri_faces ,  key=lambda x: len(x), reverse = True)
     outer_face = []
@@ -189,14 +188,11 @@ def get_tri_edges(non_tri_faces,positions):
 
     """
     tri_edges = []
-    print(non_tri_faces)
     for face in non_tri_faces:
         face_vertices = find_face_node(face)
         face_coordinates = np.array([positions[node]
                                  for node in face_vertices])
-        print(face_coordinates)
         triangles = ec.triangulate(face_coordinates,0)
-        print(triangles)
         for triangle in triangles:
             vertex1 = face_vertices[triangle[0]]
             vertex2 = face_vertices[triangle[1]]
