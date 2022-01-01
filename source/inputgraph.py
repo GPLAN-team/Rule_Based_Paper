@@ -67,26 +67,6 @@ class InputGraph:
         mergednodes: A list containing nodes to be merged.
                         (list of list for multiple floorplans)
         degrees: A list containing degree of each node.
-        room_x: A list containing bottom-left x coordinate
-                of each room.
-        room_y: A list containing bottom-left y coordinate
-               of each room.
-        room_x_bottom_right: A list containing rightmost-middle
-                             x coordinate in bottom edge.
-        room_x_bottom_left: A list containing leftmost-middle
-                            x coordinate in bottom edge.
-        room_x_top_right: A list containing rightmost-middle
-                          x coordinate in top edge.
-        room_x_top_left: A list containing leftmost-middle
-                         x coordinate in top edge.
-        room_y_right_top: A list containing topmost-middle
-                          x coordinate in right edge.
-        room_y_left_top: A list containing topmost-middle
-                         x coordinate in left edge.
-        room_y_right_bottom: A list containing bottommost-middle
-                             x coordinate in right edge.
-        room_y_left_bottom: A list containing bottommost-middle
-                            x coordinate in left edge.
         room_height: A list containing height of each room.
         room_width: A list containing width of each room.
         nodecnt_list: A list containing node count for each rel matrix.
@@ -290,6 +270,8 @@ class InputGraph:
             self.room_width = width.flatten()
             self.room_height = height.flatten()
             self.extranodes, self.mergednodes, self.irreg_nodes1 = self.extranodes[i], self.mergednodes[i], self.irreg_nodes1[i]
+            self.room_x = self.room_x[i]
+            self.room_y = self.room_y[i]
             for j in range(0, len(self.room_x)):
                 self.room_x[j] = round(self.room_x[j], 3)
             for j in range(0, len(self.room_y)):
@@ -492,40 +474,16 @@ class InputGraph:
         room_y = []
         room_width = []
         room_height = []
-        room_x_bottom_left = []
-        room_x_bottom_right = []
-        room_x_top_left = []
-        room_x_top_right = []
-        room_y_left_bottom = []
-        room_y_right_bottom = []
-        room_y_left_top = []
-        room_y_right_top = []
         for i in range(len(status_list)):
             if status_list[i] == True:
                 room_x.append(self.room_x[i])
                 room_y.append(self.room_y[i])
                 room_width.append(self.room_width[i])
                 room_height.append(self.room_height[i])
-                room_x_bottom_left.append(self.room_x_bottom_left[i])
-                room_x_bottom_right.append(self.room_x_bottom_right[i])
-                room_x_top_left.append(self.room_x_top_left[i])
-                room_x_top_right.append(self.room_x_top_right[i])
-                room_y_left_bottom.append(self.room_y_left_bottom[i])
-                room_y_right_bottom.append(self.room_y_right_bottom[i])
-                room_y_left_top.append(self.room_y_left_top[i])
-                room_y_right_top.append(self.room_y_right_top[i])
         self.room_x = room_x
         self.room_y = room_y
         self.room_width = room_width
         self.room_height = room_height
-        self.room_x_bottom_left = room_x_bottom_left
-        self.room_x_bottom_right = room_x_bottom_right
-        self.room_x_top_left = room_x_top_left
-        self.room_x_top_right = room_x_top_right
-        self.room_y_left_bottom = room_y_left_bottom
-        self.room_y_right_bottom = room_y_right_bottom
-        self.room_y_left_top = room_y_left_top
-        self.room_y_right_top = room_y_right_top
 
     def oneconnected_dual(self, string):
         """Generates oneconnected rectangular duals for a given input graph.
@@ -670,24 +628,13 @@ class InputGraph:
 
         #Returning floorplans as per string
         if(string == "single"):
-            [self.room_x, self.room_y, self.room_width, self.room_height, self.room_x_bottom_left, self.room_x_bottom_right,
-            self.room_x_top_left, self.room_x_top_right,
-            self.room_y_left_bottom, self.room_y_right_bottom, self.room_y_left_top,
-            self.room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[0], nodes + 4, [], [])
+            [self.room_x, self.room_y, self.room_width, self.room_height] = rdg.construct_dual(self.rel_matrix_list[0], nodes + 4, [], [])
         elif(string == "multiple"):
             self.fpcnt = len(self.rel_matrix_list)
             self.room_x = []
             self.room_y = []
             self.room_width = []
             self.room_height = []
-            self.room_x_bottom_left = []
-            self.room_x_bottom_right = []
-            self.room_x_top_left = []
-            self.room_x_top_right = []
-            self.room_y_left_bottom = []
-            self.room_y_right_bottom = []
-            self.room_y_left_top = []
-            self.room_y_right_top = []
             self.area = []
             self.extranodes = []
             self.mergednodes = []
@@ -696,20 +643,11 @@ class InputGraph:
             
             
             for cnt in range(self.fpcnt):
-                [room_x, room_y, room_width, room_height, room_x_bottom_left, room_x_bottom_right, room_x_top_left, room_x_top_right, room_y_left_bottom, room_y_right_bottom,
-                    room_y_left_top, room_y_right_top] = rdg.construct_dual(self.rel_matrix_list[cnt], nodes + 4, [], [])
+                [room_x, room_y, room_width, room_height] = rdg.construct_dual(self.rel_matrix_list[cnt], nodes + 4, [], [])
                 self.room_x.append(room_x)
                 self.room_y.append(room_y)
                 self.room_width.append(room_width)
                 self.room_height.append(room_height)
-                self.room_x_bottom_left.append(room_x_bottom_left)
-                self.room_x_bottom_right.append(room_x_bottom_right)
-                self.room_x_top_left.append(room_x_top_left)
-                self.room_x_top_right.append(room_x_top_right)
-                self.room_y_left_bottom.append(room_y_left_bottom)
-                self.room_y_right_bottom.append(room_y_right_bottom)
-                self.room_y_left_top.append(room_y_left_top)
-                self.room_y_right_top.append(room_y_right_top)
                 self.mergednodes.append([])
                 self.irreg_nodes1.append([])
                 self.irreg_nodes2.append([])
