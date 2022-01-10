@@ -245,7 +245,7 @@ def driver():
     else:
         store_rooms = input("Enter number of storerooms you want: ")
         room_dict, total_rooms = planner(plan, store_rooms,False, 4)
-    graphs = getRandomGraphlist(room_dict,total_rooms,number = 30, defaultGraph = False, default_components = None, is_biconnected = False)
+    graphs = getRandomGraphlist(room_dict,total_rooms,number = 70, defaultGraph = False, default_components = None, is_biconnected = False)
     my_plot(graphs)
     plt.show()
 
