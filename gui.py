@@ -10,8 +10,39 @@ helv8 = ("Helvetica", 8, "bold")
 
 INPUTGRAPH_JSON_PATH = ("./FastPLAN/inputgraph.json")
 
+rgb_colors = [ 	
+    (123,104,238), #medium slate blue	
+    (64,224,208), #turqouise
+    (255,127,80), #coral
+    (255,105,180), #hot pink	
+    (230,230,250), #lavender
+    (250,128,114), #salmon
+    (152,251,152), #pale green
+    (186,85,211), #medium orchid
+    (176,196,222), #light steel blue
+    (255,165,0), #orange
+    (255,218,185), #peach puff
+    (100,149,237), #corn flower blue
+    ]*10
+
+hex_colors = [
+    "#7B68EE", #medium slate blue	
+    "#40E0D0", #turqouise
+    "#FF7F50", #coral
+    "#FF69B4", #hot pink	
+    "#E6E6FA", #lavender
+    "#FA8072", #salmon
+    "#98FB98", #pale green
+    "#BA55D3", #medium orchid
+    "#B0C4DE", #light steel blue
+    "#FFA500", #orange
+    "#FFDAB9", #peach puff
+    "#6495ED", #corn flower blue
+]*10
+
 class App:
     def __init__(self) -> None:
+        self.input = Input()
         self.initialise_root()
         self.add_logo()
         self.custom_rfp_section()
@@ -23,9 +54,9 @@ class App:
         self.room_freq = []
         self.value = []
         self.freqbox = []
-        self.input = Input()
         self.output_found = False
         self.curr_rfp = -1
+        self.colors_map = {}
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -58,7 +89,15 @@ class App:
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
     def properties_section(self):
-        pass
+        self.properties_frame = tk.Frame(self.root)
+        self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
+
+        self.colors_table_frame = tk.Frame(self.properties_frame)
+        self.colors_table_frame.grid()
+        self.colors_table_canvas = tk.Canvas(self.colors_table_frame)
+        self.colors_table_canvas.grid()
+
+        self.update_colors_table()
 
     def modification_section(self):
         self.modify_frame = tk.Frame(self.root)
@@ -71,20 +110,16 @@ class App:
         self.modify_rules_button = tk.Button(self.modify_frame, text="Modify Rules", font=helv15,
                                              command=self.modify_rules_Button_click)
         self.modify_rules_button.grid(row=3, column=0, padx=10, pady=10)
-
         
         self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
                                              command=self.run_Button_click)
         self.run_button.grid(row=4, column=0, padx=10, pady=10)
-
         
         self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
         self.prev_btn.grid(row=5, column=0, padx=10, pady=10)
         
         self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
         self.next_btn.grid(row=6, column=0, padx=10, pady=10)
-
-
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
@@ -93,7 +128,6 @@ class App:
         self.rfp_canvas = tk.Canvas(self.rfp_draw_frame, background="#FFFFFF", width=1000, height=800)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
-
     def handle_prev_btn(self):
         self.curr_rfp -= 1
         if self.curr_rfp == 0:
@@ -101,8 +135,6 @@ class App:
             return
 
         self.draw_one_rfp(self.output_rfps[self.curr_rfp])
-
-        
 
     def handle_next_btn(self):
         if self.curr_rfp == len(self.output_rfps) - 1:
@@ -113,13 +145,28 @@ class App:
 
         self.draw_one_rfp(self.output_rfps[self.curr_rfp])
 
+    def update_colors_table(self):
+
+        self.colors_table_canvas.delete("all")
+        for i, each_room in enumerate(self.input.rooms.values()):
+            self.colors_table_canvas.create_rectangle(100, 100 + i*30, 120, 120 + i*30 , fill=self.colors_map[each_room])
+            self.colors_table_canvas.create_text(200, 105 + i*30, text=each_room)
+            
+
+        
+
     def draw_one_rfp(self, rfp, origin = (200, 200), scale = 1):
         x, y = origin
         self.rfp_canvas.delete("all")
+
+        
         for each_room in rfp:
             print(f"each room {each_room}")
-            self.rfp_canvas.create_rectangle(x + scale* each_room['left'], y + scale * each_room['top'], x +  scale * (each_room['left'] + each_room['width']) , y + scale * (each_room['top'] + each_room['height']))
+            self.colors_map[self.input.rooms[each_room['label']]] = hex_colors[each_room['label']]
+            self.rfp_canvas.create_rectangle(x + scale* each_room['left'], y + scale * each_room['top'], x +  scale * (each_room['left'] + each_room['width']) , y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
             # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
+
+        self.update_colors_table()
 
     def run_Button_click(self):
         print("[LOG] Run Button Clicked")
@@ -143,11 +190,6 @@ class App:
 
         self.handle_next_btn()
 
-
-
-
-
-    
     def create_inputgraph_json(self):
         input = {}
         input["nodes"] = list(self.input.rooms.values())
@@ -157,10 +199,6 @@ class App:
 
         with open(INPUTGRAPH_JSON_PATH, "w") as outfile:
             outfile.write(inputgraph_object)
-
-
-
-
 
     def oneBHK_Button_click(self):
         print("[LOG] One BHK Button Clicked")
@@ -246,9 +284,6 @@ class App:
 
         room_win.title("Room Modifier")
         # room_win.geometry(str(1000) + 'x' + str(400))
-
-        
-
         prev_room_list_frame = tk.Frame(room_win)
 
         prev_room_list_frame.grid()
