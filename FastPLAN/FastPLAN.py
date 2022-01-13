@@ -22,7 +22,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 from random import randint
-from FastPLAN_constraints import applyConstraints
+from .FastPLAN_constraints import applyConstraints
 
 JSON_PATH = ('./FastPLAN/inputgraph.json')
 
