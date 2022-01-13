@@ -22,7 +22,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 from random import randint
-from .FastPLAN_constraints import applyConstraints
 
 JSON_PATH = ('./FastPLAN/inputgraph.json')
 
@@ -259,5 +258,8 @@ def runner_test():
     plt.show()
 
 if __name__ == "__main__":
+    from FastPLAN_constraints import applyConstraints
     driver()
     # runner_test()
+else:
+    from .FastPLAN_constraints import applyConstraints
