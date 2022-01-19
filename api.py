@@ -158,17 +158,17 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
                 "top": int(graph.room_y[idx][node["id"]] * normalize_const),
                 "width": int(graph.room_width[idx][node["id"]] * normalize_const),
                 "height": int(graph.room_height[idx][node["id"]] * normalize_const)
-                })
+            })
         for cnt in range(len(graph.mergednodes[idx])):
             output_fp.append({
                 "id": graph.mergednodes[idx][cnt],
                 "label": input_data['nodes'][graph.irreg_nodes1[idx][cnt]]["label"],
                 "color": input_data['nodes'][graph.irreg_nodes1[idx][cnt]]["color"],
                 "left": int(graph.room_x[idx][graph.mergednodes[idx][cnt]] * normalize_const),
-                "top": int( graph.room_y[idx][graph.mergednodes[idx][cnt]] * normalize_const),
+                "top": int(graph.room_y[idx][graph.mergednodes[idx][cnt]] * normalize_const),
                 "width": int(graph.room_width[idx][graph.mergednodes[idx][cnt]] * normalize_const),
                 "height": int(graph.room_height[idx][graph.mergednodes[idx][cnt]] * normalize_const)
-                })
+            })
         output_data.append(output_fp)
     return output_data
 
@@ -176,9 +176,9 @@ if __name__ == "__main__":
     test_one_BHK_to_input_data()
     input_data = {
         "nodes": [
-            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color":  "#e7e7e7"},
-            {"id": 1, "label": "living room", "x": 25, "y": 20, "color":  "#e7e7e7"},
-            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color":  "#e7e7e7"}],
+            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color": "#e7e7e7"},
+            {"id": 1, "label": "living room", "x": 25, "y": 20, "color": "#e7e7e7"},
+            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color": "#e7e7e7"}],
         "edges": [
             {"source": 0, "target": 1},
             {"source": 1, "target": 2},
@@ -188,9 +188,9 @@ if __name__ == "__main__":
 
     input_data = {
         "nodes": [
-            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color":  "#e7e7e7"},
-            {"id": 1, "label": "living room", "x": 25, "y": 20, "color":  "#e7e7e7"},
-            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color":  "#e7e7e7"}],
+            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color": "#e7e7e7"},
+            {"id": 1, "label": "living room", "x": 25, "y": 20, "color": "#e7e7e7"},
+            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color": "#e7e7e7"}],
         "edges": [
             {"source": 0, "target": 1},
             {"source": 1, "target": 2},
@@ -200,10 +200,10 @@ if __name__ == "__main__":
 
     input_data = {
         "nodes": [
-            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color":  "#e7e7e7"},
-            {"id": 1, "label": "living room", "x": 25, "y": 20, "color":  "#e7e7e7"},
-            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color":  "#e7e7e7"},
-            {"id": 3, "label": "rotunda", "x": 20, "y": 25, "color":  "#e7e7e7"}],
+            {"id": 0, "label": "kitchen", "x": 14, "y": 20, "color": "#e7e7e7"},
+            {"id": 1, "label": "living room", "x": 25, "y": 20, "color": "#e7e7e7"},
+            {"id": 2, "label": "rotunda", "x": 20, "y": 30, "color": "#e7e7e7"},
+            {"id": 3, "label": "rotunda", "x": 20, "y": 25, "color": "#e7e7e7"}],
         "edges": [
             {"source": 0, "target": 1},
             {"source": 1, "target": 2},

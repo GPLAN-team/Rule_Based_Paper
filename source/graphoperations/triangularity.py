@@ -193,24 +193,53 @@ def get_tri_edges(non_tri_faces,positions):
         face_coordinates = np.array([positions[node]
                                  for node in face_vertices])
         triangles = ec.triangulate(face_coordinates,0)
-        
         for triangle in triangles:
             vertex1 = face_vertices[triangle[0]]
             vertex2 = face_vertices[triangle[1]]
             vertex3 = face_vertices[triangle[2]]
             if (vertex1,vertex2) not in face and\
                 (vertex2,vertex1) not in face and\
-                (vertex1,vertex2) not in tri_edges:
+                (vertex1,vertex2) not in tri_edges and\
+                (vertex2,vertex1) not in tri_edges:
                 tri_edges.append((vertex1,vertex2))
             if (vertex2,vertex3) not in face and\
                 (vertex3,vertex2) not in face and\
-                (vertex2,vertex3) not in tri_edges:
+                (vertex2,vertex3) not in tri_edges and\
+                (vertex3,vertex2) not in tri_edges:
                 tri_edges.append((vertex2,vertex3))
             if (vertex1,vertex3) not in face and\
                 (vertex3,vertex1) not in face and\
-                (vertex1,vertex3) not in tri_edges:
+                (vertex1,vertex3) not in tri_edges and\
+                (vertex3,vertex1) not in tri_edges:
                 tri_edges.append((vertex1,vertex3))
     return tri_edges
+
+def get_faces_after_triangulation(tri_edges,nxgraph,positions):
+    """Finds faces of the triangualated graph.
+
+    Args:
+        tri_edges: A list containing the edges to be added to make the 
+                    graph triangulated.
+        nxgraph: A Networkx object representing the input graph.
+        positions: A dictionary containing the node as key and
+                   its coordinate as value.
+
+    Returns:
+        tri_faces: A list containing the faces of triangulated graph.
+
+    """
+    trng_nxgraph = nx.Graph(list(nxgraph.edges)+tri_edges)
+    nodes_ordered_nbr = {}
+    for node in trng_nxgraph.nodes:
+        nbr_dict = {n:positions[n] for n in trng_nxgraph[node]}
+        nbr_dict_polar = get_new_coordinates(nbr_dict,positions[node])
+        nbr_sorted = sorted(nbr_dict_polar.items() ,  key=lambda x: x[1], reverse = True)
+        nbr_sorted = [x[0] for x in nbr_sorted]
+        nodes_ordered_nbr[node] = nbr_sorted
+    faces = get_faces(trng_nxgraph.edges,nodes_ordered_nbr)
+    tri_faces = [face for face in faces if len(face) == 3]
+    return tri_faces
+
 
 def triangulate(matrix,bcn_edges_added,pos):
     """Find edges to be added to make graph triangulated.
@@ -233,7 +262,8 @@ def triangulate(matrix,bcn_edges_added,pos):
         positions = nx.planar_layout(nxgraph)
     non_tri_faces = get_nontriangular_face(positions, nxgraph)
     tri_edges = get_tri_edges(non_tri_faces,positions)
-    return tri_edges,positions
+    tri_faces = get_faces_after_triangulation(tri_edges,nxgraph,positions)
+    return tri_edges,positions,tri_faces
 
     
 
