@@ -11,11 +11,11 @@ import json
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def multigraph_to_rfp(input_data_list):
+def multigraph_to_rfp(input_graph_list):
     output_rfps = []
-    for each_graph in input_data_list:
+    for each_graph in input_graph_list:
         print("each graph = "  + str(each_graph.edges()))
-        output_rfps.extend(graph_to_rfp(convert_nxgraph_to_input_data(each_graph)))
+        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph))[0])
         # output_rfps.append(graph_to_rfp(each_graph))
 
     return output_rfps
@@ -114,7 +114,6 @@ def convert_json_to_input_data(graph):
     # print(input_data)
     return input_data
 
-
 def test_one_BHK_to_input_data():
     one_BHK_file = open("two_bhk.json")
     json_data = json.load(one_BHK_file)
@@ -122,10 +121,6 @@ def test_one_BHK_to_input_data():
     print(input_data)
     output_data = graph_to_rfp(input_data)
     print(output_data)
-
-
-
-
 
 def graph_to_rfp(input_data, normalize_const=40, limit=100000):
     """Generates a rfp for given graph data
@@ -177,7 +172,6 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
         output_data.append(output_fp)
     return output_data
 
-
 if __name__ == "__main__":
     test_one_BHK_to_input_data()
     input_data = {
@@ -218,7 +212,3 @@ if __name__ == "__main__":
             {"source": 1, "target": 3},
             {"source": 2, "target": 3}],
     }
-
-    # print(graph_to_rfp(input_data))
-
-

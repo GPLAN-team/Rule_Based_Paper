@@ -2,29 +2,32 @@
     "nodes": [
         "Living Room",
         "Bed Room 1",
+        "Bed Room 2",
         "Kitchen",
-        "WC"
+        "Dining Room",
+        "WC 1",
+        "WC 2"
     ],
     "edges": [
         [
             0,
-            1
-        ],
-        [
-            1,
             2
         ],
         [
             0,
-            2
+            6
         ],
         [
             0,
-            3
+            4
+        ],
+        [
+            3,
+            4
         ],
         [
             1,
-            3
+            5
         ]
     ]
 }

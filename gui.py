@@ -107,9 +107,9 @@ class App:
                                              command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_rules_button = tk.Button(self.modify_frame, text="Modify Rules", font=helv15,
-                                             command=self.modify_rules_Button_click)
-        self.modify_rules_button.grid(row=3, column=0, padx=10, pady=10)
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Modify Doors", font=helv15,
+                                             command=self.modify_doors_Button_click)
+        self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
         
         self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
                                              command=self.run_Button_click)
@@ -152,9 +152,6 @@ class App:
             self.colors_table_canvas.create_rectangle(100, 100 + i*30, 120, 120 + i*30 , fill=self.colors_map[each_room])
             self.colors_table_canvas.create_text(200, 105 + i*30, text=each_room)
             
-
-        
-
     def draw_one_rfp(self, rfp, origin = (200, 200), scale = 1):
         x, y = origin
         self.rfp_canvas.delete("all")
@@ -172,13 +169,14 @@ class App:
         print("[LOG] Run Button Clicked")
 
         print(f"Room List is {list(self.input.rooms.values())}")
-        print(f"Rules List is {self.input.adjacencies}")
+        print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         graphs = runner(True)
 
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
         output_rfps = multigraph_to_rfp(graphs)
+        print(f"number of rfps = {len(output_rfps)}")
         self.output_rfps = output_rfps
 
         self.output_found = True
@@ -213,7 +211,7 @@ class App:
 
 
         self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_rules_from(adjcancy_list = new_adj_list)
+        self.input.add_doors_from(adjcancy_list = new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -230,7 +228,7 @@ class App:
 
 
         self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_rules_from(adjcancy_list = new_adj_list)
+        self.input.add_doors_from(adjcancy_list = new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -247,7 +245,7 @@ class App:
 
 
         self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_rules_from(adjcancy_list = new_adj_list)
+        self.input.add_doors_from(adjcancy_list = new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -314,21 +312,21 @@ class App:
         self.remove_room_btn_list[room_id].destroy()
         print(f"current room list = {self.input.rooms}")
 
-    def modify_rules_Button_click(self):
-        print("[LOG] Modify Rules Button Clicked")
+    def modify_doors_Button_click(self):
+        print("[LOG] Modify Doors Button Clicked")
         
-        rules_win = tk.Toplevel(self.root)
+        doors_win = tk.Toplevel(self.root)
         
-        rules_win.title("Rules Modifier")
-        # rules_win.geometry(str(1000) + 'x' + str(400))
+        doors_win.title("Doors Modifier")
+        # doors_win.geometry(str(1000) + 'x' + str(400))
 
 
-        adj_frame = tk.Frame(rules_win)
+        adj_frame = tk.Frame(doors_win)
         adj_frame.grid(row=0)
 
         self.recall_adj_constraints_frame(adj_frame)
 
-        add_new_adj_frame = tk.Frame(rules_win)
+        add_new_adj_frame = tk.Frame(doors_win)
         add_new_adj_frame.grid(row=1)
 
         cur_new_adj_frame_row = 0
@@ -353,7 +351,7 @@ class App:
         add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add Rule", command = lambda : self.handle_add_new_adj_btn(adj_frame))
         add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
 
-        rules_win.wait_variable()
+        doors_win.wait_variable()
 
     def handle_add_new_adj_btn(self,frame):
         right = self.new_adj_text_right.get()
@@ -368,7 +366,6 @@ class App:
         print(f"current adjs is {self.input.adjacencies}")
         self.input.adjacencies.remove(rule)
         self.recall_adj_constraints_frame(frame)
-        # frame.destroy()
 
     def recall_adj_constraints_frame(self, frame):
         for widget in frame.winfo_children():
@@ -400,7 +397,6 @@ class App:
              
     def run(self):
         self.root.mainloop()
-
 
 if __name__ == "__main__":
     app = App()

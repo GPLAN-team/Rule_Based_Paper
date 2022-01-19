@@ -41,6 +41,7 @@ class BCNError(Exception):
     Raised when one-connected code gets biconnected graph as input.
     """
     pass
+
 class InputGraph:
     """A InputGraph class for graph input by the user.
     This class provides methods to generate single or
@@ -756,8 +757,6 @@ class InputGraph:
                 self.irreg_nodes1.append([])
                 self.irreg_nodes2.append([])
                 self.extranodes.append([])
-
-    
 
 def generate_multiple_rel(bdys, matrix, nodecnt, edgecnt):
     """Generates multiple RELs for given matrix and boundary.
