@@ -3,6 +3,8 @@ from FastPLAN import FastPLAN
 from input import Input
 import json
 from FastPLAN.FastPLAN import runner
+from FastPLAN.FastPLAN import my_plot
+import matplotlib.pyplot as plt
 from api import multigraph_to_rfp
 
 helv15 = ("Helvetica", 15, "bold")
@@ -171,7 +173,9 @@ class App:
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
-        graphs = runner(True)
+        graphs = runner(False)
+        my_plot(graphs)
+        plt.show()
 
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
