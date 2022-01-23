@@ -27,9 +27,9 @@ def block_checker(E,symm_rooms):
         for i in range(0,len(l)):
             P[P==l[i]] = -1
 
-        left = columns
+        left = rows
         right = 0
-        top = rows
+        top = columns
         bottom = 0
         count = 0
 

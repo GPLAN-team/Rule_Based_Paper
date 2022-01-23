@@ -42,6 +42,7 @@ def floorplan_to_st(E, min_width, min_height, max_width, max_height, ver_list, h
     rows = len(E)
     columns = len(E[0])
     E = np.array(E)
+    print(E)
     # E=[[5,5,5,5,6],[3,3,4,4,4],[0,1,1,2,2]]
     # E = np.array(E)
     rows = len(E)

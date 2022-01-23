@@ -50,12 +50,12 @@ def run():
             graph = inputgraph.InputGraph(gclass.value[0]
                 ,gclass.value[1]
                 ,gclass.value[2]
-                ,gclass.value[7])
+                ,gclass.value[7],[])
             origin = 0
-            if(gclass.command == "single"): #Single Irregular Dual/Floorplan
+            if(gclass.command == "single"): #Single Dual/Floorplan
                 if(gclass.value[4] == 0): #Non-Dimensioned single dual
                     start = time.time()
-                    graph.irreg_single_dual()
+                    graph.single_dual()
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
                     graph_data = {
@@ -63,6 +63,14 @@ def run():
                             'room_y': graph.room_y,
                             'room_width': graph.room_width,
                             'room_height': graph.room_height,
+                            'room_x_bottom_left': graph.room_x_bottom_left,
+                            'room_x_bottom_right': graph.room_x_bottom_right,
+                            'room_x_top_left': graph.room_x_top_left,
+                            'room_x_top_right': graph.room_x_top_right,
+                            'room_y_left_bottom': graph.room_y_left_bottom,
+                            'room_y_right_bottom': graph.room_y_right_bottom,
+                            'room_y_left_top': graph.room_y_left_top,
+                            'room_y_right_top': graph.room_y_right_top,
                             'area': graph.area,
                             'extranodes': graph.extranodes,
                             'mergednodes': graph.mergednodes,
@@ -85,146 +93,7 @@ def run():
                                 , [0] * gclass.value[0]]
                     min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
                     start = time.time()
-                    graph.irreg_multiple_dual()
-                    graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    while(graph.floorplan_exist == False):
-                        old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
-                        min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                        graph.irreg_multiple_dual()
-                        graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    end = time.time()
-                    printe("Time taken: " + str((end-start)*1000) + " ms")
-                    graph_data = {
-                            'room_x': graph.room_x,
-                            'room_y': graph.room_y,
-                            'room_width': graph.room_width,
-                            'room_height': graph.room_height,
-                            'area': graph.area,
-                            'extranodes': graph.extranodes,
-                            'mergednodes': graph.mergednodes,
-                            'irreg_nodes': graph.irreg_nodes1
-                        }
-                    draw.draw_rdg(graph_data
-                            ,1
-                            ,gclass.pen
-                            ,1
-                            ,gclass.value[6]
-                            ,[]
-                            ,origin)
-            elif(gclass.command == "multiple"):#Multiple Irregular Dual/Floorplan
-                if(gclass.value[4] == 0):#Non-Dimensioned multiple dual
-                    start = time.time()
-                    graph.irreg_multiple_dual()
-                    end = time.time()
-                    printe("Average Time taken: " + str(((end-start)*1000)/graph.fpcnt) + " ms")
-                    printe("Number of floorplans: " +  str(graph.fpcnt))
-                    for idx in range(graph.fpcnt):
-                        graph_data = {
-                            'room_x': graph.room_x[idx],
-                            'room_y': graph.room_y[idx],
-                            'room_width': graph.room_width[idx],
-                            'room_height': graph.room_height[idx],
-                            'area': graph.area,
-                            'extranodes': graph.extranodes[idx],
-                            'mergednodes': graph.mergednodes[idx],
-                            'irreg_nodes': graph.irreg_nodes1[idx]
-                        }
-                        draw.draw_rdg(graph_data
-                            ,idx+1
-                            ,gclass.pen
-                            ,1
-                            ,gclass.value[6]
-                            ,[]
-                            ,origin)
-                        # origin += 1000
-                        
-                        gclass.ocan.add_tab()
-                        gclass.pen = gclass.ocan.getpen()
-                        gclass.pen.speed(0)
-                else:#Dimensioned multiple floorplans
-                    old_dims = [[0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , ""
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]]
-                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                    start = time.time()
-                    graph.irreg_multiple_dual()
-                    graph.multiple_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    end = time.time()
-                    printe("Time taken: " + str((end-start)*1000) + " ms")
-                    printe("Number of floorplans: " +  str(len(graph.room_x)))
-                    for idx in range(len(graph.room_x)):
-                        graph_data = {
-                            'room_x': graph.room_x[idx],
-                            'room_y': graph.room_y[idx],
-                            'room_width': graph.room_width[idx],
-                            'room_height': graph.room_height[idx],
-                            'area': graph.area[idx],
-                            'extranodes': graph.extranodes[idx],
-                            'mergednodes': graph.mergednodes[idx],
-                            'irreg_nodes': graph.irreg_nodes1[idx]
-                        }
-                        # origin += 1000
-                        draw.draw_rdg(graph_data
-                            ,idx+1
-                            ,gclass.pen
-                            ,1
-                            ,gclass.value[6]
-                            ,[]
-                            ,origin)
-                        
-                        gclass.ocan.add_tab()
-                        gclass.pen = gclass.ocan.getpen()
-                        gclass.pen.speed(0)
-            elif(gclass.command == "single_oc"):
-                if(gclass.value[4] == 0): #Non-Dimensioned single rectangular dual
-                    start = time.time()
-                    try:
-                        graph.oneconnected_dual("single")
-                    except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
-                        graph.irreg_single_dual()
-                    except inputgraph.BCNError:
-                        graph.irreg_single_dual()
-                    end = time.time()
-                    printe("Time taken: " + str((end-start)*1000) + " ms")
-                    graph_data = {
-                            'room_x': graph.room_x,
-                            'room_y': graph.room_y,
-                            'room_width': graph.room_width,
-                            'room_height': graph.room_height,
-                            'area': graph.area,
-                            'extranodes': graph.extranodes,
-                            'mergednodes': graph.mergednodes,
-                            'irreg_nodes': graph.irreg_nodes1
-                        }
-                    draw.draw_rdg(graph_data
-                            ,1
-                            ,gclass.pen
-                            ,1
-                            ,gclass.value[6]
-                            ,[]
-                            ,origin)
-                else: #Dimensioned single floorplan
-                    old_dims = [[0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , ""
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]]
-                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                    start = time.time()
-                    try:
-                        graph.oneconnected_dual("multiple")
-                    except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
-                        graph.irreg_multiple_dual()
-                    except inputgraph.BCNError:
-                        graph.irreg_multiple_dual()
+                    graph.multiple_dual()
                     graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     while(graph.floorplan_exist == False):
                         old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
@@ -238,6 +107,14 @@ def run():
                             'room_y': graph.room_y,
                             'room_width': graph.room_width,
                             'room_height': graph.room_height,
+                            'room_x_bottom_left': graph.room_x_bottom_left,
+                            'room_x_bottom_right': graph.room_x_bottom_right,
+                            'room_x_top_left': graph.room_x_top_left,
+                            'room_x_top_right': graph.room_x_top_right,
+                            'room_y_left_bottom': graph.room_y_left_bottom,
+                            'room_y_right_bottom': graph.room_y_right_bottom,
+                            'room_y_left_top': graph.room_y_left_top,
+                            'room_y_right_top': graph.room_y_right_top,
                             'area': graph.area,
                             'extranodes': graph.extranodes,
                             'mergednodes': graph.mergednodes,
@@ -250,16 +127,10 @@ def run():
                             ,gclass.value[6]
                             ,[]
                             ,origin)
-            elif(gclass.command == "multiple_oc"):
+            elif(gclass.command == "multiple"):#Multiple Dual/Floorplan
                 if(gclass.value[4] == 0):#Non-Dimensioned multiple dual
                     start = time.time()
-                    try:
-                        graph.oneconnected_dual("multiple")
-                    except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
-                        graph.irreg_multiple_dual()
-                    except inputgraph.BCNError:
-                        graph.irreg_multiple_dual()
+                    graph.multiple_dual()
                     end = time.time()
                     printe("Average Time taken: " + str(((end-start)*1000)/graph.fpcnt) + " ms")
                     printe("Number of floorplans: " +  str(graph.fpcnt))
@@ -269,6 +140,14 @@ def run():
                             'room_y': graph.room_y[idx],
                             'room_width': graph.room_width[idx],
                             'room_height': graph.room_height[idx],
+                            'room_x_bottom_left': graph.room_x_bottom_left[idx],
+                            'room_x_bottom_right': graph.room_x_bottom_right[idx],
+                            'room_x_top_left': graph.room_x_top_left[idx],
+                            'room_x_top_right': graph.room_x_top_right[idx],
+                            'room_y_left_bottom': graph.room_y_left_bottom[idx],
+                            'room_y_right_bottom': graph.room_y_right_bottom[idx],
+                            'room_y_left_top': graph.room_y_left_top[idx],
+                            'room_y_right_top': graph.room_y_right_top[idx],
                             'area': graph.area,
                             'extranodes': graph.extranodes[idx],
                             'mergednodes': graph.mergednodes[idx],
@@ -296,13 +175,7 @@ def run():
                                 , [0] * gclass.value[0]]
                     min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
                     start = time.time()
-                    try:
-                        graph.oneconnected_dual("multiple")
-                    except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
-                        graph.irreg_multiple_dual()
-                    except inputgraph.BCNError:
-                        graph.irreg_multiple_dual()
+                    graph.multiple_dual()
                     graph.multiple_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
@@ -313,6 +186,14 @@ def run():
                             'room_y': graph.room_y[idx],
                             'room_width': graph.room_width[idx],
                             'room_height': graph.room_height[idx],
+                            'room_x_bottom_left': graph.room_x_bottom_left[idx],
+                            'room_x_bottom_right': graph.room_x_bottom_right[idx],
+                            'room_x_top_left': graph.room_x_top_left[idx],
+                            'room_x_top_right': graph.room_x_top_right[idx],
+                            'room_y_left_bottom': graph.room_y_left_bottom[idx],
+                            'room_y_right_bottom': graph.room_y_right_bottom[idx],
+                            'room_y_left_top': graph.room_y_left_top[idx],
+                            'room_y_right_top': graph.room_y_right_top[idx],
                             'area': graph.area[idx],
                             'extranodes': graph.extranodes[idx],
                             'mergednodes': graph.mergednodes[idx],

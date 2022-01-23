@@ -144,7 +144,7 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
     node_coordinates = []
     for node in input_data['nodes']:
         node_coordinates.append([node['x'], node['y']])
-    graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates)
+    graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates, [])
     output_data = []
     graph.irreg_multiple_dual()
     for idx in range(min(graph.fpcnt, limit)):
