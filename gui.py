@@ -7,6 +7,8 @@ from FastPLAN.FastPLAN import my_plot
 import matplotlib.pyplot as plt
 from api import multigraph_to_rfp
 
+import Temp_Code.gengraphs as gengraphs
+
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
 
@@ -173,7 +175,9 @@ class App:
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
-        graphs = runner(False)
+        # graphs = runner(False)
+        graphs = gengraphs.generate_graphs()
+        # print(graphs)
         my_plot(graphs)
         plt.show()
 
@@ -184,7 +188,7 @@ class App:
         self.output_rfps = output_rfps
 
         self.output_found = True
-        self.curr_rfp = 0
+        self.curr_rfp = -1
 
         print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
