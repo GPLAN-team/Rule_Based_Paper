@@ -78,6 +78,7 @@ class App:
 
     def custom_rfp_section(self):
         self.custom_rfp_choice_frame = tk.Frame(self.root)
+        # master = self.custom_rfp_choice_frame
         self.custom_rfp_choice_frame.grid(row=0, column=1, padx=10, pady=10)
         self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15,
                                        command=self.oneBHK_Button_click)
@@ -92,12 +93,12 @@ class App:
                                           command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
         
-        dim_Button_var = tk.IntVar(0)
+        self.dimCheckVar = tk.IntVar()
         
-        dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
-                                          command=self.dimensioned_checkbox_click, variable=dim_Button_var, onvalue=1, offvalue=0)
-        dim_Button.dim_Button_var = dim_Button_var
-        self.dim_Button = dim_Button
+        self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
+                                          command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
+        # dim_Button.dim_Button_var = dim_Button_var
+        # self.dim_Button = dim_Button
         # self.dim_Button_var.dim_Button_var = self.dim_Button_var 
         self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
@@ -186,31 +187,53 @@ class App:
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
-        graphs, coord_list = gengraphs.generate_graphs()
+        print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
+        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms)
         
-        dim_floorplans =  dimensioning_part(graphs, coord_list)
-        print(dim_floorplans)
-        
-        # print(graphs)
-        my_plot(graphs)
-        plt.show()
+        if self.dimCheckVar == 1:
+            dim_floorplans =  dimensioning_part(graphs, coord_list)
+            print(dim_floorplans)
+            
+            # print(graphs)
+            my_plot(graphs)
+            plt.show()
 
-        print(f"{len(graphs)} output_graphs = {str(graphs)}")
-        
-        self.draw_one_rfp(dim_floorplans)
+            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+            
+            self.draw_one_rfp(dim_floorplans)
 
-        # output_rfps = multigraph_to_rfp(graphs)
-        # print(f"number of rfps = {len(output_rfps)}")
-        # self.output_rfps = output_rfps
+            output_rfps = multigraph_to_rfp(graphs)
+            print(f"number of rfps = {len(output_rfps)}")
+            self.output_rfps = output_rfps
 
-        # self.output_found = True
-        # self.curr_rfp = -1
+            self.output_found = True
+            self.curr_rfp = -1
 
-        # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+            print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-        # print(f"one rfp = {output_rfps[0]}")
+            print(f"one rfp = {output_rfps[0]}")
 
-        # self.handle_next_btn()
+            self.handle_next_btn()
+            
+        else:    
+            # print(graphs)
+            my_plot(graphs)
+            plt.show()
+
+            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+
+            output_rfps = multigraph_to_rfp(graphs)
+            print(f"number of rfps = {len(output_rfps)}")
+            self.output_rfps = output_rfps
+
+            self.output_found = True
+            self.curr_rfp = -1
+
+            print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+
+            print(f"one rfp = {output_rfps[0]}")
+
+            self.handle_next_btn()
 
     def create_inputgraph_json(self):
         input = {}
@@ -279,8 +302,8 @@ class App:
         self.input.reset()
         
     def dimensioned_checkbox_click(self):
-        check = "Checked" if self.dim_Button_var == 1 else "Unchecked"
-        print("[LOG] Dimensioned checkbox ", self.dim_Button_var)
+        check = "Checked" if self.dimCheckVar == 1 else "Unchecked"
+        print("[LOG] Dimensioned checkbox ", check)
 
     def recall_room_list_frame(self, frame):
         

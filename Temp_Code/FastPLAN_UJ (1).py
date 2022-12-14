@@ -7,27 +7,27 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 import math
 import numpy as np
-from ..FastPLAN import graph_crossings as gc
-from ..FastPLAN import septri as septri
+from . import graph_crossings as gc
+from . import septri as septri
 import source.inputgraph as inputgraph
-import pythongui.dimensiongui as dimgui
+from . import dimensiongui as dimgui
 
 # import triangularity as trg
 
 # %%
 
 
-def generate_graphs():
+def generate_graphs(ext_rooms, int_rooms):
 
     # GRAPH NODES
 
     G = nx.Graph()
     # n = int(input("Enter Outer Boundary Vertices: "))
-    n = 6
+    n = len(ext_rooms)
     # Outer boundary Convex Hull
 
     # m = int(input("Enter Interior Vertices: "))
-    m = 2
+    m = len(int_rooms)
     # Interior nodes
 
     rad = 1
@@ -49,10 +49,17 @@ def generate_graphs():
     for i in range(n+m):
         G.add_node(i, pos=coord_list[i])
 
+    nodes = G.nodes
+    nodecnt = len(nodes)
+
     pos = nx.get_node_attributes(G, 'pos')
     # nx.draw(G, with_labels=True, pos=pos)
     # plt.show()
 
+    old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+                [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+    min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        old_dims, nodecnt)
     constraintsincbdry = [(i, i+1) for i in range(n-1)]
     constraintsincbdry.append((0, n-1))
 
@@ -90,8 +97,6 @@ def generate_graphs():
     # %%
     # APPLYING SWEEP LINE ALGO FOR ALL GRAPHS
 
-    nodes = G.nodes
-    nodecnt = len(nodes)
     positions = [y for (x, y) in G.nodes.data("pos")]
     permgraphs = []
     for P in listgraphs:
@@ -193,66 +198,64 @@ def generate_graphs():
             final_graphs.append(permgraphs[i])
     print(count_non_septri, "graphs without separating triangles")
 
-    # for P in final_graphs:
-    P = final_graphs[0]
-    edgecnt = nx.number_of_edges(P)
-    edgeset = P.edges
-    graph = inputgraph.InputGraph(
-        nodecnt, edgecnt, edgeset, coord_list, [])
-    old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-                [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-    min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-        old_dims, nodecnt)
-    # start = time.time()
-    # min_width = []
-    # max_width = []
-    # min_height = []
-    # max_height = []
-    # min_aspect = []
-    # max_aspect = []
-    # symmetric_text = []
-    # for i in range(0, nodecnt):
-    #     w[i].set(0)
-    #     w1[i].set(99999)
-    #     minA[i].set(0)
-    #     maxA[i].set(99999)
-    #     min_ar[i].set(0)
-    #     max_ar[i].set(99999)
-    graph.multiple_dual()
-    graph.single_floorplan(min_width, min_height, max_width, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height)
-    print(graph.floorplan_exist)
-    while(graph.floorplan_exist == False):
-        old_dims = [min_width, max_width, min_height,
-                    max_height, symm_string, min_aspect, max_aspect]
-        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-            old_dims, nodecnt)
+    for P in final_graphs:
+        edgecnt = nx.number_of_edges(P)
+        edgeset = P.edges
+        graph = inputgraph.InputGraph(
+            nodecnt, edgecnt, edgeset, coord_list, [])
+
+        # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        #     old_dims, nodecnt)
+        # start = time.time()
+        # min_width = []
+        # max_width = []
+        # min_height = []
+        # max_height = []
+        # min_aspect = []
+        # max_aspect = []
+        # symmetric_text = []
+        # for i in range(0, nodecnt):
+        #     w[i].set(0)
+        #     w1[i].set(99999)
+        #     minA[i].set(0)
+        #     maxA[i].set(99999)
+        #     min_ar[i].set(0)
+        #     max_ar[i].set(99999)
         graph.multiple_dual()
         graph.single_floorplan(min_width, min_height, max_width, max_height,
                                symm_string, min_aspect, max_aspect, plot_width, plot_height)
-    # end = time.time()
-    # printe("Time taken: " + str((end-start)*1000) + " ms")
-    graph_data = {
-        'room_x': graph.room_x,
-        'room_y': graph.room_y,
-        'room_width': graph.room_width,
-        'room_height': graph.room_height,
-        'room_x_bottom_left': graph.room_x_bottom_left,
-        'room_x_bottom_right': graph.room_x_bottom_right,
-        'room_x_top_left': graph.room_x_top_left,
-        'room_x_top_right': graph.room_x_top_right,
-        'room_y_left_bottom': graph.room_y_left_bottom,
-        'room_y_right_bottom': graph.room_y_right_bottom,
-        'room_y_left_top': graph.room_y_left_top,
-        'room_y_right_top': graph.room_y_right_top,
-        'area': graph.area,
-        'extranodes': graph.extranodes,
-        'mergednodes': graph.mergednodes,
-        'irreg_nodes': graph.irreg_nodes1
-    }
-    print("\n\n\n")
-    print(graph_data['area'])
-    print("\n\n\n")
+        print(graph.floorplan_exist)
+        while(graph.floorplan_exist == False):
+            old_dims = [min_width, max_width, min_height,
+                        max_height, symm_string, min_aspect, max_aspect]
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                old_dims, nodecnt)
+            graph.multiple_dual()
+            graph.single_floorplan(min_width, min_height, max_width, max_height,
+                                   symm_string, min_aspect, max_aspect, plot_width, plot_height)
+        # end = time.time()
+        # printe("Time taken: " + str((end-start)*1000) + " ms")
+        graph_data = {
+            'room_x': graph.room_x,
+            'room_y': graph.room_y,
+            'room_width': graph.room_width,
+            'room_height': graph.room_height,
+            'room_x_bottom_left': graph.room_x_bottom_left,
+            'room_x_bottom_right': graph.room_x_bottom_right,
+            'room_x_top_left': graph.room_x_top_left,
+            'room_x_top_right': graph.room_x_top_right,
+            'room_y_left_bottom': graph.room_y_left_bottom,
+            'room_y_right_bottom': graph.room_y_right_bottom,
+            'room_y_left_top': graph.room_y_left_top,
+            'room_y_right_top': graph.room_y_right_top,
+            'area': graph.area,
+            'extranodes': graph.extranodes,
+            'mergednodes': graph.mergednodes,
+            'irreg_nodes': graph.irreg_nodes1
+        }
+        print("\n\n\n")
+        print(graph_data['room_x'])
+        print("\n\n\n")
 
     return final_graphs
 

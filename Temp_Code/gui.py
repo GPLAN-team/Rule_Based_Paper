@@ -1,4 +1,4 @@
-import tkinter as tk
+self.import tkinter as tk
 from FastPLAN import FastPLAN
 from input import Input
 import json

@@ -266,14 +266,16 @@ import pythongui.dimensiongui as dimgui
 # return permgraphs
 # # %%
 
-def generate_graphs():
+def generate_graphs(ext_rooms, int_rooms):
     
     G = nx.Graph()
     # n = input("Enter Outer Boundary Vertices")
-    n = 5   # Outer boundary Convex Hull
+    # n = 5   # Outer boundary Convex Hull
+    n = len(ext_rooms)
 
     # m =input("Enter Inner Boundary Vertices")
-    m = 3   # Inner nodes
+    # m = 3   # Inner nodes
+    m = len(int_rooms)
 
     rad = 1
 
