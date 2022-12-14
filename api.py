@@ -11,6 +11,8 @@ import json
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from pythongui import dimensiongui as dimgui
+
 def multigraph_to_rfp(input_graph_list):
     output_rfps = []
     for each_graph in input_graph_list:
@@ -171,6 +173,71 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
                 })
         output_data.append(output_fp)
     return output_data
+
+def dimensioning_part(graphs, coord_list):
+    P = graphs[0]
+    nodecnt = len(P.nodes)
+    edgecnt = nx.number_of_edges(P)
+    edgeset = P.edges
+    graph = inputgraph.InputGraph(
+        nodecnt, edgecnt, edgeset, coord_list, [])
+    old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+                [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+    min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        old_dims, nodecnt)
+    # start = time.time()
+    # min_width = []
+    # max_width = []
+    # min_height = []
+    # max_height = []
+    # min_aspect = []
+    # max_aspect = []
+    # symmetric_text = []
+    # for i in range(0, nodecnt):
+    #     w[i].set(0)
+    #     w1[i].set(99999)
+    #     minA[i].set(0)
+    #     maxA[i].set(99999)
+    #     min_ar[i].set(0)
+    #     max_ar[i].set(99999)
+    graph.multiple_dual()
+    graph.single_floorplan(min_width, min_height, max_width, max_height,
+                           symm_string, min_aspect, max_aspect, plot_width, plot_height)
+    print(graph.floorplan_exist)
+    while(graph.floorplan_exist == False):
+        old_dims = [min_width, max_width, min_height,
+                    max_height, symm_string, min_aspect, max_aspect]
+        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+            old_dims, nodecnt)
+        graph.multiple_dual()
+        graph.single_floorplan(min_width, min_height, max_width, max_height,
+                               symm_string, min_aspect, max_aspect, plot_width, plot_height)
+    # end = time.time()
+    # printe("Time taken: " + str((end-start)*1000) + " ms")
+    graph_data = {
+        'room_x': graph.room_x,
+        'room_y': graph.room_y,
+        'room_width': graph.room_width,
+        'room_height': graph.room_height,
+        'room_x_bottom_left': graph.room_x_bottom_left,
+        'room_x_bottom_right': graph.room_x_bottom_right,
+        'room_x_top_left': graph.room_x_top_left,
+        'room_x_top_right': graph.room_x_top_right,
+        'room_y_left_bottom': graph.room_y_left_bottom,
+        'room_y_right_bottom': graph.room_y_right_bottom,
+        'room_y_left_top': graph.room_y_left_top,
+        'room_y_right_top': graph.room_y_right_top,
+        'area': graph.area,
+        'extranodes': graph.extranodes,
+        'mergednodes': graph.mergednodes,
+        'irreg_nodes': graph.irreg_nodes1
+    }
+    print("\n\n\n")
+    print(graph_data['area'])
+    print("\n\n\n")
+    
+    return graph_data
+
 
 if __name__ == "__main__":
     test_one_BHK_to_input_data()

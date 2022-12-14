@@ -3,46 +3,46 @@ from FastPLAN import FastPLAN
 from input import Input
 import json
 from FastPLAN.FastPLAN import runner
+from FastPLAN.Temp_UJ import FastPLAN_UJ as fuj
 from FastPLAN.FastPLAN import my_plot
 import matplotlib.pyplot as plt
-from api import multigraph_to_rfp, dimensioning_part
-
-import Temp_Code.gengraphs as gengraphs
+from api import multigraph_to_rfp
 
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
 
 INPUTGRAPH_JSON_PATH = ("./FastPLAN/inputgraph.json")
 
-rgb_colors = [ 	
-    (123,104,238), #medium slate blue	
-    (64,224,208), #turqouise
-    (255,127,80), #coral
-    (255,105,180), #hot pink	
-    (230,230,250), #lavender
-    (250,128,114), #salmon
-    (152,251,152), #pale green
-    (186,85,211), #medium orchid
-    (176,196,222), #light steel blue
-    (255,165,0), #orange
-    (255,218,185), #peach puff
-    (100,149,237), #corn flower blue
-    ]*10
+rgb_colors = [
+    (123, 104, 238),  # medium slate blue
+    (64, 224, 208),  # turqouise
+    (255, 127, 80),  # coral
+    (255, 105, 180),  # hot pink
+    (230, 230, 250),  # lavender
+    (250, 128, 114),  # salmon
+    (152, 251, 152),  # pale green
+    (186, 85, 211),  # medium orchid
+    (176, 196, 222),  # light steel blue
+    (255, 165, 0),  # orange
+    (255, 218, 185),  # peach puff
+    (100, 149, 237),  # corn flower blue
+]*10
 
 hex_colors = [
-    "#7B68EE", #medium slate blue	
-    "#40E0D0", #turqouise
-    "#FF7F50", #coral
-    "#FF69B4", #hot pink	
-    "#E6E6FA", #lavender
-    "#FA8072", #salmon
-    "#98FB98", #pale green
-    "#BA55D3", #medium orchid
-    "#B0C4DE", #light steel blue
-    "#FFA500", #orange
-    "#FFDAB9", #peach puff
-    "#6495ED", #corn flower blue
+    "#7B68EE",  # medium slate blue
+    "#40E0D0",  # turqouise
+    "#FF7F50",  # coral
+    "#FF69B4",  # hot pink
+    "#E6E6FA",  # lavender
+    "#FA8072",  # salmon
+    "#98FB98",  # pale green
+    "#BA55D3",  # medium orchid
+    "#B0C4DE",  # light steel blue
+    "#FFA500",  # orange
+    "#FFDAB9",  # peach puff
+    "#6495ED",  # corn flower blue
 ]*10
+
 
 class App:
     def __init__(self) -> None:
@@ -67,7 +67,8 @@ class App:
         self.root.title("Rule Based GPLAN")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
-        self.root.geometry(str(str(self.screen_width) + 'x' + str(self.screen_height)))
+        self.root.geometry(str(str(self.screen_width) +
+                           'x' + str(self.screen_height)))
 
     def add_logo(self):
         self.logo_frame = tk.Frame(self.root)
@@ -89,17 +90,8 @@ class App:
                                          command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
         self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15,
-                                          command=self.reset_Button_click)
+                                      command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
-        
-        dim_Button_var = tk.IntVar(0)
-        
-        dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
-                                          command=self.dimensioned_checkbox_click, variable=dim_Button_var, onvalue=1, offvalue=0)
-        dim_Button.dim_Button_var = dim_Button_var
-        self.dim_Button = dim_Button
-        # self.dim_Button_var.dim_Button_var = self.dim_Button_var 
-        self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
     def properties_section(self):
         self.properties_frame = tk.Frame(self.root)
@@ -123,22 +115,26 @@ class App:
         self.modify_doors_button = tk.Button(self.modify_frame, text="Modify Doors", font=helv15,
                                              command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
-        
+
         self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
-                                             command=self.run_Button_click)
+                                    command=self.run_Button_click)
         self.run_button.grid(row=4, column=0, padx=10, pady=10)
-        
-        self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
+
+        self.prev_btn = tk.Button(
+            self.modify_frame, text="Previous", font=helv15, command=self.handle_prev_btn)
         self.prev_btn.grid(row=5, column=0, padx=10, pady=10)
-        
-        self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
+
+        self.next_btn = tk.Button(
+            self.modify_frame, text="Next", font=helv15, command=self.handle_next_btn)
         self.next_btn.grid(row=6, column=0, padx=10, pady=10)
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
-        self.rfp_draw_frame.grid(row=1, column=1, padx=10, pady=10, rowspan=10, columnspan=10)
+        self.rfp_draw_frame.grid(
+            row=1, column=1, padx=10, pady=10, rowspan=10, columnspan=10)
 
-        self.rfp_canvas = tk.Canvas(self.rfp_draw_frame, background="#FFFFFF", width=1000, height=800)
+        self.rfp_canvas = tk.Canvas(
+            self.rfp_draw_frame, background="#FFFFFF", width=1000, height=800)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
     def handle_prev_btn(self):
@@ -151,7 +147,8 @@ class App:
 
     def handle_next_btn(self):
         if self.curr_rfp == len(self.output_rfps) - 1:
-            tk.messagebox.showwarning("The End", "You have exhausted all the options")
+            tk.messagebox.showwarning(
+                "The End", "You have exhausted all the options")
             return
 
         self.curr_rfp += 1
@@ -162,22 +159,24 @@ class App:
 
         self.colors_table_canvas.delete("all")
         for i, each_room in enumerate(self.input.rooms.values()):
-            self.colors_table_canvas.create_rectangle(100, 100 + i*30, 120, 120 + i*30 , fill=self.colors_map[each_room])
-            self.colors_table_canvas.create_text(200, 105 + i*30, text=each_room)
-            
-    def draw_one_rfp(self, rfp, origin = (200, 200), scale = 1):
+            self.colors_table_canvas.create_rectangle(
+                100, 100 + i*30, 120, 120 + i*30, fill=self.colors_map[each_room])
+            self.colors_table_canvas.create_text(
+                200, 105 + i*30, text=each_room)
+
+    def draw_one_rfp(self, rfp, origin=(200, 200), scale=1):
         x, y = origin
         self.rfp_canvas.delete("all")
 
-        
         for each_room in rfp:
             print(f"each room {each_room}")
-            self.colors_map[self.input.rooms[each_room['label']]] = hex_colors[each_room['label']]
-            self.rfp_canvas.create_rectangle(x + scale* each_room['left'], y + scale * each_room['top'], x +  scale * (each_room['left'] + each_room['width']) , y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
+            self.colors_map[self.input.rooms[each_room['label']]
+                            ] = hex_colors[each_room['label']]
+            self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
+                each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
             # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
 
         self.update_colors_table()
-        
 
     def run_Button_click(self):
         print("[LOG] Run Button Clicked")
@@ -186,31 +185,24 @@ class App:
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
-        graphs, coord_list = gengraphs.generate_graphs()
-        
-        dim_floorplans =  dimensioning_part(graphs, coord_list)
-        print(dim_floorplans)
-        
-        # print(graphs)
+        graphs = fuj.generate_graphs(self.exterior_rooms, self.interior_rooms)
         my_plot(graphs)
         plt.show()
 
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
-        
-        self.draw_one_rfp(dim_floorplans)
 
-        # output_rfps = multigraph_to_rfp(graphs)
-        # print(f"number of rfps = {len(output_rfps)}")
-        # self.output_rfps = output_rfps
+        output_rfps = multigraph_to_rfp(graphs)
+        print(f"number of rfps = {len(output_rfps)}")
+        self.output_rfps = output_rfps
 
-        # self.output_found = True
-        # self.curr_rfp = -1
+        self.output_found = True
+        self.curr_rfp = -1
 
-        # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+        print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-        # print(f"one rfp = {output_rfps[0]}")
+        print(f"one rfp = {output_rfps[0]}")
 
-        # self.handle_next_btn()
+        self.handle_next_btn()
 
     def create_inputgraph_json(self):
         input = {}
@@ -225,7 +217,6 @@ class App:
     def oneBHK_Button_click(self):
         print("[LOG] One BHK Button Clicked")
 
-        
         self.input.reset()
         with open('./one_bhk.json') as one_file:
             one_bhk_data = json.load(one_file)
@@ -233,9 +224,8 @@ class App:
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
 
-
-        self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_doors_from(adjcancy_list = new_adj_list)
+        self.input.add_rooms_from(room_list=new_rooms)
+        self.input.add_doors_from(adjcancy_list=new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -250,9 +240,8 @@ class App:
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
 
-
-        self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_doors_from(adjcancy_list = new_adj_list)
+        self.input.add_rooms_from(room_list=new_rooms)
+        self.input.add_doors_from(adjcancy_list=new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -267,9 +256,8 @@ class App:
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
 
-
-        self.input.add_rooms_from(room_list = new_rooms)
-        self.input.add_doors_from(adjcancy_list = new_adj_list)
+        self.input.add_rooms_from(room_list=new_rooms)
+        self.input.add_doors_from(adjcancy_list=new_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
@@ -277,15 +265,11 @@ class App:
     def reset_Button_click(self):
         print("[LOG] Reset Button Clicked")
         self.input.reset()
-        
-    def dimensioned_checkbox_click(self):
-        check = "Checked" if self.dim_Button_var == 1 else "Unchecked"
-        print("[LOG] Dimensioned checkbox ", self.dim_Button_var)
 
     def recall_room_list_frame(self, frame):
-        
+
         head = tk.Label(frame, text="Room List")
-        head.grid(row=0,column=0, padx=5, pady=5)
+        head.grid(row=0, column=0, padx=5, pady=5)
 
         self.room_label_list = []
         self.remove_room_btn_list = []
@@ -301,23 +285,22 @@ class App:
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
 
-
-            each_remove_room_btn = tk.Button(frame, text="Remove",command= lambda i=i: self.handle_remove_room_btn(i))
+            each_remove_room_btn = tk.Button(
+                frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i))
             each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
-            
+
             each_intext_room_btn = tk.Button(
                 frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
             each_intext_room_btn.grid(row=i+1, column=2, padx=5, pady=5)
 
             self.interior_rooms_btn_list.append(each_intext_room_btn)
-            
+
             self.remove_room_btn_list.append(each_remove_room_btn)
 
     def modify_rooms_Button_click(self):
         print("[LOG] Modify Rooms Button Clicked")
 
         room_win = tk.Toplevel(self.root)
-
 
         room_win.title("Room Modifier")
         # room_win.geometry(str(1000) + 'x' + str(400))
@@ -333,25 +316,26 @@ class App:
         new_room_text = tk.Text(new_room_frame, height=1, width=8)
         new_room_text.grid(row=0, column=0, padx=5, pady=5)
 
-        add_new_room_btn = tk.Button(new_room_frame, text="Add Room", command = lambda i = new_room_text: self.handle_add_new_room_btn(i,prev_room_list_frame))
+        add_new_room_btn = tk.Button(new_room_frame, text="Add Room",
+                                     command=lambda i=new_room_text: self.handle_add_new_room_btn(i, prev_room_list_frame))
         add_new_room_btn.grid(row=0, column=1)
 
         room_win.wait_window()
 
     def handle_add_new_room_btn(self, new_room, prev_room_list_frame):
         idx = len(self.input.rooms)
-        self.input.rooms[idx] = new_room.get("1.0","end")
+        self.input.rooms[idx] = new_room.get("1.0", "end")
 
         self.recall_room_list_frame(prev_room_list_frame)
 
-    def handle_remove_room_btn(self,room_id):
+    def handle_remove_room_btn(self, room_id):
         print(f"room to remove is {room_id}")
         self.input.rooms.pop(room_id)
         self.room_label_list[room_id].destroy()
         self.remove_room_btn_list[room_id].destroy()
         self.interior_rooms_btn_list[room_id].destroy()
         print(f"current room list = {self.input.rooms}")
-        
+
     def handle_intext_room_btn(self, room_id):
         # print(f"room is {room_id}")
         self.exterior_rooms.pop(room_id)
@@ -363,12 +347,11 @@ class App:
 
     def modify_doors_Button_click(self):
         print("[LOG] Modify Doors Button Clicked")
-        
+
         doors_win = tk.Toplevel(self.root)
-        
+
         doors_win.title("Doors Modifier")
         # doors_win.geometry(str(1000) + 'x' + str(400))
-
 
         adj_frame = tk.Frame(doors_win)
         adj_frame.grid(row=0)
@@ -380,7 +363,7 @@ class App:
 
         cur_new_adj_frame_row = 0
 
-        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Door") 
+        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Door")
         add_new_adj_label.grid(row=cur_new_adj_frame_row, columnspan=5)
 
         self.new_adj_text_left = tk.StringVar()
@@ -388,21 +371,28 @@ class App:
 
         cur_new_adj_frame_row += 1
 
-        new_adj_option_left = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
-        new_adj_option_left.grid(row=cur_new_adj_frame_row,column=0, padx=5, pady=5)
+        new_adj_option_left = tk.OptionMenu(
+            add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
+        new_adj_option_left.grid(
+            row=cur_new_adj_frame_row, column=0, padx=5, pady=5)
 
         new_adj_door_sign = tk.Label(add_new_adj_frame, text="<=>")
-        new_adj_door_sign.grid(row=cur_new_adj_frame_row,column=1, padx=5, pady=5)
-        
-        new_adj_option_right = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
-        new_adj_option_right.grid(row=cur_new_adj_frame_row,column=2, padx=5, pady=5)
+        new_adj_door_sign.grid(row=cur_new_adj_frame_row,
+                               column=1, padx=5, pady=5)
 
-        add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add Rule", command = lambda : self.handle_add_new_adj_btn(adj_frame))
-        add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
+        new_adj_option_right = tk.OptionMenu(
+            add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
+        new_adj_option_right.grid(
+            row=cur_new_adj_frame_row, column=2, padx=5, pady=5)
+
+        add_new_adj_btn = tk.Button(
+            add_new_adj_frame, text="Add Rule", command=lambda: self.handle_add_new_adj_btn(adj_frame))
+        add_new_adj_btn.grid(row=cur_new_adj_frame_row,
+                             column=3, padx=5, pady=5)
 
         doors_win.wait_variable()
 
-    def handle_add_new_adj_btn(self,frame):
+    def handle_add_new_adj_btn(self, frame):
         right = self.new_adj_text_right.get()
         left = self.new_adj_text_left.get()
         rule_dict = self.input.rooms
@@ -429,23 +419,27 @@ class App:
             each_frame.grid(row=i+1)
 
             if each_rule[0] in self.input.rooms.keys() and each_rule[1] in self.input.rooms.keys():
-                left_label = tk.Label(each_frame,text=self.input.rooms[each_rule[0]])
-                left_label.grid(row = i+1, column=0, padx=5, pady=5)
+                left_label = tk.Label(
+                    each_frame, text=self.input.rooms[each_rule[0]])
+                left_label.grid(row=i+1, column=0, padx=5, pady=5)
 
                 door_sign = tk.Label(each_frame, text="<=>")
-                door_sign.grid(row = i+1,column=1, padx=5, pady=5)
+                door_sign.grid(row=i+1, column=1, padx=5, pady=5)
 
-                right_label = tk.Label(each_frame, text=self.input.rooms[each_rule[1]])
-                right_label.grid(row = i+1,column=2, padx=5, pady=5)
+                right_label = tk.Label(
+                    each_frame, text=self.input.rooms[each_rule[1]])
+                right_label.grid(row=i+1, column=2, padx=5, pady=5)
 
-                remove_adj_btn = tk.Button(each_frame, text="Remove Rule", command= lambda lframe = frame, lrule = each_rule: self.handle_remove_adj_rule_btn(lframe, lrule))
-                remove_adj_btn.grid(row = i+1,column=3, padx=5, pady=5)
+                remove_adj_btn = tk.Button(each_frame, text="Remove Rule", command=lambda lframe=frame,
+                                           lrule=each_rule: self.handle_remove_adj_rule_btn(lframe, lrule))
+                remove_adj_btn.grid(row=i+1, column=3, padx=5, pady=5)
 
             else:
                 self.input.adjacencies.remove(each_rule)
-             
+
     def run(self):
         self.root.mainloop()
+
 
 if __name__ == "__main__":
     app = App()

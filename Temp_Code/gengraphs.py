@@ -521,7 +521,7 @@ def generate_graphs():
     
     # # DIMENSIONING PART
     
-    # # for P in final_graphs:
+    # for P in final_graphs:
     # P = final_graphs[1]
     # edgecnt = nx.number_of_edges(P)
     # edgeset = P.edges
@@ -579,8 +579,8 @@ def generate_graphs():
     #     'irreg_nodes': graph.irreg_nodes1
     # }
     # print("\n\n\n")
-    # print(graph_data)
+    # print(graph_data['area'])
     # print("\n\n\n")
 
-    return final_graphs
+    return final_graphs, coord_list
     # %%
