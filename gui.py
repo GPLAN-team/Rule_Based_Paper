@@ -97,9 +97,7 @@ class App:
         
         self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
                                           command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
-        # dim_Button.dim_Button_var = dim_Button_var
-        # self.dim_Button = dim_Button
-        # self.dim_Button_var.dim_Button_var = self.dim_Button_var 
+
         self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
     def properties_section(self):
@@ -121,19 +119,23 @@ class App:
                                              command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_doors_button = tk.Button(self.modify_frame, text="Modify Doors", font=helv15,
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Adjacencies", font=helv15,
                                              command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
         
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Non-Adjacencies", font=helv15,
+                                             command=self.modify_doors_Button_click)
+        self.modify_doors_button.grid(row=4, column=0, padx=10, pady=10)
+        
         self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
                                              command=self.run_Button_click)
-        self.run_button.grid(row=4, column=0, padx=10, pady=10)
+        self.run_button.grid(row=5, column=0, padx=10, pady=10)
         
         self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
-        self.prev_btn.grid(row=5, column=0, padx=10, pady=10)
+        self.prev_btn.grid(row=6, column=0, padx=10, pady=10)
         
         self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
-        self.next_btn.grid(row=6, column=0, padx=10, pady=10)
+        self.next_btn.grid(row=7, column=0, padx=10, pady=10)
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
@@ -190,30 +192,35 @@ class App:
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
         graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms)
         
-        if self.dimCheckVar == 1:
-            dim_floorplans =  dimensioning_part(graphs, coord_list)
-            print(dim_floorplans)
+        if self.dimCheckVar.get() == 1:
+            print("[LOG] Dimensioned selected")
             
             # print(graphs)
             my_plot(graphs)
             plt.show()
+            
+            print("[LOG] Now will wait for dimensions input")
+            
+            dim_floorplans =  dimensioning_part(graphs, coord_list)
+            print("[LOG] Dimensioned floorplan object\n")
+            print(dim_floorplans)
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
             
-            self.draw_one_rfp(dim_floorplans)
+            # self.draw_one_rfp(dim_floorplans)
 
-            output_rfps = multigraph_to_rfp(graphs)
-            print(f"number of rfps = {len(output_rfps)}")
-            self.output_rfps = output_rfps
+            # output_rfps = multigraph_to_rfp(graphs)
+            # print(f"number of rfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
 
-            self.output_found = True
-            self.curr_rfp = -1
+            # self.output_found = True
+            # self.curr_rfp = -1
 
-            print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-            print(f"one rfp = {output_rfps[0]}")
+            # print(f"one rfp = {output_rfps[0]}")
 
-            self.handle_next_btn()
+            # self.handle_next_btn()
             
         else:    
             # print(graphs)
@@ -302,7 +309,7 @@ class App:
         self.input.reset()
         
     def dimensioned_checkbox_click(self):
-        check = "Checked" if self.dimCheckVar == 1 else "Unchecked"
+        check = "Checked" if self.dimCheckVar.get() == 1 else "Unchecked"
         print("[LOG] Dimensioned checkbox ", check)
 
     def recall_room_list_frame(self, frame):
@@ -377,7 +384,7 @@ class App:
         
     def handle_intext_room_btn(self, room_id):
         # print(f"room is {room_id}")
-        self.exterior_rooms.pop(room_id)
+        self.exterior_rooms.remove(room_id)
         self.interior_rooms.append(room_id)
         self.interior_rooms_btn_list[room_id].configure(
             highlightbackground='blue')
