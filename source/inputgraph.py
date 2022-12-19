@@ -22,6 +22,7 @@ from .floorplangen import contraction as cntr
 from .floorplangen import expansion as exp
 from .floorplangen import rdg as rdg
 from .graphoperations import triangularity as trng
+from .graphoperations import triangularity2 as trng2
 from .floorplangen import transformation as transform
 from .dimensioning import floorplan_to_st as fpts
 from .floorplangen import flippable as flp
@@ -436,7 +437,7 @@ class InputGraph:
         bcn_edges_added = len(bcn_edges) > 0
 
         #Triangulation
-        trng_edges,positions,tri_faces = trng.triangulate(self.matrix
+        trng_edges,positions,tri_faces = trng2.triangulate(self.matrix
                                                 ,bcn_edges_added
                                                 ,self.coordinates)
         for edge in trng_edges:
