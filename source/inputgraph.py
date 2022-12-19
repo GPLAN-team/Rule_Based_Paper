@@ -303,6 +303,7 @@ class InputGraph:
         Returns:
             None
         """
+        
         #Biconnectivity Augmentation
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
@@ -323,10 +324,11 @@ class InputGraph:
             self.nonrect = True
         
         if(self.nodecnt - self.edgecnt + len(opr.get_trngls(self.matrix)) != 1):
+            print("here1\n")
             origin_pos = nx.planar_layout(nx.from_numpy_matrix(self.matrix))
             pos = [origin_pos[i] for i in range(0, self.nodecnt)]
             ptpg_matrices, extra_nodes = st.handle_STs(self.matrix, pos, 20)
-
+            print("here2\n")
             for cnt in range(len(ptpg_matrices)):
                 self.matrix = ptpg_matrices[cnt]
                 self.nodecnt = self.matrix.shape[0]
@@ -334,12 +336,14 @@ class InputGraph:
                 mergednodes = []
                 irreg_nodes1 = []
                 irreg_nodes2 = []
+                print("here3\n")
                 for key in extra_nodes[cnt]:
                     mergednodes.append(key)
                     irreg_nodes1.append(extra_nodes[cnt][key][0])
                     irreg_nodes2.append(extra_nodes[cnt][key][1])
                 self.matrix, cip_list, self.nodecnt, self.edgecnt, extranodes = generate_multiple_bdy(
                     self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges)
+                print("here4\n")
                 for bdys in cip_list:
                     matrix = copy.deepcopy(self.matrix)
                     rel_matrices = generate_multiple_rel(
@@ -368,6 +372,7 @@ class InputGraph:
                     self.extranodes.append(extranodes)
                     self.nodecnt_list.append(self.nodecnt)
 
+        print("here5\n")
         self.room_x = []
         self.room_y = []
         self.room_width = []

@@ -15,7 +15,7 @@ from pythongui import dimensiongui as dimgui
 
 def multigraph_to_rfp(input_graph_list):
     output_rfps = []
-    for each_graph in input_graph_list[0:1]:
+    for each_graph in input_graph_list:
         print("each graph = "  + str(each_graph.edges()))
         output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph))[0])
         # output_rfps.append(graph_to_rfp(each_graph))
