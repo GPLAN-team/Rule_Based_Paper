@@ -506,7 +506,7 @@ class InputGraph:
                     self.matrix, edge, tri_faces, positions)
                 self.nodecnt += 1  # Extra node added
                 self.edgecnt += extra_edges_cnt
-            self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+            self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy2(
                     self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
             for bdys in cip_list:
                 matrix = copy.deepcopy(self.matrix)
@@ -527,7 +527,7 @@ class InputGraph:
         self.room_height = []
         self.area = []
         for cnt in range(self.fpcnt):
-            [room_x, room_y, room_width, room_height] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
+            [room_x, room_y, room_width, room_height, *rest] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
             self.room_x.append(room_x)
             self.room_y.append(room_y)
             self.room_width.append(room_width)
@@ -907,3 +907,35 @@ def generate_multiple_bdy(matrix, nodecnt, edgecnt, bcn_edges, trng_edges):
         cip_list = news.find_multiple_boundary(
             news.all_boundaries(corner_pts, outer_boundary), outer_boundary)
     return matrix, cip_list, nodecnt, edgecnt, extranodes
+
+def generate_multiple_bdy2(matrix, nodecnt, edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2):
+    """Generates multiple boundary for given matrix and extra edges.
+
+    Args:
+        matrix: A matrix representing the adjacency matrix of the graph.
+        nodecnt: An integer representing the node count of the graph.
+        edgecnt: An integer representing the edge count of the graph.
+        bcn_edges: A list containing extra edges added for biconnectivity.
+        trng_edges: A list containing extra edges added for triangularity.
+    Returns:
+        matrix: A matrix representing the adjacency matrix of the graph.
+        cip_list: A list containing differemt possible boundaries.
+        nodecnt: An integer representing the node count of the graph.
+        edgecnt: An integer representing the edge count of the graph.
+        extranodes: A list containing the extra nodes added to the graph.
+    """
+    triangular_cycles = opr.get_trngls(matrix)
+    digraph = opr.get_directed(matrix)
+    bdy_nodes, bdy_edges = opr.get_bdy(triangular_cycles, digraph)
+    shortcuts = sr.get_shortcut(matrix, bdy_nodes, bdy_edges)
+    if(edgecnt == 3 and nodecnt == 3):
+        cip_list = [[[0], [0, 1], [1, 2], [2, 0]], [
+            [0, 1], [1], [1, 2], [2, 0]], [[0, 1], [1, 2], [2], [2, 0]]]
+    else:
+        bdy_ordered = opr.ordered_bdy(bdy_nodes, bdy_edges)
+        cips = cip.find_cip(bdy_ordered, shortcuts)
+        corner_pts = news.multiple_corners(news.find_bdy(cips))
+        outer_boundary = opr.ordered_bdy(bdy_nodes, bdy_edges)
+        cip_list = news.find_multiple_boundary(
+            news.all_boundaries(corner_pts, outer_boundary), outer_boundary)
+    return matrix, cip_list, nodecnt, edgecnt, mergednodes, irreg_nodes1, irreg_nodes2
