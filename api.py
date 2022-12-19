@@ -1,7 +1,7 @@
 
 """API
 
-Generates floorplamns for given graph data as input.
+Generates floorplans for given graph data as input.
 Current support only for rectangular floorplans.
 A running example is available.
 
