@@ -119,7 +119,7 @@ class App:
                                              command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_doors_button = tk.Button(self.modify_frame, text="Adjacencies", font=helv15,
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Modify Doors", font=helv15,
                                              command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
         
@@ -127,15 +127,19 @@ class App:
                                              command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=4, column=0, padx=10, pady=10)
         
-        self.run_button = tk.Button(self.modify_frame, text="Run", font=helv15,
+        self.run_button = tk.Button(self.modify_frame, text="Rectangular floorplan", font=helv15,
                                              command=self.run_Button_click)
         self.run_button.grid(row=5, column=0, padx=10, pady=10)
         
+        self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15,
+                                             command=self.run_Button_click)
+        self.run_button.grid(row=6, column=0, padx=10, pady=10)
+        
         self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
-        self.prev_btn.grid(row=6, column=0, padx=10, pady=10)
+        self.prev_btn.grid(row=7, column=0, padx=10, pady=10)
         
         self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
-        self.next_btn.grid(row=7, column=0, padx=10, pady=10)
+        self.next_btn.grid(row=8, column=0, padx=10, pady=10)
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
