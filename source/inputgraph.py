@@ -24,6 +24,7 @@ from .floorplangen import rdg as rdg
 from .graphoperations import triangularity as trng
 from .graphoperations import triangularity2 as trng2
 from .floorplangen import transformation as transform
+from .floorplangen import transformation2 as transform2
 from .dimensioning import floorplan_to_st as fpts
 from .floorplangen import flippable as flp
 from .irregular import septri as st
@@ -452,13 +453,13 @@ class InputGraph:
             extranodes = []
             for edge in bcn_edges:
                 extranodes.append(self.nodecnt)
-                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform2.transform_edges(
                     self.matrix, edge, tri_faces, positions)
                 self.nodecnt += 1  # Extra node added
                 self.edgecnt += extra_edges_cnt
             for edge in trng_edges:
                 extranodes.append(self.nodecnt)
-                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform2.transform_edges(
                     self.matrix, edge, tri_faces, positions)
                 self.nodecnt += 1  # Extra node added
                 self.edgecnt += extra_edges_cnt
@@ -475,7 +476,7 @@ class InputGraph:
                     mergednodes.append(key)
                     irreg_nodes1.append(extra_nodes[cnt][key][0])
                     irreg_nodes2.append(extra_nodes[cnt][key][1])
-                self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
+                self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy2(
                     self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
                 for bdys in cip_list:
                     matrix = copy.deepcopy(self.matrix)
