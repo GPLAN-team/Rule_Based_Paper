@@ -15,7 +15,7 @@ from pythongui import dimensiongui as dimgui
 
 def multigraph_to_rfp(input_graph_list):
     output_rfps = []
-    for each_graph in input_graph_list:
+    for each_graph in input_graph_list[0:1]:
         print("each graph = "  + str(each_graph.edges()))
         output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph))[0])
         # output_rfps.append(graph_to_rfp(each_graph))
@@ -148,7 +148,9 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
         node_coordinates.append([node['x'], node['y']])
     graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates, [])
     output_data = []
+    print("\nbefore")
     graph.irreg_multiple_dual()
+    print("\nafter")
     for idx in range(min(graph.fpcnt, limit)):
         output_fp = []
         for node in input_data['nodes']:
@@ -172,6 +174,7 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
                 "height": int(graph.room_height[idx][graph.mergednodes[idx][cnt]] * normalize_const)
                 })
         output_data.append(output_fp)
+    
     return output_data
 
 def dimensioning_part(graphs, coord_list):

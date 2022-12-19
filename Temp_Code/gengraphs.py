@@ -514,7 +514,8 @@ def generate_graphs(ext_rooms, int_rooms):
     final_graphs = []
     count_non_septri = 0
     for i in range(0, len(permgraphs)):
-        if septri_info[i] == False:
+        # if septri_info[i] == False:
+        if septri_info[i] == True:
             # nx.draw(permgraphs[i], with_labels=True, pos=pos)
             # plt.show()
             count_non_septri += 1
