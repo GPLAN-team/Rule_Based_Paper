@@ -7,6 +7,7 @@ class Input:
     def reset(self):
         self.rooms = {}
         self.adjacencies = []
+        self.non_adjacencies = []
 
     def add_rooms_from(self, room_list):
         pre = len(self.rooms)

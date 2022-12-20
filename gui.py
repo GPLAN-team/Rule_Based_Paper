@@ -140,6 +140,9 @@ class App:
         
         self.next_btn = tk.Button(self.modify_frame, text= "Next", font=helv15, command= self.handle_next_btn)
         self.next_btn.grid(row=8, column=0, padx=10, pady=10)
+        
+        self.exit_btn = tk.Button(self.modify_frame, text= "Exit", font=helv15, command= self.handle_exit_btn)
+        self.exit_btn.grid(row=8, column=0, padx=11, pady=10)
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
@@ -164,6 +167,9 @@ class App:
         self.curr_rfp += 1
 
         self.draw_one_rfp(self.output_rfps[self.curr_rfp])
+        
+    def handle_exit_btn(self):
+        sys.exit()
 
     def update_colors_table(self):
 
@@ -255,7 +261,7 @@ class App:
         self.create_inputgraph_json()
         # graphs = runner(False)
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False)
+        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")

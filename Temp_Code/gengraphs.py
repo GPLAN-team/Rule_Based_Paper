@@ -3,7 +3,7 @@
 from turtle import pos
 import networkx as nx
 import matplotlib.pyplot as plt
-from itertools import combinations
+from itertools import combinations, permutations
 import math
 import numpy as np
 from .  import graph_crossings as gc
@@ -276,6 +276,11 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # m =input("Enter Inner Boundary Vertices")
     # m = 3   # Inner nodes
     m = len(int_rooms)
+    
+    original_mapping = ["Bed Room 1", "WC 1", "WC 2", "Bed Room 2", "Kitchen", "Dining Room", "Living Room", "Store Room"]
+    print(ext_rooms)
+    print(adjacencies)
+    print(non_adjacencies)
 
     rad = 1
 
@@ -296,13 +301,124 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     for i in range(n+m):
         G.add_node(i, pos=coord_list[i])
         
-    # Adding adjacency and non-adjacency constraints
-    
-    
-    
-    
-    
 
+    # constraintsincbdry = [(i, i+1) for i in range(n-1)]
+    # if n == 5:
+    #     constraintsincbdry.append((0,4))
+    # elif n  == 6:
+    #     constraintsincbdry.append((0,5))
+    # elif n  == 4:
+    #     constraintsincbdry.append((0,3))
+    # else:
+    #     raise ValueError('value of n is not in permissible limits!')
+
+    # print(constraintsincbdry)
+    constraintsinc = []
+    constraintsexc = []
+    
+    # Adding adjacency and non-adjacency constraints
+    for rule in adjacencies:
+        a = min(rule[0], rule[1])
+        b = max(rule[0], rule[1])
+        if a == b:
+            continue
+        constraintsinc.append((a,b))
+        
+    for rule in non_adjacencies:
+        a = min(rule[0], rule[1])
+        b = max(rule[0], rule[1])
+        if a == b:
+            continue
+        constraintsexc.append((a,b))
+        
+    print(constraintsinc)
+    print(constraintsexc)
+    
+    # if n == 4:
+    # # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3  Kitchen - 4, Dining - 5, Living - 6, Store - 7
+    #     constraintsinc = [(4,5), (5,6)]
+    #     constraintsexc = [(3,4)]
+    # elif n == 5:
+    # # Fixing Master BR - 0, WC1 - 1, WC2 - 2, BR2 - 3, Kitchen - 4, Dining - 5, Living - 6, Store - 7  (5 outer vertices)
+    #     constraintsinc = [(4, 5), (5,6)]
+
+    #     constraintsexc = [(2,4), (1,4)]
+    # elif n == 6:
+    # # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3, Living - 4, Kitchen - 5, Dining - 6, Store - 7
+    #     constraintsinc = [(5,6), (4,6)]
+
+    #     constraintsexc = [(1, 5)]
+    
+    def map_constraints(perm):
+        new_constraints_inc = []
+        new_constraints_exc = []
+        for rule in constraintsinc:
+            a = None
+            b = None
+            if rule[0] in perm:
+                a = perm.index(rule[0])
+            else:
+                a = rule[0]
+            
+            if rule[1] in perm:
+                b = perm.index(rule[1])
+            else:
+                b = rule[1]
+            new_constraints_inc.append((min(a,b), max(a,b)))
+            
+        for rule in constraintsexc:
+            a = None
+            b = None
+            if rule[0] in perm:
+                a = perm.index(rule[0])
+            else:
+                a = rule[0]
+            
+            if rule[1] in perm:
+                b = perm.index(rule[1])
+            else:
+                b = rule[1]
+            new_constraints_exc.append((min(a,b), max(a,b)))
+            
+        return new_constraints_inc, new_constraints_exc
+                
+    def check_validity_of_permutation(perm):
+        new_constraints_inc, new_constraints_exc = map_constraints(perm)
+        for i in range(0,n):
+            if i == n-1:
+                if (perm[0], perm[n-1]) in new_constraints_exc or (perm[n-1], perm[0]) in new_constraints_exc:
+                    return new_constraints_inc, new_constraints_exc, False
+            
+            elif (perm[i], perm[i+1]) in new_constraints_exc or (perm[i+1], perm[i]) in new_constraints_exc:
+                return new_constraints_inc, new_constraints_exc, False
+        return new_constraints_inc, new_constraints_exc, True
+        
+
+    # %%
+
+    # %%
+    new_constraints_inc = []
+    new_constraints_exc = []
+    valid_perm = []
+    perm = permutations(ext_rooms, n)
+    for p in perm:
+        new_constraints_inc, new_constraints_exc, valid = check_validity_of_permutation(p)
+        if valid == True:
+            print("Found valid permutation ", p)
+            valid_perm = list(p)
+            break
+        else:
+            continue
+
+    print(new_constraints_inc)
+    print(new_constraints_exc)
+    # %%
+    valid_perm.extend(int_rooms)
+    
+    # MAPPING BETWEEN ROOM NUMBERS AND ROOM NAMES
+    perm_mapping = [original_mapping[i] for i in valid_perm]
+    print(perm_mapping)
+    # %%
     constraintsincbdry = [(i, i+1) for i in range(n-1)]
     if n == 5:
         constraintsincbdry.append((0,4))
@@ -312,24 +428,11 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
         constraintsincbdry.append((0,3))
     else:
         raise ValueError('value of n is not in permissible limits!')
+    
+    new_constraints_inc = list(set(new_constraints_inc).difference(set(constraintsincbdry)))
+    print("Inclusion constraints: ", new_constraints_inc)
+    print("Exclusion constraints: ", new_constraints_exc)
 
-    # print(constraintsincbdry)
-    constraintsinc = []
-    constraintsexc = []
-    if n == 4:
-    # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3  Kitchen - 4, Dining - 5, Living - 6, Store - 7
-        constraintsinc = [(4,5), (5,6)]
-        constraintsexc = [(3,4)]
-    elif n == 5:
-    # Fixing Master BR - 0, WC1 - 1, WC2 - 2, BR2 - 3, Kitchen - 4, Dining - 5, Living - 6, Store - 7  (5 outer vertices)
-        constraintsinc = [(4, 5), (5,6)]
-
-        constraintsexc = [(2,4), (1,4)]
-    elif n == 6:
-    # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3, Living - 4, Kitchen - 5, Dining - 6, Store - 7
-        constraintsinc = [(5,6), (4,6)]
-
-        constraintsexc = [(1, 5)]
 
     pos = nx.get_node_attributes(G, 'pos')
     # nx.draw(G, with_labels=True, pos=pos)
@@ -338,8 +441,9 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     listedges = []
     for i in range(0, 7):
         for j in range(i+1, 8):
-            if(((i, j) not in constraintsincbdry) and ((i, j) not in constraintsexc) and ((i, j) not in constraintsinc)):
+            if(((i, j) not in constraintsincbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
                 listedges.append((i, j))
+    print(listedges)
 
     listgraphs = []
 
@@ -361,11 +465,11 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
 
     # ALL Triangulated Graphs have same no of edges 
 
-    comb = combinations(listedges, e - len(constraintsinc) - len(constraintsincbdry))
+    comb = combinations(listedges, e - len(new_constraints_inc) - len(constraintsincbdry))
     for i in list(comb):
         H = nx.Graph()
         H.add_nodes_from(G)
-        H.add_edges_from(constraintsinc)
+        H.add_edges_from(new_constraints_inc)
         H.add_edges_from(constraintsincbdry)    # CONSTRAINT EDGES
         for source, target in i:
             H.add_edge(source, target)
