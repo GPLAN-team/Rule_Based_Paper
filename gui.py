@@ -106,7 +106,7 @@ class App:
 
         self.colors_table_frame = tk.Frame(self.properties_frame)
         self.colors_table_frame.grid()
-        self.colors_table_canvas = tk.Canvas(self.colors_table_frame)
+        self.colors_table_canvas = tk.Canvas(self.colors_table_frame, width = 300, height = 500)
         self.colors_table_canvas.grid()
 
         self.update_colors_table()
@@ -142,13 +142,13 @@ class App:
         self.next_btn.grid(row=8, column=0, padx=10, pady=10)
         
         self.exit_btn = tk.Button(self.modify_frame, text= "Exit", font=helv15, command= self.handle_exit_btn)
-        self.exit_btn.grid(row=8, column=0, padx=11, pady=10)
+        self.exit_btn.grid(row=9, column=0, padx=11, pady=10)
 
     def rfp_draw_section(self):
         self.rfp_draw_frame = tk.Frame(self.root)
         self.rfp_draw_frame.grid(row=1, column=1, padx=10, pady=10, rowspan=10, columnspan=10)
 
-        self.rfp_canvas = tk.Canvas(self.rfp_draw_frame, background="#FFFFFF", width=1000, height=800)
+        self.rfp_canvas = tk.Canvas(self.rfp_draw_frame, background="#FFFFFF", width=800, height=800)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
     def handle_prev_btn(self):
@@ -169,7 +169,7 @@ class App:
         self.draw_one_rfp(self.output_rfps[self.curr_rfp])
         
     def handle_exit_btn(self):
-        sys.exit()
+        self.root.quit()
 
     def update_colors_table(self):
 
