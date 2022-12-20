@@ -266,7 +266,7 @@ import pythongui.dimensiongui as dimgui
 # return permgraphs
 # # %%
 
-def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True):
+def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
     
     G = nx.Graph()
     # n = input("Enter Outer Boundary Vertices")
@@ -295,6 +295,13 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True):
 
     for i in range(n+m):
         G.add_node(i, pos=coord_list[i])
+        
+    # Adding adjacency and non-adjacency constraints
+    
+    
+    
+    
+    
 
     constraintsincbdry = [(i, i+1) for i in range(n-1)]
     if n == 5:

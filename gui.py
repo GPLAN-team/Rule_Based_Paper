@@ -191,10 +191,11 @@ class App:
 
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
+        print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True)
+        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")
@@ -507,35 +508,35 @@ class App:
         # doors_win.geometry(str(1000) + 'x' + str(400))
 
 
-        adj_frame = tk.Frame(doors_win)
-        adj_frame.grid(row=0)
+        non_adj_frame = tk.Frame(doors_win)
+        non_adj_frame.grid(row=0)
 
-        self.recall_non_adj_constraints_frame(adj_frame)
+        self.recall_non_adj_constraints_frame(non_adj_frame)
 
-        add_new_adj_frame = tk.Frame(doors_win)
-        add_new_adj_frame.grid(row=1)
+        add_new_non_adj_frame = tk.Frame(doors_win)
+        add_new_non_adj_frame.grid(row=1)
 
-        cur_new_adj_frame_row = 0
+        cur_new_non_adj_frame_row = 0
 
-        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Door") 
-        add_new_adj_label.grid(row=cur_new_adj_frame_row, columnspan=5)
+        add_new_non_adj_label = tk.Label(add_new_non_adj_frame, text="Add New Non-Adjacencies") 
+        add_new_non_adj_label.grid(row=cur_new_non_adj_frame_row, columnspan=5)
 
-        self.new_adj_text_left = tk.StringVar()
-        self.new_adj_text_right = tk.StringVar()
+        self.new_non_adj_text_left = tk.StringVar()
+        self.new_non_adj_text_right = tk.StringVar()
 
-        cur_new_adj_frame_row += 1
+        cur_new_non_adj_frame_row += 1
 
-        new_adj_option_left = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
-        new_adj_option_left.grid(row=cur_new_adj_frame_row,column=0, padx=5, pady=5)
+        new_non_adj_option_left = tk.OptionMenu(add_new_non_adj_frame, self.new_non_adj_text_left, *list(self.input.rooms.values()))
+        new_non_adj_option_left.grid(row=cur_new_non_adj_frame_row,column=0, padx=5, pady=5)
 
-        new_adj_door_sign = tk.Label(add_new_adj_frame, text="<=>")
-        new_adj_door_sign.grid(row=cur_new_adj_frame_row,column=1, padx=5, pady=5)
+        new_non_adj_door_sign = tk.Label(add_new_non_adj_frame, text="<=>")
+        new_non_adj_door_sign.grid(row=cur_new_non_adj_frame_row,column=1, padx=5, pady=5)
         
-        new_adj_option_right = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
-        new_adj_option_right.grid(row=cur_new_adj_frame_row,column=2, padx=5, pady=5)
+        new_non_adj_option_right = tk.OptionMenu(add_new_non_adj_frame, self.new_non_adj_text_right, *list(self.input.rooms.values()))
+        new_non_adj_option_right.grid(row=cur_new_non_adj_frame_row,column=2, padx=5, pady=5)
 
-        add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add Rule", command = lambda : self.handle_add_new_adj_btn(adj_frame))
-        add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
+        add_new_non_adj_btn = tk.Button(add_new_non_adj_frame, text="Add Rule", command = lambda : self.handle_add_new_non_adj_btn(non_adj_frame))
+        add_new_non_adj_btn.grid(row=cur_new_non_adj_frame_row, column=3, padx=5, pady=5)
 
         doors_win.wait_variable()
 
@@ -549,18 +550,24 @@ class App:
         self.recall_adj_constraints_frame(frame)
         
     def handle_add_new_non_adj_btn(self,frame):
-        right = self.new_adj_text_right.get()
-        left = self.new_adj_text_left.get()
+        right = self.new_non_adj_text_right.get()
+        left = self.new_non_adj_text_left.get()
         rule_dict = self.input.rooms
         rev_dict = dict(zip(rule_dict.values(), rule_dict.keys()))
-        self.input.adjacencies.append([rev_dict[left], rev_dict[right]])
-        self.recall_adj_constraints_frame(frame)
+        self.input.non_adjacencies.append([rev_dict[left], rev_dict[right]])
+        self.recall_non_adj_constraints_frame(frame)
 
     def handle_remove_adj_rule_btn(self, frame: tk.Frame, rule):
         print(f"rule to remove {rule}")
         print(f"current adjs is {self.input.adjacencies}")
         self.input.adjacencies.remove(rule)
         self.recall_adj_constraints_frame(frame)
+        
+    def handle_remove_non_adj_rule_btn(self, frame: tk.Frame, rule):
+        print(f"rule to remove {rule}")
+        print(f"current non-adjs is {self.input.adjacencies}")
+        self.input.non_adjacencies.remove(rule)
+        self.recall_non_adj_constraints_frame(frame)
 
     def recall_adj_constraints_frame(self, frame):
         for widget in frame.winfo_children():
@@ -593,12 +600,12 @@ class App:
     def recall_non_adj_constraints_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
-        adj_cons_label = tk.Label(frame, text="Door Connections")
-        adj_cons_label.grid(row=0, padx=5, pady=5)
+        non_adj_cons_label = tk.Label(frame, text="Non adjacencies")
+        non_adj_cons_label.grid(row=0, padx=5, pady=5)
 
-        self.adj_cons_frame_list = []
+        self.non_adj_cons_frame_list = []
 
-        for i, each_rule in enumerate(self.input.adjacencies):
+        for i, each_rule in enumerate(self.input.non_adjacencies):
             each_frame = tk.Frame(frame)
             each_frame.grid(row=i+1)
 
@@ -612,11 +619,11 @@ class App:
                 right_label = tk.Label(each_frame, text=self.input.rooms[each_rule[1]])
                 right_label.grid(row = i+1,column=2, padx=5, pady=5)
 
-                remove_adj_btn = tk.Button(each_frame, text="Remove Rule", command= lambda lframe = frame, lrule = each_rule: self.handle_remove_adj_rule_btn(lframe, lrule))
-                remove_adj_btn.grid(row = i+1,column=3, padx=5, pady=5)
+                remove_non_adj_btn = tk.Button(each_frame, text="Remove Rule", command= lambda lframe = frame, lrule = each_rule: self.handle_remove_non_adj_rule_btn(lframe, lrule))
+                remove_non_adj_btn.grid(row = i+1,column=3, padx=5, pady=5)
 
             else:
-                self.input.adjacencies.remove(each_rule)
+                self.input.non_adjacencies.remove(each_rule)
              
     def run(self):
         self.root.mainloop()
