@@ -2,6 +2,7 @@ class Input:
     def __init__(self) -> None:
         self.rooms = {}
         self.adjacencies = []
+        self.non_adjacencies = []
 
     def reset(self):
         self.rooms = {}
@@ -20,6 +21,15 @@ class Input:
                 int_list.append(int(each_ele))
 
             self.adjacencies.append(int_list)
+            
+    def add_non_adjacencies_from(self, non_adjacency_list):
+        for each_list in non_adjacency_list:
+            int_list = []
+
+            for each_ele in each_list:
+                int_list.append(int(each_ele))
+
+            self.non_adjacencies.append(int_list)
 
 
         

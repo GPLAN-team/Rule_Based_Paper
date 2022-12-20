@@ -266,7 +266,7 @@ import pythongui.dimensiongui as dimgui
 # return permgraphs
 # # %%
 
-def generate_graphs(ext_rooms, int_rooms):
+def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True):
     
     G = nx.Graph()
     # n = input("Enter Outer Boundary Vertices")
@@ -513,14 +513,24 @@ def generate_graphs(ext_rooms, int_rooms):
     print("Graphs without Separating Triangle: \n")
     final_graphs = []
     count_non_septri = 0
-    for i in range(0, len(permgraphs)):
-        # if septri_info[i] == False:
-        if septri_info[i] == True:
-            # nx.draw(permgraphs[i], with_labels=True, pos=pos)
-            # plt.show()
-            count_non_septri += 1
-            final_graphs.append(permgraphs[i])
-    print(count_non_septri, "graphs without separating triangles")
+    
+    if rect_floorplans == True:
+        for i in range(0, len(permgraphs)):
+            if septri_info[i] == False:
+                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                # plt.show()
+                count_non_septri += 1
+                final_graphs.append(permgraphs[i])
+        print(count_non_septri, "graphs without separating triangles")
+        
+    else:
+        for i in range(0, len(permgraphs)):
+            if septri_info[i] == True:
+                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                # plt.show()
+                count_non_septri += 1
+                final_graphs.append(permgraphs[i])
+        print(count_non_septri, "graphs with separating triangles")
     
     # # DIMENSIONING PART
     

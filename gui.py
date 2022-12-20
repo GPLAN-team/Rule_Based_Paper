@@ -124,15 +124,15 @@ class App:
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
         
         self.modify_doors_button = tk.Button(self.modify_frame, text="Non-Adjacencies", font=helv15,
-                                             command=self.modify_doors_Button_click)
+                                             command=self.modify_non_adj_Button_click)
         self.modify_doors_button.grid(row=4, column=0, padx=10, pady=10)
         
         self.run_button = tk.Button(self.modify_frame, text="Rectangular floorplan", font=helv15,
-                                             command=self.run_Button_click)
+                                             command=self.run_Rect_Button_click)
         self.run_button.grid(row=5, column=0, padx=10, pady=10)
         
         self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15,
-                                             command=self.run_Button_click)
+                                             command=self.run_Irreg_Button_click)
         self.run_button.grid(row=6, column=0, padx=10, pady=10)
         
         self.prev_btn = tk.Button(self.modify_frame, text= "Previous", font=helv15, command= self.handle_prev_btn)
@@ -186,15 +186,15 @@ class App:
         self.update_colors_table()
         
 
-    def run_Button_click(self):
-        print("[LOG] Run Button Clicked")
+    def run_Rect_Button_click(self):
+        print("[LOG] Rectangular Floorplans Button Clicked")
 
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms)
+        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True)
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")
@@ -245,6 +245,66 @@ class App:
             print(f"one rfp = {output_rfps[0]}")
 
             self.handle_next_btn()
+            
+    def run_Irreg_Button_click(self):
+        print("[LOG] Irregular Floorplans Button Clicked")
+
+        print(f"Room List is {list(self.input.rooms.values())}")
+        print(f"Doors List is {self.input.adjacencies}")
+        self.create_inputgraph_json()
+        # graphs = runner(False)
+        print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
+        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False)
+        
+        if self.dimCheckVar.get() == 1:
+            print("[LOG] Dimensioned selected")
+            
+            # print(graphs)
+            my_plot(graphs)
+            plt.show()
+            
+            print("[LOG] Now will wait for dimensions input")
+            
+            dim_floorplans =  dimensioning_part(graphs, coord_list)
+            print("[LOG] Dimensioned floorplan object\n")
+            print(dim_floorplans)
+
+            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+            
+            # self.draw_one_rfp(dim_floorplans)
+
+            # output_rfps = multigraph_to_rfp(graphs)
+            # print(f"number of rfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
+
+            # self.output_found = True
+            # self.curr_rfp = -1
+
+            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+
+            # print(f"one rfp = {output_rfps[0]}")
+
+            # self.handle_next_btn()
+            
+        else:    
+            # print(graphs)
+            my_plot(graphs)
+            plt.show()
+
+            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+
+            output_rfps = multigraph_to_rfp(graphs)
+            print(f"number of irfps = {len(output_rfps)}")
+            self.output_rfps = output_rfps
+
+            self.output_found = True
+            self.curr_rfp = -1
+
+            print(f"{len(output_rfps)} output irfps = {str(output_rfps)}")
+
+            print(f"one irfp = {output_rfps[0]}")
+
+            self.handle_next_btn()
 
     def create_inputgraph_json(self):
         input = {}
@@ -283,13 +343,16 @@ class App:
 
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
-
+        new_non_adj_list = one_bhk_data['non_adjacency_constraints']
+        
 
         self.input.add_rooms_from(room_list = new_rooms)
         self.input.add_doors_from(adjcancy_list = new_adj_list)
+        self.input.add_non_adjacencies_from(non_adjacency_list= new_non_adj_list)
 
         print(self.input.rooms)
         print(self.input.adjacencies)
+        print(self.input.non_adjacencies)
 
     def threeBHK_Button_click(self):
         print("[LOG] three BHK Button Clicked")
@@ -301,10 +364,9 @@ class App:
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
 
-
         self.input.add_rooms_from(room_list = new_rooms)
         self.input.add_doors_from(adjcancy_list = new_adj_list)
-
+        
         print(self.input.rooms)
         print(self.input.adjacencies)
 
@@ -435,8 +497,58 @@ class App:
         add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
 
         doors_win.wait_variable()
+        
+    def modify_non_adj_Button_click(self):
+        print("[LOG] Modify Non-Adjacencies Button Clicked")
+        
+        doors_win = tk.Toplevel(self.root)
+        
+        doors_win.title("Non-Adjacencies Modifier")
+        # doors_win.geometry(str(1000) + 'x' + str(400))
+
+
+        adj_frame = tk.Frame(doors_win)
+        adj_frame.grid(row=0)
+
+        self.recall_non_adj_constraints_frame(adj_frame)
+
+        add_new_adj_frame = tk.Frame(doors_win)
+        add_new_adj_frame.grid(row=1)
+
+        cur_new_adj_frame_row = 0
+
+        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Door") 
+        add_new_adj_label.grid(row=cur_new_adj_frame_row, columnspan=5)
+
+        self.new_adj_text_left = tk.StringVar()
+        self.new_adj_text_right = tk.StringVar()
+
+        cur_new_adj_frame_row += 1
+
+        new_adj_option_left = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
+        new_adj_option_left.grid(row=cur_new_adj_frame_row,column=0, padx=5, pady=5)
+
+        new_adj_door_sign = tk.Label(add_new_adj_frame, text="<=>")
+        new_adj_door_sign.grid(row=cur_new_adj_frame_row,column=1, padx=5, pady=5)
+        
+        new_adj_option_right = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
+        new_adj_option_right.grid(row=cur_new_adj_frame_row,column=2, padx=5, pady=5)
+
+        add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add Rule", command = lambda : self.handle_add_new_adj_btn(adj_frame))
+        add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
+
+        doors_win.wait_variable()
+
 
     def handle_add_new_adj_btn(self,frame):
+        right = self.new_adj_text_right.get()
+        left = self.new_adj_text_left.get()
+        rule_dict = self.input.rooms
+        rev_dict = dict(zip(rule_dict.values(), rule_dict.keys()))
+        self.input.adjacencies.append([rev_dict[left], rev_dict[right]])
+        self.recall_adj_constraints_frame(frame)
+        
+    def handle_add_new_non_adj_btn(self,frame):
         right = self.new_adj_text_right.get()
         left = self.new_adj_text_left.get()
         rule_dict = self.input.rooms
@@ -451,6 +563,34 @@ class App:
         self.recall_adj_constraints_frame(frame)
 
     def recall_adj_constraints_frame(self, frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+        adj_cons_label = tk.Label(frame, text="Door Connections")
+        adj_cons_label.grid(row=0, padx=5, pady=5)
+
+        self.adj_cons_frame_list = []
+
+        for i, each_rule in enumerate(self.input.adjacencies):
+            each_frame = tk.Frame(frame)
+            each_frame.grid(row=i+1)
+
+            if each_rule[0] in self.input.rooms.keys() and each_rule[1] in self.input.rooms.keys():
+                left_label = tk.Label(each_frame,text=self.input.rooms[each_rule[0]])
+                left_label.grid(row = i+1, column=0, padx=5, pady=5)
+
+                door_sign = tk.Label(each_frame, text="<=>")
+                door_sign.grid(row = i+1,column=1, padx=5, pady=5)
+
+                right_label = tk.Label(each_frame, text=self.input.rooms[each_rule[1]])
+                right_label.grid(row = i+1,column=2, padx=5, pady=5)
+
+                remove_adj_btn = tk.Button(each_frame, text="Remove Rule", command= lambda lframe = frame, lrule = each_rule: self.handle_remove_adj_rule_btn(lframe, lrule))
+                remove_adj_btn.grid(row = i+1,column=3, padx=5, pady=5)
+
+            else:
+                self.input.adjacencies.remove(each_rule)
+                
+    def recall_non_adj_constraints_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
         adj_cons_label = tk.Label(frame, text="Door Connections")
