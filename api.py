@@ -150,7 +150,7 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
     output_data = []
     print("\nbefore")
     # graph.irreg_multiple_dual_2()
-    graph.oneconnected_dual()
+    graph.oneconnected_dual("single")
     print("\nafter")
     for idx in range(min(graph.fpcnt, limit)):
         output_fp = []
