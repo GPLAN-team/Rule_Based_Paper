@@ -390,13 +390,26 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
                 
     def check_validity_of_permutation(perm):
         new_constraints_inc, new_constraints_exc = map_constraints(perm)
+        
+        if n == 6:
+            if (5,7) in new_constraints_inc or (2,6) in new_constraints_inc:
+                return new_constraints_inc, new_constraints_exc, False
+        
         for i in range(0,n):
+            # if i == n-1:
+            #     if (perm[0], perm[n-1]) in new_constraints_exc or (perm[n-1], perm[0]) in new_constraints_exc:
+            #         return new_constraints_inc, new_constraints_exc, False
+            
+            # elif (perm[i], perm[i+1]) in new_constraints_exc or (perm[i+1], perm[i]) in new_constraints_exc:
+            #     return new_constraints_inc, new_constraints_exc, False
+            
             if i == n-1:
-                if (perm[0], perm[n-1]) in new_constraints_exc or (perm[n-1], perm[0]) in new_constraints_exc:
+                if (0, n-1) in new_constraints_exc or (n-1, 0) in new_constraints_exc:
                     return new_constraints_inc, new_constraints_exc, False
             
-            elif (perm[i], perm[i+1]) in new_constraints_exc or (perm[i+1], perm[i]) in new_constraints_exc:
+            elif (i, i+1) in new_constraints_exc or (i+1, i) in new_constraints_exc:
                 return new_constraints_inc, new_constraints_exc, False
+            
         return new_constraints_inc, new_constraints_exc, True
         
 
@@ -627,7 +640,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # for i in septri_info:
     #     print(i)
 
-    print("Graphs without Separating Triangle: \n")
+    # print("Graphs without Separating Triangle: \n")
     final_graphs = []
     count_non_septri = 0
     

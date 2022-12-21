@@ -200,6 +200,7 @@ class App:
         print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
+        self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
         graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
         
@@ -260,6 +261,7 @@ class App:
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
+        self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
         graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
         
