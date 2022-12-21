@@ -743,7 +743,7 @@ class InputGraph:
         for i in range(0, len(final)):
             final_em.append(onc2.merge(final[i]))
         for i in range(len(final_em)):
-            rel = onc.convert_to_rel(final_em[i], nodes)
+            rel = onc2.convert_to_rel(final_em[i], nodes)
             self.rel_matrix_list.append(rel)
 
         #Returning floorplans as per string

@@ -17,7 +17,7 @@ def multigraph_to_rfp(input_graph_list, rectangular=False):
     output_rfps = []
     for each_graph in input_graph_list:
         print("each graph = "  + str(each_graph.edges()))
-        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph), rectangular)[0])
+        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph), 40, 100000, rectangular)[0])
         # output_rfps.append(graph_to_rfp(each_graph))
 
     return output_rfps
@@ -124,7 +124,7 @@ def test_one_BHK_to_input_data():
     output_data = graph_to_rfp(input_data)
     print(output_data)
 
-def graph_to_rfp(input_data, normalize_const=400, limit=100000, rectangular=False):
+def graph_to_rfp(input_data, normalize_const=40, limit=100000, rectangular=False):
     """Generates a rfp for given graph data
 
     Args:
