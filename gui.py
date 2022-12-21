@@ -221,7 +221,7 @@ class App:
             
             # self.draw_one_rfp(dim_floorplans)
 
-            # output_rfps = multigraph_to_rfp(graphs)
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
             # print(f"number of rfps = {len(output_rfps)}")
             # self.output_rfps = output_rfps
 
@@ -241,7 +241,7 @@ class App:
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            output_rfps = multigraph_to_rfp(graphs)
+            output_rfps = multigraph_to_rfp(graphs, rectangular=True)
             print(f"number of rfps = {len(output_rfps)}")
             self.output_rfps = output_rfps
 
@@ -282,7 +282,7 @@ class App:
             
             # self.draw_one_rfp(dim_floorplans)
 
-            # output_rfps = multigraph_to_rfp(graphs)
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
             # print(f"number of rfps = {len(output_rfps)}")
             # self.output_rfps = output_rfps
 
@@ -302,7 +302,7 @@ class App:
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            output_rfps = multigraph_to_rfp(graphs)
+            output_rfps = multigraph_to_rfp(graphs, rectangular=False)
             print(f"number of irfps = {len(output_rfps)}")
             self.output_rfps = output_rfps
 

@@ -14,6 +14,7 @@ import networkx as nx
 from random import randint
 from .graphoperations import biconnectivity as bcn
 from .graphoperations import oneconnectivity as onc
+from .graphoperations import oneconnectivity_2 as onc2
 from .graphoperations import operations as opr
 from .irregular import shortcutresolver as sr
 from .boundary import cip as cip
@@ -740,7 +741,7 @@ class InputGraph:
         onc.recurse(ems, 0, final, individual)
         final_em = []
         for i in range(0, len(final)):
-            final_em.append(onc.merge(final[i]))
+            final_em.append(onc2.merge(final[i]))
         for i in range(len(final_em)):
             rel = onc.convert_to_rel(final_em[i], nodes)
             self.rel_matrix_list.append(rel)

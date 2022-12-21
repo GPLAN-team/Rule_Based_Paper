@@ -647,8 +647,8 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     if rect_floorplans == True:
         for i in range(0, len(permgraphs)):
             if septri_info[i] == False:
-                nx.draw(permgraphs[i], with_labels=True, pos=pos)
-                plt.show()
+                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                # plt.show()
                 count_non_septri += 1
                 final_graphs.append(permgraphs[i])
         print(count_non_septri, "graphs without separating triangles")

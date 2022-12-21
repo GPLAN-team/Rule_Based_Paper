@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 
 from pythongui import dimensiongui as dimgui
 
-def multigraph_to_rfp(input_graph_list):
+def multigraph_to_rfp(input_graph_list, rectangular=False):
     output_rfps = []
     for each_graph in input_graph_list:
         print("each graph = "  + str(each_graph.edges()))
-        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph))[0])
+        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph), rectangular)[0])
         # output_rfps.append(graph_to_rfp(each_graph))
 
     return output_rfps
@@ -124,7 +124,7 @@ def test_one_BHK_to_input_data():
     output_data = graph_to_rfp(input_data)
     print(output_data)
 
-def graph_to_rfp(input_data, normalize_const=40, limit=100000):
+def graph_to_rfp(input_data, normalize_const=400, limit=100000, rectangular=False):
     """Generates a rfp for given graph data
 
     Args:
@@ -149,8 +149,12 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000):
     graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates, [])
     output_data = []
     print("\nbefore")
-    # graph.irreg_multiple_dual_2()
-    graph.oneconnected_dual("single")
+    
+    if rectangular == True:  #Rectangular floorplans
+        graph.oneconnected_dual("multiple")
+    else:                    #Irregular floorplans
+        graph.irreg_multiple_dual_2()
+        
     print("\nafter")
     for idx in range(min(graph.fpcnt, limit)):
         output_fp = []
