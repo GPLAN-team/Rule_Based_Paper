@@ -10,6 +10,7 @@ class Input:
         self.non_adjacencies = []
 
     def add_rooms_from(self, room_list):
+        self.rooms.clear()
         pre = len(self.rooms)
         for i, each_room in enumerate(room_list):
             self.rooms[pre+i] = each_room

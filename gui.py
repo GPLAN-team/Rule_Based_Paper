@@ -169,7 +169,7 @@ class App:
         self.draw_one_rfp(self.output_rfps[self.curr_rfp])
         
     def handle_exit_btn(self):
-        self.root.quit()
+        self.root.destroy()
 
     def update_colors_table(self):
 
@@ -202,7 +202,9 @@ class App:
         # graphs = runner(False)
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        graphs, coord_list, room_mapping = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        
+        self.input.add_rooms_from(room_mapping)
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")
@@ -263,7 +265,9 @@ class App:
         # graphs = runner(False)
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        graphs, coord_list, room_mapping = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        
+        self.input.add_rooms_from(room_mapping)
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")
