@@ -202,9 +202,10 @@ class App:
         # graphs = runner(False)
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list, room_mapping = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
         
         self.input.add_rooms_from(room_mapping)
+        self.inp
         
         if self.dimCheckVar.get() == 1:
             print("[LOG] Dimensioned selected")

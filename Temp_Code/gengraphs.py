@@ -476,5 +476,5 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # print(graph_data['area'])
     # print("\n\n\n")
 
-    return final_graphs, coord_list, perm_mapping
+    return final_graphs, coord_list, perm_mapping, new_constraints_inc, new_constraints_exc
     # %%
