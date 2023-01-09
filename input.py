@@ -16,6 +16,7 @@ class Input:
             self.rooms[pre+i] = each_room
 
     def add_doors_from(self, adjcancy_list):
+        self.adjacencies.clear()
         for each_list in adjcancy_list:
             int_list = []
 
@@ -25,6 +26,7 @@ class Input:
             self.adjacencies.append(int_list)
             
     def add_non_adjacencies_from(self, non_adjacency_list):
+        self.non_adjacencies.clear()
         for each_list in non_adjacency_list:
             int_list = []
 

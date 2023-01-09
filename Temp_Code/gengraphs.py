@@ -196,6 +196,8 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     else:
         raise ValueError('value of n is not in permissible limits!')
     
+    new_constraints_inc_unmodified = new_constraints_inc
+    
     new_constraints_inc = list(set(new_constraints_inc).difference(set(constraintsincbdry)))
     print("Inclusion constraints: ", new_constraints_inc)
     print("Exclusion constraints: ", new_constraints_exc)
@@ -396,7 +398,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     if rect_floorplans == True:
         for i in range(0, len(permgraphs)):
             if septri_info[i] == False:
-                nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
                 # plt.show()
                 # plt.savefig('RFP_'+str(i))
                 count_non_septri += 1
@@ -406,7 +408,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     else:
         for i in range(0, len(permgraphs)):
             if septri_info[i] == True:
-                nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
                 # plt.show()
                 # plt.savefig('OFP_'+str(i))
                 count_non_septri += 1
@@ -476,5 +478,5 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # print(graph_data['area'])
     # print("\n\n\n")
 
-    return final_graphs, coord_list, perm_mapping, new_constraints_inc, new_constraints_exc
+    return final_graphs, coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc
     # %%
