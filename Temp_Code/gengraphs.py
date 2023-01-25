@@ -13,13 +13,18 @@ import source.inputgraph as inputgraph
 import pythongui.dimensiongui as dimgui
 
 
-def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
+def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
 
     G = nx.Graph()
     # n = input("Enter Outer Boundary Vertices")
     # n = 5   # Outer boundary Convex Hull
     n = len(ext_rooms)
     graph_param = []
+    print("PARAMS")
+    print(ext_rooms)
+    print(int_rooms)
+    print(rooms)
+    print("PARAMS END")
 
     # m =input("Enter Inner Boundary Vertices")
     # m = 3   # Inner nodes
@@ -50,19 +55,23 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     for i in range(n+m):
         G.add_node(i, pos=coord_list[i])
 
-    # constraintsincbdry = [(i, i+1) for i in range(n-1)]
+    constraints_incbdry = [(i, i+1) for i in range(n-1)]
+    if (n > 3):
+        constraints_incbdry.append((0, n-1))
+    else:
+        raise ValueError('value of n is not in permissible limits!')
     # if n == 5:
-    #     constraintsincbdry.append((0,4))
+    #     constraints_incbdry.append((0,4))
     # elif n  == 6:
-    #     constraintsincbdry.append((0,5))
+    #     constraints_incbdry.append((0,5))
     # elif n  == 4:
-    #     constraintsincbdry.append((0,3))
+    #     constraints_incbdry.append((0,3))
     # else:
     #     raise ValueError('value of n is not in permissible limits!')
 
-    # print(constraintsincbdry)
-    constraintsinc = []
-    constraintsexc = []
+    # print(constraints_incbdry)
+    constraints_inc = []
+    constraints_exc = []
 
     # Adding adjacency and non-adjacency constraints
     for rule in adjacencies:
@@ -70,37 +79,38 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
         b = max(rule[0], rule[1])
         if a == b:
             continue
-        constraintsinc.append((a, b))
+        constraints_inc.append((a, b))
 
     for rule in non_adjacencies:
         a = min(rule[0], rule[1])
         b = max(rule[0], rule[1])
         if a == b:
             continue
-        constraintsexc.append((a, b))
+        constraints_exc.append((a, b))
 
-    print(constraintsinc)
-    print(constraintsexc)
+    print(constraints_inc)
+    print(constraints_exc)
 
     # if n == 4:
     # # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3  Kitchen - 4, Dining - 5, Living - 6, Store - 7
-    #     constraintsinc = [(4,5), (5,6)]
-    #     constraintsexc = [(3,4)]
+    #     constraints_inc = [(4,5), (5,6)]
+    #     constraints_exc = [(3,4)]
     # elif n == 5:
     # # Fixing Master BR - 0, WC1 - 1, WC2 - 2, BR2 - 3, Kitchen - 4, Dining - 5, Living - 6, Store - 7  (5 outer vertices)
-    #     constraintsinc = [(4, 5), (5,6)]
+    #     constraints_inc = [(4, 5), (5,6)]
 
-    #     constraintsexc = [(2,4), (1,4)]
+    #     constraints_exc = [(2,4), (1,4)]
     # elif n == 6:
     # # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3, Living - 4, Kitchen - 5, Dining - 6, Store - 7
-    #     constraintsinc = [(5,6), (4,6)]
+    #     constraints_inc = [(5,6), (4,6)]
 
-    #     constraintsexc = [(1, 5)]
+    #     constraints_exc = [(1, 5)]
 
+    # --------------------------PERMUTATION-----------------------
     def map_constraints(perm):
         new_constraints_inc = []
         new_constraints_exc = []
-        for rule in constraintsinc:
+        for rule in constraints_inc:
             a = None
             b = None
             if rule[0] in perm:
@@ -117,7 +127,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
 
             new_constraints_inc.append((min(a, b), max(a, b)))
 
-        for rule in constraintsexc:
+        for rule in constraints_exc:
             a = None
             b = None
             if rule[0] in perm:
@@ -186,24 +196,26 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     perm_mapping = [original_mapping[i] for i in valid_perm]
     print(perm_mapping)
     # %%
-    constraintsincbdry = [(i, i+1) for i in range(n-1)]
+    constraints_incbdry = [(i, i+1) for i in range(n-1)]
     if n == 7:
-        constraintsincbdry.append((0, 6))
+        constraints_incbdry.append((0, 6))
     elif n == 5:
-        constraintsincbdry.append((0, 4))
+        constraints_incbdry.append((0, 4))
     elif n == 6:
-        constraintsincbdry.append((0, 5))
+        constraints_incbdry.append((0, 5))
     elif n == 4:
-        constraintsincbdry.append((0, 3))
+        constraints_incbdry.append((0, 3))
     else:
         raise ValueError('value of n is not in permissible limits!')
 
     new_constraints_inc_unmodified = new_constraints_inc
 
     new_constraints_inc = list(
-        set(new_constraints_inc).difference(set(constraintsincbdry)))
+        set(new_constraints_inc).difference(set(constraints_incbdry)))
     print("Inclusion constraints: ", new_constraints_inc)
     print("Exclusion constraints: ", new_constraints_exc)
+
+    # ----------------------------PERMUTATION END ---------------------------
 
     pos = nx.get_node_attributes(G, 'pos')
     # nx.draw(G, with_labels=True, pos=pos)
@@ -211,9 +223,9 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # plt.savefig('nodes_positioning')
 
     listedges = []
-    for i in range(0, 7):
-        for j in range(i+1, 8):
-            if(((i, j) not in constraintsincbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
+    for i in range(0, n+m-1):
+        for j in range(i+1, n+m):
+            if (((i, j) not in constraints_incbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
                 listedges.append((i, j))
     print(listedges)
 
@@ -227,8 +239,8 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     #     for i in list(comb):
     #         H = nx.Graph()
     #         H.add_nodes_from(G)
-    #         H.add_edges_from(constraintsinc)
-    #         H.add_edges_from(constraintsincbdry)    # CONSTRAINT EDGES
+    #         H.add_edges_from(constraints_inc)
+    #         H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
     #         for source, target in i:
     #             H.add_edge(source, target)
     #         t = nx.check_planarity(H, counterexample=False)
@@ -238,16 +250,16 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     # ALL Triangulated Graphs have same no of edges
 
     comb = combinations(
-        listedges, e - len(new_constraints_inc) - len(constraintsincbdry))
+        listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
     for i in list(comb):
         H = nx.Graph()
         H.add_nodes_from(G)
         H.add_edges_from(new_constraints_inc)
-        H.add_edges_from(constraintsincbdry)    # CONSTRAINT EDGES
+        H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
         for source, target in i:
             H.add_edge(source, target)
         t = nx.check_planarity(H, counterexample=False)
-        if(t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+        if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
             listgraphs.append(H)
 
     print(len(listgraphs))
@@ -272,7 +284,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
             np.array(xcoord), np.array(ycoord), matrix)
         # print(flag)
 
-        if(not flag):
+        if (not flag):
             permgraphs.append(P)
 
     print(len(permgraphs))
@@ -371,7 +383,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
                 # Add face information to edge_to_faces
                 trianlular_faces.append(face)
                 for edge in septri.get_edges(face):
-                    if(edge not in edge_to_faces):
+                    if (edge not in edge_to_faces):
                         edge_to_faces[edge] = []
                     edge_to_faces[edge].append(face)
 
@@ -385,7 +397,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
                 separating_edges.extend(edges)
 
                 for edge in edges:
-                    if(edge not in separating_edge_to_triangles):
+                    if (edge not in separating_edge_to_triangles):
                         separating_edge_to_triangles[edge] = []
                     separating_edge_to_triangles[edge].append(
                         separating_triangle)
@@ -399,6 +411,7 @@ def generate_graphs(ext_rooms, int_rooms, rect_floorplans=True, adjacencies=[], 
     #     print(i)
 
     # print("Graphs without Separating Triangle: \n")
+    print(f"Septri Info is {septri_info}")
     final_graphs = []
     count_non_septri = 0
 

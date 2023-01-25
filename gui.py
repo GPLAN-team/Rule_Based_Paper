@@ -79,6 +79,7 @@ class App:
         self.output_found = False
         self.curr_rfp = -1
         self.colors_map = {}
+        self.irreg_check = 0
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -139,7 +140,7 @@ class App:
                                              command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_doors_button = tk.Button(self.modify_frame, text="Modify Doors", font=helv15,
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Adjacencies", font=helv15,
                                              command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
 
@@ -196,7 +197,48 @@ class App:
         graph = inputgraph.InputGraph(
             self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3], [])
 
-        if (self.dimCheckVar.get() == 1):
+        if (self.dimCheckVar.get() == 1 and self.irreg_check == 1):
+            print("Condition : Dimensioned Irregular")
+            # try:
+            #     graph.oneconnected_dual("multiple")
+            # except inputgraph.OCError:
+            #     print("Can not generate rectangular floorplan.")
+            #     graph.irreg_multiple_dual_2()
+            # except inputgraph.BCNError:
+            graph.irreg_multiple_dual_2()
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            graph_data = {
+                'room_x': graph.room_x,
+                'room_y': graph.room_y,
+                'room_width': graph.room_width,
+                'room_height': graph.room_height,
+                'area': graph.area,
+                'extranodes': graph.extranodes,
+                'mergednodes': graph.mergednodes,
+                'irreg_nodes': graph.irreg_nodes1
+            }
+        elif (self.irreg_check == 1):
+            print("Condition : Non dimensioned Irregular")
+            # try:
+            #     graph.oneconnected_dual("multiple")
+            # except inputgraph.OCError:
+            #     print("Can not generate rectangular floorplan.")
+            #     graph.irreg_multiple_dual_2()
+            # except inputgraph.BCNError:
+            graph.irreg_multiple_dual_2()
+            graph_data = {
+                'room_x': graph.room_x,
+                'room_y': graph.room_y,
+                'room_width': graph.room_width,
+                'room_height': graph.room_height,
+                'area': graph.area,
+                'extranodes': graph.extranodes,
+                'mergednodes': graph.mergednodes,
+                'irreg_nodes': graph.irreg_nodes1
+            }
+
+        elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
             graph.multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
@@ -229,8 +271,7 @@ class App:
                 'mergednodes': graph.mergednodes,
                 'irreg_nodes': graph.irreg_nodes1
             }
-            self.draw_one_rfp(
-                self.output_rfps[self.curr_rfp], graph_data)
+
         else:
             graph.single_dual()
             graph_data = {
@@ -251,8 +292,9 @@ class App:
                 'mergednodes': graph.mergednodes,
                 'irreg_nodes': graph.irreg_nodes1
             }
-            self.draw_one_rfp(
-                self.output_rfps[self.curr_rfp], graph_data)
+
+        self.draw_one_rfp(
+            self.output_rfps[self.curr_rfp], graph_data)
 
     def handle_next_btn(self):
         if self.curr_rfp == len(self.output_rfps) - 1:
@@ -266,65 +308,106 @@ class App:
             self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3], [])
 
         if (self.dimCheckVar.get() == 1):
-            graph.multiple_dual()
-            for i in range(0, len(self.dim_params)):
-                print(self.dim_params[i])
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
-            # while(graph.floorplan_exist == False):
-            #     old_dims = [min_width, max_width, min_height,
-            #                 max_height, symm_string, min_aspect, max_aspect]
-            #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-            #         old_dims, nodecnt)
-            #     graph.multiple_dual()
-            #     graph.single_floorplan(min_width, min_height, max_width, max_height,
-            #                         symm_string, min_aspect, max_aspect, plot_width, plot_height)
-            # end = time.time()
-            # printe("Time taken: " + str((end-start)*1000) + " ms")
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'room_x_bottom_left': graph.room_x_bottom_left,
-                'room_x_bottom_right': graph.room_x_bottom_right,
-                'room_x_top_left': graph.room_x_top_left,
-                'room_x_top_right': graph.room_x_top_right,
-                'room_y_left_bottom': graph.room_y_left_bottom,
-                'room_y_right_bottom': graph.room_y_right_bottom,
-                'room_y_left_top': graph.room_y_left_top,
-                'room_y_right_top': graph.room_y_right_top,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
-            self.draw_one_rfp(
-                self.output_rfps[self.curr_rfp], graph_data)
+            if (self.irreg_check == 1):
+                print("Condition : Dimensioned Irregular")
+                # try:
+                #     graph.oneconnected_dual("multiple")
+                # except inputgraph.OCError:
+                #     print("Can not generate rectangular floorplan.")
+                #     graph.irreg_multiple_dual_2()
+                # except inputgraph.BCNError:
+                graph.irreg_multiple_dual_2()
+                graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                       self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                graph_data = {
+                    'room_x': graph.room_x,
+                    'room_y': graph.room_y,
+                    'room_width': graph.room_width,
+                    'room_height': graph.room_height,
+                    'area': graph.area,
+                    'extranodes': graph.extranodes,
+                    'mergednodes': graph.mergednodes,
+                    'irreg_nodes': graph.irreg_nodes1
+                }
+            else:
+                print("Condition : Dimensioned Regular")
+                graph.multiple_dual()
+                graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                       self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                print(graph.floorplan_exist)
+                # while(graph.floorplan_exist == False):
+                #     old_dims = [min_width, max_width, min_height,
+                #                 max_height, symm_string, min_aspect, max_aspect]
+                #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                #         old_dims, nodecnt)
+                #     graph.multiple_dual()
+                #     graph.single_floorplan(min_width, min_height, max_width, max_height,
+                #                         symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                # end = time.time()
+                # printe("Time taken: " + str((end-start)*1000) + " ms")
+                graph_data = {
+                    'room_x': graph.room_x,
+                    'room_y': graph.room_y,
+                    'room_width': graph.room_width,
+                    'room_height': graph.room_height,
+                    'room_x_bottom_left': graph.room_x_bottom_left,
+                    'room_x_bottom_right': graph.room_x_bottom_right,
+                    'room_x_top_left': graph.room_x_top_left,
+                    'room_x_top_right': graph.room_x_top_right,
+                    'room_y_left_bottom': graph.room_y_left_bottom,
+                    'room_y_right_bottom': graph.room_y_right_bottom,
+                    'room_y_left_top': graph.room_y_left_top,
+                    'room_y_right_top': graph.room_y_right_top,
+                    'area': graph.area,
+                    'extranodes': graph.extranodes,
+                    'mergednodes': graph.mergednodes,
+                    'irreg_nodes': graph.irreg_nodes1
+                }
         else:
+            if (self.irreg_check == 1):
+                print("Condition : Non dimensioned Irregular")
+                # try:
+                #     graph.oneconnected_dual("multiple")
+                # except inputgraph.OCError:
+                #     print("Can not generate rectangular floorplan.")
+                #     graph.irreg_multiple_dual_2()
+                # except inputgraph.BCNError:
+                graph.irreg_multiple_dual_2()
+                graph_data = {
+                    'room_x': graph.room_x,
+                    'room_y': graph.room_y,
+                    'room_width': graph.room_width,
+                    'room_height': graph.room_height,
+                    'area': graph.area,
+                    'extranodes': graph.extranodes,
+                    'mergednodes': graph.mergednodes,
+                    'irreg_nodes': graph.irreg_nodes1
+                }
 
-            graph.single_dual()
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'room_x_bottom_left': graph.room_x_bottom_left,
-                'room_x_bottom_right': graph.room_x_bottom_right,
-                'room_x_top_left': graph.room_x_top_left,
-                'room_x_top_right': graph.room_x_top_right,
-                'room_y_left_bottom': graph.room_y_left_bottom,
-                'room_y_right_bottom': graph.room_y_right_bottom,
-                'room_y_left_top': graph.room_y_left_top,
-                'room_y_right_top': graph.room_y_right_top,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
-            self.draw_one_rfp(
-                self.output_rfps[self.curr_rfp], graph_data)
+            else:
+                print("Condition : Non dimensioned Regular")
+                graph.single_dual()
+                graph_data = {
+                    'room_x': graph.room_x,
+                    'room_y': graph.room_y,
+                    'room_width': graph.room_width,
+                    'room_height': graph.room_height,
+                    'room_x_bottom_left': graph.room_x_bottom_left,
+                    'room_x_bottom_right': graph.room_x_bottom_right,
+                    'room_x_top_left': graph.room_x_top_left,
+                    'room_x_top_right': graph.room_x_top_right,
+                    'room_y_left_bottom': graph.room_y_left_bottom,
+                    'room_y_right_bottom': graph.room_y_right_bottom,
+                    'room_y_left_top': graph.room_y_left_top,
+                    'room_y_right_top': graph.room_y_right_top,
+                    'area': graph.area,
+                    'extranodes': graph.extranodes,
+                    'mergednodes': graph.mergednodes,
+                    'irreg_nodes': graph.irreg_nodes1
+                }
+
+        self.draw_one_rfp(
+            self.output_rfps[self.curr_rfp], graph_data)
 
     def handle_exit_btn(self):
         self.root.destroy()
@@ -343,18 +426,20 @@ class App:
         x, y = origin
         self.rfp_canvas.delete("all")
 
-        draw.draw_rdg(graph_data, 1, self.pen, 1,
-                      colors[:self.graphs_param[self.curr_rfp][0]], [], 250)
+        # draw.draw_rdg(graph_data, 1, self.pen, 1,
+        #               colors[:self.graphs_param[self.curr_rfp][0]], [], 250)
 
-        # for each_room in rfp:
-        #     print(f"each room {each_room}")
-        #     self.colors_map[self.input.rooms[each_room['label']]
-        #                     ] = hex_colors[each_room['label']]
+        for each_room in rfp:
+            #     print(f"each room {each_room}")
+            self.colors_map[self.input.rooms[each_room['label']]
+                            ] = hex_colors[each_room['label']]
         #     self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
         #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
         #     # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
 
         self.update_colors_table()
+        draw.draw_rdg(graph_data, 1, self.pen, 1,
+                      list(self.colors_map.values()), [], 250)
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
@@ -368,7 +453,7 @@ class App:
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
         self.graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
         graphs = self.graphs
         self.input.add_rooms_from(room_mapping)
         self.input.add_doors_from(adjacencies_modified)
@@ -440,11 +525,12 @@ class App:
         print(f"Doors List is {self.input.adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
+        self.irreg_check = 1
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+        graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
 
         self.input.add_rooms_from(room_mapping)
         self.input.add_doors_from(adjacencies_modified)
@@ -581,16 +667,13 @@ class App:
         self.exterior_rooms = []
         self.interior_rooms_btn_list = []
         for i, each_room in self.input.rooms.items():
-            print(each_room)
             self.exterior_rooms.append(i)
-            print(self.exterior_rooms)
-            print("\n")
             each_room_label = tk.Label(frame, text=each_room)
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
 
             each_remove_room_btn = tk.Button(
-                frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i))
+                frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
             each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
 
             each_intext_room_btn = tk.Button(
@@ -605,6 +688,7 @@ class App:
         print("[LOG] Modify Rooms Button Clicked")
 
         room_win = tk.Toplevel(self.root)
+        self.mod_room_win = room_win
 
         room_win.title("Room Modifier")
         # room_win.geometry(str(1000) + 'x' + str(400))
@@ -629,16 +713,20 @@ class App:
     def handle_add_new_room_btn(self, new_room, prev_room_list_frame):
         idx = len(self.input.rooms)
         self.input.rooms[idx] = new_room.get("1.0", "end")
-
+        print(self.input.rooms)
         self.recall_room_list_frame(prev_room_list_frame)
 
-    def handle_remove_room_btn(self, room_id):
+    def handle_remove_room_btn(self, room_id, room_win):
         print(f"room to remove is {room_id}")
         self.input.rooms.pop(room_id)
-        self.room_label_list[room_id].destroy()
-        self.remove_room_btn_list[room_id].destroy()
-        self.interior_rooms_btn_list[room_id].destroy()
+        # self.room_label_list[room_id].destroy()
+        # self.remove_room_btn_list[room_id].destroy()
+        # self.interior_rooms_btn_list[room_id].destroy()
+        self.input.add_rooms_from(room_list=list(self.input.rooms.values()))
         print(f"current room list = {self.input.rooms}")
+        # self.recall_room_list_frame(prev_room_list_frame)
+        room_win.destroy()
+        self.modify_rooms_Button_click()
 
     def handle_intext_room_btn(self, room_id):
         # print(f"room is {room_id}")
@@ -646,6 +734,7 @@ class App:
         self.interior_rooms.append(room_id)
         self.interior_rooms_btn_list[room_id].configure(
             highlightbackground='blue')
+        print("Exterior Rooms: ")
         print(self.exterior_rooms)
         # print(f"current room list = {self.input.rooms}")
 
