@@ -15,7 +15,20 @@ from pythongui import dimensiongui as dimgui
 
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
-
+colors = [
+    "#7B68EE",  # medium slate blue
+    "#40E0D0",  # turqouise
+    "#FF7F50",  # coral
+    "#FF69B4",  # hot pink
+    "#E6E6FA",  # lavender
+    "#FA8072",  # salmon
+    "#98FB98",  # pale green
+    "#BA55D3",  # medium orchid
+    "#B0C4DE",  # light steel blue
+    "#FFA500",  # orange
+    "#FFDAB9",  # peach puff
+    "#6495ED",  # corn flower blue
+] * 10
 INPUTGRAPH_JSON_PATH = ("./FastPLAN/inputgraph.json")
 
 rgb_colors = [
@@ -330,8 +343,8 @@ class App:
         x, y = origin
         self.rfp_canvas.delete("all")
 
-        draw.draw_rdg(graph_data, 1, self.pen, 1, [
-                      '#4BC0D9']*self.graphs_param[self.curr_rfp][0], [], 250)
+        draw.draw_rdg(graph_data, 1, self.pen, 1,
+                      colors[:self.graphs_param[self.curr_rfp][0]], [], 250)
 
         # for each_room in rfp:
         #     print(f"each room {each_room}")
