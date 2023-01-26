@@ -24,17 +24,13 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     print(ext_rooms)
     print(int_rooms)
     print(rooms)
+    print(adjacencies)
+    print(non_adjacencies)
     print("PARAMS END")
 
     # m =input("Enter Inner Boundary Vertices")
     # m = 3   # Inner nodes
     m = len(int_rooms)
-
-    original_mapping = ["Bed Room 1", "WC 1", "WC 2", "Bed Room 2",
-                        "Kitchen", "Dining Room", "Living Room", "Store Room"]
-    print(ext_rooms)
-    print(adjacencies)
-    print(non_adjacencies)
 
     rad = 1
 
@@ -49,7 +45,12 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
                 (center[0]-radius + (i+1)*(2*radius)/(m+1), center[1]))
         return coord_list
 
-    coord_list = _draw_regular_polygon((3, 3), rad, n, m, 0)
+    angle = math.pi/n
+
+    if (n % 4 == 0):
+        angle = 0
+
+    coord_list = _draw_regular_polygon((3, 3), rad, n, m, angle)
     # print(coord_list)
 
     for i in range(n+m):
@@ -60,6 +61,10 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
         constraints_incbdry.append((0, n-1))
     else:
         raise ValueError('value of n is not in permissible limits!')
+
+    # nx.draw(G, with_labels=True, pos=pos)
+    # plt.show()
+
     # if n == 5:
     #     constraints_incbdry.append((0,4))
     # elif n  == 6:
@@ -88,8 +93,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
             continue
         constraints_exc.append((a, b))
 
-    print(constraints_inc)
-    print(constraints_exc)
+    print(f"Constraints_inc: {constraints_inc}")
+    print(f"Constraints_exc: {constraints_exc}")
 
     # if n == 4:
     # # Fixing Master BR - 0, WC1 - 1, BR2 - 2, WC2 - 3  Kitchen - 4, Dining - 5, Living - 6, Store - 7
@@ -149,9 +154,9 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     def check_validity_of_permutation(perm):
         new_constraints_inc, new_constraints_exc = map_constraints(perm)
 
-        if n == 6:
-            if (4, 7) in new_constraints_inc or (1, 6) in new_constraints_inc:
-                return new_constraints_inc, new_constraints_exc, False
+        # if n == 6:
+        #     if (4, 7) in new_constraints_inc or (1, 6) in new_constraints_inc:
+        #         return new_constraints_inc, new_constraints_exc, False
 
         for i in range(0, n):
             # if i == n-1:
@@ -193,7 +198,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     valid_perm.extend(int_rooms)
 
     # MAPPING BETWEEN ROOM NUMBERS AND ROOM NAMES
-    perm_mapping = [original_mapping[i] for i in valid_perm]
+    perm_mapping = [rooms[i] for i in valid_perm]
     print(perm_mapping)
     # %%
     constraints_incbdry = [(i, i+1) for i in range(n-1)]
