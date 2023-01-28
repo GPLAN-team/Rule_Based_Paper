@@ -405,7 +405,7 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-        print(graph_data['room_x'])
+        print(graph_data['room_x'].shape[0])
         self.draw_one_rfp(
             self.output_rfps[self.curr_rfp], graph_data)
 
@@ -422,7 +422,7 @@ class App:
             self.colors_table_canvas.create_text(
                 200, 105 + i*30, text=each_room)
 
-    def draw_one_rfp(self, rfp, graph_data, origin=(200, 200), scale=1):
+    def draw_one_rfp(self, rfp, graph_data, origin=(0, 0), scale=1):
         x, y = origin
         self.rfp_canvas.delete("all")
 
@@ -433,13 +433,15 @@ class App:
             #     print(f"each room {each_room}")
             self.colors_map[self.input.rooms[each_room['label']]
                             ] = hex_colors[each_room['label']]
-        #     self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
-        #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
-        #     # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
+            # if self.irreg_check == 1:
+            #     self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
+            #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
+            #     # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
 
         self.update_colors_table()
+        # if self.irreg_check != 1:
         draw.draw_rdg(graph_data, 1, self.pen, 1,
-                      list(self.colors_map.values()), [], 250, self.input.rooms)
+                      list(self.colors_map.values()), self.input.rooms, 200)
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
@@ -481,8 +483,6 @@ class App:
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            # GENERATE FLOORPLAN!!!!!!!!!!!
-
             # self.draw_one_rfp(dim_graphdata)
 
             output_rfps = multigraph_to_rfp(graphs, rectangular=True)
@@ -492,9 +492,9 @@ class App:
             self.output_found = True
             self.curr_rfp = -1
 
-            print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-            print(f"one rfp = {output_rfps[0]}")
+            # print(f"one rfp = {output_rfps[0]}")
 
             self.handle_next_btn()
 
@@ -512,9 +512,9 @@ class App:
             self.output_found = True
             self.curr_rfp = -1
 
-            print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-            print(f"one rfp = {output_rfps[0]}")
+            # print(f"one rfp = {output_rfps[0]}")
 
             self.handle_next_btn()
 
@@ -553,18 +553,18 @@ class App:
 
             # self.draw_one_rfp(dim_graphdata)
 
-            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
-            # print(f"number of rfps = {len(output_rfps)}")
-            # self.output_rfps = output_rfps
+            output_rfps = multigraph_to_rfp(graphs, rectangular=False)
+            print(f"number of rfps = {len(output_rfps)}")
+            self.output_rfps = output_rfps
 
-            # self.output_found = True
-            # self.curr_rfp = -1
+            self.output_found = True
+            self.curr_rfp = -1
 
             # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
             # print(f"one rfp = {output_rfps[0]}")
 
-            # self.handle_next_btn()
+            self.handle_next_btn()
 
         else:
             # print(graphs)
@@ -580,9 +580,9 @@ class App:
             self.output_found = True
             self.curr_rfp = -1
 
-            print(f"{len(output_rfps)} output irfps = {str(output_rfps)}")
+            # print(f"{len(output_rfps)} output irfps = {str(output_rfps)}")
 
-            print(f"one irfp = {output_rfps[0]}")
+            # print(f"one irfp = {output_rfps[0]}")
 
             self.handle_next_btn()
 
