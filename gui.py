@@ -405,7 +405,7 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-
+        print(graph_data['room_x'])
         self.draw_one_rfp(
             self.output_rfps[self.curr_rfp], graph_data)
 
@@ -439,7 +439,7 @@ class App:
 
         self.update_colors_table()
         draw.draw_rdg(graph_data, 1, self.pen, 1,
-                      list(self.colors_map.values()), [], 250)
+                      list(self.colors_map.values()), [], 250, self.input.rooms)
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")

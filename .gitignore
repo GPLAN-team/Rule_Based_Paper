@@ -11,4 +11,4 @@ __pycache__\
 *__pycache__
 *saved_files*
 *.json
-.venv
+.DS_Store
