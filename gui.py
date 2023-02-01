@@ -543,11 +543,19 @@ class App:
             my_plot(graphs)
             plt.show()
 
+            nodecnt = len(graphs[0].nodes)
             print("[LOG] Now will wait for dimensions input")
 
-            dim_graphdata = dimensioning_part(graphs, coord_list)
+            old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+                        [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                old_dims, nodecnt)
+            self.dim_params = [min_width, max_width, min_height, max_height,
+                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+
+            # dim_graphdata = dimensioning_part(graphs, coord_list)
             print("[LOG] Dimensioned floorplan object\n")
-            print(dim_graphdata)
+            # print(dim_graphdata)
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 

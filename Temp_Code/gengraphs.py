@@ -202,14 +202,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     print(perm_mapping)
     # %%
     constraints_incbdry = [(i, i+1) for i in range(n-1)]
-    if n == 7:
-        constraints_incbdry.append((0, 6))
-    elif n == 5:
-        constraints_incbdry.append((0, 4))
-    elif n == 6:
-        constraints_incbdry.append((0, 5))
-    elif n == 4:
-        constraints_incbdry.append((0, 3))
+    if n >= 4:
+        constraints_incbdry.append((0, n-1))
     else:
         raise ValueError('value of n is not in permissible limits!')
 
