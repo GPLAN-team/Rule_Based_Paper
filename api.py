@@ -151,7 +151,7 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000, rectangular=False
     print("\nbefore")
 
     if rectangular == True:  # Rectangular floorplans
-        graph.oneconnected_dual("multiple")
+        graph.irreg_single_dual()
     else:  # Irregular floorplans
         graph.irreg_multiple_dual()
 

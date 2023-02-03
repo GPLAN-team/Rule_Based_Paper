@@ -239,7 +239,7 @@ class App:
             }
 
         elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            graph.oneconnected_dual()
+            graph.irreg_single_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
@@ -265,7 +265,7 @@ class App:
             }
 
         else:
-            graph.oneconnected_dual()
+            graph.irreg_single_dual()
             graph_data = {
                 'room_x': graph.room_x,
                 'room_y': graph.room_y,
@@ -277,11 +277,10 @@ class App:
                 'irreg_nodes': graph.irreg_nodes1
             }
 
-        self.draw_one_rfp(
-            self.output_rfps[self.curr_rfp], graph_data)
+        self.draw_one_rfp(graph_data)
 
     def handle_next_btn(self):
-        if self.curr_rfp == len(self.output_rfps) - 1:
+        if self.curr_rfp == len(self.graphs) - 1:
             tk.messagebox.showwarning(
                 "The End", "You have exhausted all the options")
             return
@@ -333,7 +332,7 @@ class App:
             }
 
         elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            graph.oneconnected_dual()
+            graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
@@ -359,7 +358,7 @@ class App:
             }
 
         else:
-            graph.oneconnected_dual()
+            graph.irreg_single_dual()
             graph_data = {
                 'room_x': graph.room_x,
                 'room_y': graph.room_y,
@@ -372,8 +371,7 @@ class App:
             }
 
         print(graph_data['room_x'].shape[0])
-        self.draw_one_rfp(
-            self.output_rfps[self.curr_rfp], graph_data)
+        self.draw_one_rfp(graph_data)
 
     def handle_exit_btn(self):
         self.root.destroy()
@@ -388,17 +386,17 @@ class App:
             self.colors_table_canvas.create_text(
                 200, 105 + i*30, text=each_room)
 
-    def draw_one_rfp(self, rfp, graph_data, origin=(0, 0), scale=1):
+    def draw_one_rfp(self, graph_data, origin=(0, 0), scale=1):
         x, y = origin
         self.rfp_canvas.delete("all")
 
         # draw.draw_rdg(graph_data, 1, self.pen, 1,
         #               colors[:self.graphs_param[self.curr_rfp][0]], [], 250)
 
-        for each_room in rfp:
+        for i, each_room in enumerate(self.input.rooms.values()):
             #     print(f"each room {each_room}")
-            self.colors_map[self.input.rooms[each_room['label']]
-                            ] = hex_colors[each_room['label']]
+            self.colors_map[self.input.rooms[i]
+                            ] = hex_colors[i]
             # if self.irreg_check == 1:
             #     self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
             #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
@@ -451,9 +449,9 @@ class App:
 
             # self.draw_one_rfp(dim_graphdata)
 
-            output_rfps = multigraph_to_rfp(graphs, rectangular=True)
-            print(f"number of rfps = {len(output_rfps)}")
-            self.output_rfps = output_rfps
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+            # print(f"number of rfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
 
             self.output_found = True
             self.curr_rfp = -1
@@ -471,9 +469,9 @@ class App:
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            output_rfps = multigraph_to_rfp(graphs, rectangular=True)
-            print(f"number of rfps = {len(output_rfps)}")
-            self.output_rfps = output_rfps
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+            # print(f"number of rfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
 
             self.output_found = True
             self.curr_rfp = -1
@@ -495,9 +493,9 @@ class App:
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
-        graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+        self.graphs, coord_list, room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
             self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-
+        graphs = self.graphs
         self.input.add_rooms_from(room_mapping)
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
@@ -527,9 +525,9 @@ class App:
 
             # self.draw_one_rfp(dim_graphdata)
 
-            output_rfps = multigraph_to_rfp(graphs, rectangular=False)
-            print(f"number of rfps = {len(output_rfps)}")
-            self.output_rfps = output_rfps
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
+            # print(f"number of rfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
 
             self.output_found = True
             self.curr_rfp = -1
@@ -547,9 +545,9 @@ class App:
 
             print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            output_rfps = multigraph_to_rfp(graphs, rectangular=False)
-            print(f"number of irfps = {len(output_rfps)}")
-            self.output_rfps = output_rfps
+            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
+            # print(f"number of irfps = {len(output_rfps)}")
+            # self.output_rfps = output_rfps
 
             self.output_found = True
             self.curr_rfp = -1

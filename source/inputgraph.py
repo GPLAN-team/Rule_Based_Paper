@@ -539,8 +539,8 @@ class InputGraph:
         Returns:
             None
         """
-        if (bcn.is_biconnected(self.matrix)):
-            raise BCNError
+        # if (bcn.is_biconnected(self.matrix)):
+        #     raise BCNError
 
         # Identifying cut-vertices
         matrix = copy.deepcopy(self.matrix)
