@@ -13,17 +13,20 @@ import matplotlib.pyplot as plt
 
 from pythongui import dimensiongui as dimgui
 
+
 def multigraph_to_rfp(input_graph_list, rectangular=False):
     output_rfps = []
     for each_graph in input_graph_list:
-        print("each graph = "  + str(each_graph.edges()))
-        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(each_graph), 40, 100000, rectangular)[0])
+        print("each graph = " + str(each_graph.edges()))
+        output_rfps.append(graph_to_rfp(convert_nxgraph_to_input_data(
+            each_graph), 40, 100000, rectangular)[0])
         # output_rfps.append(graph_to_rfp(each_graph))
 
     return output_rfps
 
+
 def convert_nxgraph_to_input_data(nxgraph: nx.Graph):
-    
+
     input_data = {}
     nodes = []
     edges = []
@@ -46,8 +49,6 @@ def convert_nxgraph_to_input_data(nxgraph: nx.Graph):
     except:
         pos = nx.spring_layout(nxgraph)
 
-
-
     for i, each_room in enumerate(rooms):
         node = {}
         node["id"] = i
@@ -63,12 +64,12 @@ def convert_nxgraph_to_input_data(nxgraph: nx.Graph):
         st_edge["target"] = each_edge[1]
         edges.append(st_edge)
 
-
     input_data["nodes"] = nodes
     input_data["edges"] = edges
 
     # print(input_data)
     return input_data
+
 
 def convert_json_to_input_data(graph):
     input_data = {}
@@ -80,7 +81,7 @@ def convert_json_to_input_data(graph):
     edges_list = []
     for each_edge in adjacency_constraints:
         l, r = int(each_edge[0]), int(each_edge[1])
-        edges_list.append((l,r))
+        edges_list.append((l, r))
 
     nxgraph = nx.Graph()
     nxgraph.add_edges_from(edges_list)
@@ -91,8 +92,6 @@ def convert_json_to_input_data(graph):
         pos = nx.planar_layout(nxgraph)
     except:
         pos = nx.spring_layout(nxgraph)
-
-
 
     for i, each_room in enumerate(rooms):
         node = {}
@@ -109,20 +108,21 @@ def convert_json_to_input_data(graph):
         st_edge["target"] = each_edge[1]
         edges.append(st_edge)
 
-
     input_data["nodes"] = nodes
     input_data["edges"] = edges
 
     # print(input_data)
     return input_data
 
+
 def test_one_BHK_to_input_data():
     one_BHK_file = open("two_bhk.json")
     json_data = json.load(one_BHK_file)
-    input_data =  convert_json_to_input_data(json_data)
+    input_data = convert_json_to_input_data(json_data)
     print(input_data)
     output_data = graph_to_rfp(input_data)
     print(output_data)
+
 
 def graph_to_rfp(input_data, normalize_const=40, limit=100000, rectangular=False):
     """Generates a rfp for given graph data
@@ -146,15 +146,15 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000, rectangular=False
     node_coordinates = []
     for node in input_data['nodes']:
         node_coordinates.append([node['x'], node['y']])
-    graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates, [])
+    graph = inputgraph.InputGraph(nodecnt, edgecnt, edgedata, node_coordinates)
     output_data = []
     print("\nbefore")
-    
-    if rectangular == True:  #Rectangular floorplans
+
+    if rectangular == True:  # Rectangular floorplans
         graph.oneconnected_dual("multiple")
-    else:                    #Irregular floorplans
-        graph.irreg_multiple_dual_2()
-        
+    else:  # Irregular floorplans
+        graph.irreg_multiple_dual()
+
     print("\nafter")
     for idx in range(min(graph.fpcnt, limit)):
         output_fp = []
@@ -167,20 +167,21 @@ def graph_to_rfp(input_data, normalize_const=40, limit=100000, rectangular=False
                 "top": int(graph.room_y[idx][node["id"]] * normalize_const),
                 "width": int(graph.room_width[idx][node["id"]] * normalize_const),
                 "height": int(graph.room_height[idx][node["id"]] * normalize_const)
-                })
+            })
         for cnt in range(len(graph.mergednodes[idx])):
             output_fp.append({
                 "id": graph.mergednodes[idx][cnt],
                 "label": input_data['nodes'][graph.irreg_nodes1[idx][cnt]]["label"],
                 "color": input_data['nodes'][graph.irreg_nodes1[idx][cnt]]["color"],
                 "left": int(graph.room_x[idx][graph.mergednodes[idx][cnt]] * normalize_const),
-                "top": int( graph.room_y[idx][graph.mergednodes[idx][cnt]] * normalize_const),
+                "top": int(graph.room_y[idx][graph.mergednodes[idx][cnt]] * normalize_const),
                 "width": int(graph.room_width[idx][graph.mergednodes[idx][cnt]] * normalize_const),
                 "height": int(graph.room_height[idx][graph.mergednodes[idx][cnt]] * normalize_const)
-                })
+            })
         output_data.append(output_fp)
-    
+
     return output_data
+
 
 def dimensioning_part(graphs, coord_list):
     P = graphs[0]
@@ -188,7 +189,7 @@ def dimensioning_part(graphs, coord_list):
     edgecnt = nx.number_of_edges(P)
     edgeset = P.edges
     graph = inputgraph.InputGraph(
-        nodecnt, edgecnt, edgeset, coord_list, [])
+        nodecnt, edgecnt, edgeset, coord_list)
     old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
                 [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
@@ -212,7 +213,7 @@ def dimensioning_part(graphs, coord_list):
     graph.single_floorplan(min_width, min_height, max_width, max_height,
                            symm_string, min_aspect, max_aspect, plot_width, plot_height)
     print(graph.floorplan_exist)
-    while(graph.floorplan_exist == False):
+    while (graph.floorplan_exist == False):
         old_dims = [min_width, max_width, min_height,
                     max_height, symm_string, min_aspect, max_aspect]
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
@@ -243,7 +244,7 @@ def dimensioning_part(graphs, coord_list):
     print("\n\n\n")
     print(graph_data['area'])
     print("\n\n\n")
-    
+
     return graph_data
 
 
