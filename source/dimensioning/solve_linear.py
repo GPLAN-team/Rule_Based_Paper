@@ -50,6 +50,9 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 	      	H: List of optimised heights
 	      	status: boolean  representing success of optimization
 	   """
+	p = len(min_height)
+	empty_ver = np.empty_like(Aeq_VER)
+	empty_hor = np.empty_like(Aeq_HOR)
 	b_min_VER = np.dot(np.array(min_width), -1)
 	b_max_VER = np.array(max_width)
 	b_min_VER = np.transpose(b_min_VER)
@@ -58,17 +61,31 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 	b_max_VER = b_max_VER.astype(float)
 	b_VER = np.hstack((b_min_VER, b_max_VER))
 
-	value_opti_ver = scipy.optimize.linprog(f_VER,A_ub=A_VER,b_ub=b_VER,A_eq=Aeq_VER,b_eq=Beq_VER, bounds=(1,None), method='interior-point', callback=None, options=None, x0=None)
 
-	X1=value_opti_ver['x']
-	X1 = np.array([X1])
-	X1 = np.transpose(X1)
-	W =  (-1) * np.dot(A_VER, X1)
-	l = len(W)
-	width = W[0:int(l / 2)]
-	width = width.reshape((1, int(l/2)))
-	width = width.tolist()
-	a = width[0]
+
+	if not Aeq_VER.tolist():
+		a = np.ones(p)
+		W = []
+		for i in range(p) :
+			W.append([1])
+		for i in range(p) :
+			W.append([-1])
+		l = len(W)
+		ver_success = True
+	else:
+		value_opti_ver = scipy.optimize.linprog(f_VER,A_ub=A_VER,b_ub=b_VER,A_eq=Aeq_VER,b_eq=Beq_VER, bounds=(1,None), method='interior-point', callback=None, options=None, x0=None)
+		X1=value_opti_ver['x']
+		X1 = np.array([X1])
+		X1 = np.transpose(X1)
+		W =  (-1) * np.dot(A_VER, X1)
+		l = len(W)
+		width = W[0:int(l / 2)]
+		width = width.reshape((1, int(l/2)))
+		width = width.tolist()
+		a = width[0]
+		ver_success = value_opti_ver.success
+
+	
 
 	min_AR_height = []
 	max_AR_height = []
@@ -78,7 +95,6 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 
 	min_height_mod = []
 	max_height_mod = []
-	p = len(min_height)
 	for i in range(0, p):
 		if (min_AR_height[i] > min_height[i]):
 			min_height_mod.append(min_AR_height[i])
@@ -113,12 +129,26 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 		b_HOR = np.hstack((b_min_HOR, b_max_HOR))
 
 	# print(b_HOR)
+	if not Aeq_HOR.tolist():
+		H = []
+		for i in range(p) :
+			H.append([1])
+		for i in range(p) :
+			H.append([-1])
+		hor_success = True
+	else:
+		value_opti_hor = scipy.optimize.linprog(f_HOR,A_ub=A_HOR,b_ub=b_HOR,A_eq=Aeq_HOR,b_eq=Beq_HOR, bounds=(1,None), method='interior-point', callback=None, options=None, x0=None)
 
-	value_opti_hor = scipy.optimize.linprog(f_HOR,A_ub=A_HOR,b_ub=b_HOR,A_eq=Aeq_HOR,b_eq=Beq_HOR, bounds=(1,None), method='interior-point', callback=None, options=None, x0=None)
+		X2=value_opti_hor['x']
+		X2 = np.array([X2])
+		X2 = np.transpose(X2)
+		H = (-1) * np.dot(A_HOR,X2)
+		hor_success = value_opti_hor.success
 
-	X2=value_opti_hor['x']
-	X2 = np.array([X2])
-	X2 = np.transpose(X2)
-	H = (-1) * np.dot(A_HOR,X2)
-	status = value_opti_ver.success and value_opti_hor.success
+	
+
+
+
+
+	status =  ver_success and hor_success
 	return [W, H, status]

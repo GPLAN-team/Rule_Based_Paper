@@ -239,7 +239,7 @@ class App:
             }
 
         elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            graph.irreg_single_dual()
+            graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
