@@ -39,6 +39,69 @@ def find_points(x1, y1, x2, y2,
 
     return [(x7, y7), (x8, y8)], first_rect, second_rect
 
+
+def drawy(val, trtl):
+
+    # set position
+    trtl.up()
+    trtl.setpos(val, -250)
+    trtl.down()
+
+    # line
+    trtl.forward(500)
+
+    # another line
+    # trtl.backward(500)
+
+    # set position again
+    # trtl.up()
+    # trtl.setpos(val+40, -100)
+    # trtl.down()
+
+
+def drawx(val, trtl):
+
+    # set position
+    trtl.up()
+    trtl.setpos(-250, val)
+    trtl.down()
+
+    # line
+    trtl.forward(500)
+
+    # another line
+    # trtl.backward(500)
+
+    # set position again
+    # trtl.up()
+    # trtl.setpos(-100, val+40)
+    # trtl.down()
+
+
+def drawgrid(trtl):
+    trtl.setpos(-100, -100)
+    trtl.speed(500)
+    trtl.left(90)
+    trtl.color(.1, .1, .1)
+    for i in range(20):
+        # drawy(-300+40*(i+1), trtl)
+        trtl.up()
+        trtl.setpos(-400+40*(i+1), -400)
+        trtl.down()
+
+        # line
+        trtl.forward(800)
+
+    trtl.right(90)
+    for i in range(20):
+        # drawx(200-40*(i+1), trtl)
+        trtl.up()
+        trtl.setpos(-400, -400+40*(i+1))
+        trtl.down()
+
+        # line
+        trtl.forward(800)
+
 # Draw rectangular dual of graph
 
 
@@ -139,6 +202,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                     pen.setposition(coordinates[i][dir][idx][0] * scale + origin['x'],
                                     coordinates[i][dir][idx][1] * scale + origin['y'])
                     pen.penup()
+
         pen.end_fill()
         if (graph_data['room_x'][i] + graph_data['room_width'][i] > dim[0]):
             dim[0] = graph_data['room_x'][i] + graph_data['room_width'][i]
@@ -150,7 +214,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                   == np.max(graph_data['room_y']))[0][0])
     pen.setposition((graph_data['room_x'][x_index]) * scale + origin['x'], (graph_data['room_y']
                     [y_index] + graph_data['room_height'][y_index]) * scale + origin['y'] + 200)
-    pen.write(count, font=("Arial", 20, "normal"))
+    # pen.write(count, font=("Arial", 20, "normal"))
     pen.penup()
     for i in range(graph_data['room_x'].shape[0]):
         if i in graph_data['extranodes']:

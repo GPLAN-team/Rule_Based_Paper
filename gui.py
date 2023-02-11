@@ -177,15 +177,19 @@ class App:
         #     self.rfp_draw_frame, width=800, height=800, background="red", border=10)
         # self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
-        self.rfp_canvas = turtle.Canvas(
-            self.rfp_draw_frame, width=800, height=800)
-        # self.canvas.bind("<Double-Button-1>", self.zoom)
+        self.rfp_canvas = turtle.ScrolledCanvas(
+            self.rfp_draw_frame, width=800, height=600)
+        self.rfp_canvas.bind("<Double-Button-1>", self.zoom)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
         self.tscreen = turtle.TurtleScreen(self.rfp_canvas)
         self.tscreen.screensize(50000, 1000)
         # self.tscreen.bgcolor(col[3])
         self.pen = turtle.RawTurtle(self.tscreen)
         self.pen.speed(10000000)
+
+    def zoom(self, event):
+        self.canvas.config(width=self.root.winfo_screenwidth(),
+                           height=self.root.winfo_screenheight())
 
     def handle_prev_btn(self):
 
@@ -406,6 +410,7 @@ class App:
         # if self.irreg_check != 1:
         draw.draw_rdg(graph_data, 1, self.pen, 1,
                       list(self.colors_map.values()), self.input.rooms, 200)
+        draw.drawgrid(self.pen)
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")

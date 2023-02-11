@@ -277,6 +277,8 @@ class InputGraph:
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
                 rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
+            print("**************")
+            print(i, encoded_matrix)
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
 
             [boolean, ver_list, hor_list] = bc.block_checker(
