@@ -121,14 +121,14 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
             if rule[0] in perm:
                 a = perm.index(rule[0])
             else:
-                a = rule[0]
-                # a = n + int_rooms.index(rule[0])
+                # a = rule[0]
+                a = n + int_rooms.index(rule[0])
 
             if rule[1] in perm:
                 b = perm.index(rule[1])
             else:
-                b = rule[1]
-                # b = n + int_rooms.index(rule[1])
+                # b = rule[1]
+                b = n + int_rooms.index(rule[1])
 
             new_constraints_inc.append((min(a, b), max(a, b)))
 

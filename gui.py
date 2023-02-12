@@ -113,12 +113,12 @@ class App:
                                       command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
-        self.dimCheckVar = tk.IntVar()
+        self.dimCheckVar = tk.IntVar(value=1)
+        # self.dimCheckVar = 1
+        # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
+        #                                  command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
 
-        self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
-                                         command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
-
-        self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
+        # self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
     def properties_section(self):
         self.properties_frame = tk.Frame(self.root)
@@ -339,7 +339,7 @@ class App:
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
+            print(f"FloorPlan Exist: {graph.floorplan_exist}")
             # while(graph.floorplan_exist == False):
             #     old_dims = [min_width, max_width, min_height,
             #                 max_height, symm_string, min_aspect, max_aspect]
@@ -374,7 +374,7 @@ class App:
                 'irreg_nodes': graph.irreg_nodes1
             }
 
-        print(graph_data['room_x'].shape[0])
+        # print(graph_data['room_x'].shape[0])
         self.draw_one_rfp(graph_data)
 
     def handle_exit_btn(self):
@@ -412,6 +412,82 @@ class App:
                       list(self.colors_map.values()), self.input.rooms, 200)
         draw.drawgrid(self.pen)
 
+    def default_dim(self):
+        min_width = []
+        max_width = []
+        min_height = []
+        max_height = []
+        symm_string = "()"
+        min_aspect = []
+        max_aspect = []
+        plot_width = -1
+        plot_height = -1
+        for i, room in self.input.rooms.items():
+            if (room == "Living Room"):
+                min_width.append(9)
+                min_height.append(13)
+                max_width.append(14)
+                max_height.append(22)
+                min_aspect.append(1)
+                max_aspect.append(2)
+            elif (room == "Kitchen"):
+                min_width.append(6)
+                min_height.append(6)
+                max_width.append(14)
+                max_height.append(20)
+                min_aspect.append(0.7)
+                max_aspect.append(1.7)
+            elif (room == "Bed Room 2"):
+                min_width.append(7)
+                min_height.append(7)
+                max_width.append(10)
+                max_height.append(11)
+                min_aspect.append(1)
+                max_aspect.append(2)
+            elif (room == "Bed Room 2"):
+                min_width.append(10)
+                min_height.append(10)
+                max_width.append(13)
+                max_height.append(14)
+                min_aspect.append(1)
+                max_aspect.append(2)
+            elif (room == "WC 1"):
+                min_width.append(3)
+                min_height.append(3)
+                max_width.append(8)
+                max_height.append(10)
+                min_aspect.append(0.7)
+                max_aspect.append(1.7)
+            elif (room == "WC 2"):
+                min_width.append(3)
+                min_height.append(3)
+                max_width.append(8)
+                max_height.append(11)
+                min_aspect.append(0.7)
+                max_aspect.append(1.7)
+            elif (room == "Store Room"):
+                min_width.append(3)
+                min_height.append(3)
+                max_width.append(8)
+                max_height.append(8)
+                min_aspect.append(0.7)
+                max_aspect.append(1.7)
+            elif (room == "Dining Room"):
+                min_width.append(5)
+                min_height.append(5)
+                max_width.append(11)
+                max_height.append(11)
+                min_aspect.append(0.7)
+                max_aspect.append(1.7)
+            else:
+                min_width.append(0)
+                min_height.append(0)
+                max_width.append(9999)
+                max_height.append(9999)
+                min_aspect.append(0.5)
+                max_aspect.append(2)
+        return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
+
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
 
@@ -436,13 +512,14 @@ class App:
             # print(graphs)
             my_plot(graphs)
             plt.show()
-            nodecnt = len(graphs[0].nodes)
+            # nodecnt = len(graphs[0].nodes)
             print("[LOG] Now will wait for dimensions input")
 
-            old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-                        [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-                old_dims, nodecnt)
+            # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+            #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+            # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+            #     old_dims, nodecnt)
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
             self.dim_params = [min_width, max_width, min_height, max_height,
                                symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
@@ -512,13 +589,14 @@ class App:
             my_plot(graphs)
             plt.show()
 
-            nodecnt = len(graphs[0].nodes)
+            # nodecnt = len(graphs[0].nodes)
             print("[LOG] Now will wait for dimensions input")
 
-            old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-                        [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-                old_dims, nodecnt)
+            # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+            #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+            # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+            #     old_dims, nodecnt)
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
             self.dim_params = [min_width, max_width, min_height, max_height,
                                symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
@@ -642,28 +720,33 @@ class App:
         self.remove_room_btn_list = []
         self.interior_rooms = []
         self.exterior_rooms = []
-        self.interior_rooms_btn_list = []
+        self.interior_rooms_btn_list = dict()
         for i, each_room in self.input.rooms.items():
             self.exterior_rooms.append(i)
             each_room_label = tk.Label(frame, text=each_room)
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
+            if (each_room == "Dining Room" or each_room == "Store Room"):
+                each_remove_room_btn = tk.Button(
+                    frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
+                each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
 
-            each_remove_room_btn = tk.Button(
-                frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
-            each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
+                each_intext_room_btn = tk.Button(
+                    frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
+                each_intext_room_btn.grid(row=i+1, column=2, padx=5, pady=5)
 
-            each_intext_room_btn = tk.Button(
-                frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
-            each_intext_room_btn.grid(row=i+1, column=2, padx=5, pady=5)
+                self.interior_rooms_btn_list[each_room] = each_intext_room_btn
 
-            self.interior_rooms_btn_list.append(each_intext_room_btn)
-
-            self.remove_room_btn_list.append(each_remove_room_btn)
+                self.remove_room_btn_list.append(each_remove_room_btn)
 
     def modify_rooms_Button_click(self):
         print("[LOG] Modify Rooms Button Clicked")
 
+        self.possible_rooms = ["Office"]
+
+        for i, each_room in self.input.rooms.items():
+            if (each_room in self.possible_rooms):
+                self.possible_rooms.remove(each_room)
         room_win = tk.Toplevel(self.root)
         self.mod_room_win = room_win
 
@@ -678,20 +761,37 @@ class App:
         new_room_frame = tk.Frame(room_win)
         new_room_frame.grid(row=1, column=0)
 
+        for i in range(len(self.possible_rooms)):
+            each_room_label = tk.Label(
+                new_room_frame, text=self.possible_rooms[i])
+            # each_room_label.insert(index='1.0', chars=self.possible_rooms[i])
+            each_room_label.grid(row=i, column=0, padx=5, pady=5)
+            add_new_room_btn = tk.Button(new_room_frame, text="Add Room",
+                                         command=lambda i=each_room_label: self.handle_add_new_room_btn(i, prev_room_list_frame))
+            add_new_room_btn.grid(row=i, column=1)
+
         new_room_text = tk.Text(new_room_frame, height=1, width=8)
-        new_room_text.grid(row=0, column=0, padx=5, pady=5)
+        new_room_text.grid(row=len(self.possible_rooms),
+                           column=0, padx=5, pady=5)
 
         add_new_room_btn = tk.Button(new_room_frame, text="Add Room",
                                      command=lambda i=new_room_text: self.handle_add_new_room_btn(i, prev_room_list_frame))
-        add_new_room_btn.grid(row=0, column=1)
+        add_new_room_btn.grid(row=len(self.possible_rooms), column=1)
 
         room_win.wait_window()
 
     def handle_add_new_room_btn(self, new_room, prev_room_list_frame):
         idx = len(self.input.rooms)
-        self.input.rooms[idx] = new_room.get("1.0", "end")
+        try:
+            self.input.rooms[idx] = new_room.get("1.0", "end")
+        except:
+            self.input.rooms[idx] = new_room.cget("text")
+            # new_room.destroy()
+            # add_new_room_btn.destroy()
         print(self.input.rooms)
-        self.recall_room_list_frame(prev_room_list_frame)
+        self.mod_room_win.destroy()
+        self.modify_rooms_Button_click()
+        # self.recall_room_list_frame(prev_room_list_frame)
 
     def handle_remove_room_btn(self, room_id, room_win):
         print(f"room to remove is {room_id}")
@@ -705,11 +805,11 @@ class App:
         room_win.destroy()
         self.modify_rooms_Button_click()
 
-    def handle_intext_room_btn(self, room_id):
+    def handle_intext_room_btn(self, room_id, ):
         # print(f"room is {room_id}")
         self.exterior_rooms.remove(room_id)
         self.interior_rooms.append(room_id)
-        self.interior_rooms_btn_list[room_id].configure(
+        self.interior_rooms_btn_list[self.input.rooms[room_id]].configure(
             highlightbackground='blue')
         print("Exterior Rooms: ")
         print(self.exterior_rooms)
