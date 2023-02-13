@@ -847,11 +847,11 @@ class App:
         # print(f"current room list = {self.input.rooms}")
 
     def modify_doors_Button_click(self):
-        print("[LOG] Modify Doors Button Clicked")
+        print("[LOG] Adjacencies Button Clicked")
 
         doors_win = tk.Toplevel(self.root)
 
-        doors_win.title("Doors Modifier")
+        doors_win.title("Adjacencies")
         # doors_win.geometry(str(1000) + 'x' + str(400))
 
         adj_frame = tk.Frame(doors_win)
@@ -864,7 +864,8 @@ class App:
 
         cur_new_adj_frame_row = 0
 
-        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Door")
+        add_new_adj_label = tk.Label(
+            add_new_adj_frame, text="Add New Adjacency")
         add_new_adj_label.grid(row=cur_new_adj_frame_row, columnspan=5)
 
         self.new_adj_text_left = tk.StringVar()
