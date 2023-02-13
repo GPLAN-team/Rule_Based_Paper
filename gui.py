@@ -80,6 +80,7 @@ class App:
         self.curr_rfp = -1
         self.colors_map = {}
         self.irreg_check = 0
+        self.graph_objs = []
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -197,9 +198,10 @@ class App:
             tk.messagebox.showwarning("The Start", "Please try new options")
             return
         self.curr_rfp -= 1
+        graph = self.graph_objs[self.curr_rfp]
 
-        graph = inputgraph.InputGraph(
-            self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
+        # graph = inputgraph.InputGraph(
+        #     self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
 
         if (self.dimCheckVar.get() == 1 and self.irreg_check == 1):
             print("Condition : Dimensioned Irregular")
@@ -209,9 +211,9 @@ class App:
             #     print("Can not generate rectangular floorplan.")
             #     graph.irreg_multiple_dual()
             # except inputgraph.BCNError:
-            graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # graph.irreg_multiple_dual()
+            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             graph_data = {
                 'room_x': graph.room_x,
                 'room_y': graph.room_y,
@@ -222,31 +224,31 @@ class App:
                 'mergednodes': graph.mergednodes,
                 'irreg_nodes': graph.irreg_nodes1
             }
-        elif (self.irreg_check == 1):
-            print("Condition : Non dimensioned Irregular")
-            # try:
-            #     graph.oneconnected_dual("multiple")
-            # except inputgraph.OCError:
-            #     print("Can not generate rectangular floorplan.")
-            #     graph.irreg_multiple_dual()
-            # except inputgraph.BCNError:
-            graph.irreg_single_dual()
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
+        # elif (self.irreg_check == 1):
+        #     print("Condition : Non dimensioned Irregular")
+        #     # try:
+        #     #     graph.oneconnected_dual("multiple")
+        #     # except inputgraph.OCError:
+        #     #     print("Can not generate rectangular floorplan.")
+        #     #     graph.irreg_multiple_dual()
+        #     # except inputgraph.BCNError:
+        #     graph.irreg_single_dual()
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
 
         elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
+            # graph.irreg_multiple_dual()
+            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # print(graph.floorplan_exist)
             # while(graph.floorplan_exist == False):
             #     old_dims = [min_width, max_width, min_height,
             #                 max_height, symm_string, min_aspect, max_aspect]
@@ -268,31 +270,32 @@ class App:
                 'irreg_nodes': graph.irreg_nodes1
             }
 
-        else:
-            graph.irreg_single_dual()
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
+        # else:
+        #     graph.irreg_single_dual()
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
 
         self.draw_one_rfp(graph_data)
 
     def handle_next_btn(self):
-        if self.curr_rfp == len(self.graphs) - 1:
+        if self.curr_rfp == len(self.graph_objs) - 1:
             tk.messagebox.showwarning(
                 "The End", "You have exhausted all the options")
             return
 
         self.curr_rfp += 1
+        graph = self.graph_objs[self.curr_rfp]
 
-        graph = inputgraph.InputGraph(
-            self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
+        # graph = inputgraph.InputGraph(
+        #     self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
 
         if (self.dimCheckVar.get() == 1 and self.irreg_check == 1):
             print("Condition : Dimensioned Irregular")
@@ -302,9 +305,10 @@ class App:
             #     print("Can not generate rectangular floorplan.")
             #     graph.irreg_multiple_dual()
             # except inputgraph.BCNError:
-            graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # graph.irreg_multiple_dual()
+            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+
             graph_data = {
                 'room_x': graph.room_x,
                 'room_y': graph.room_y,
@@ -315,31 +319,31 @@ class App:
                 'mergednodes': graph.mergednodes,
                 'irreg_nodes': graph.irreg_nodes1
             }
-        elif (self.irreg_check == 1):
-            print("Condition : Non dimensioned Irregular")
-            # try:
-            #     graph.oneconnected_dual("multiple")
-            # except inputgraph.OCError:
-            #     print("Can not generate rectangular floorplan.")
-            #     graph.irreg_multiple_dual()
-            # except inputgraph.BCNError:
-            graph.irreg_single_dual()
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
+        # elif (self.irreg_check == 1):
+        #     print("Condition : Non dimensioned Irregular")
+        #     # try:
+        #     #     graph.oneconnected_dual("multiple")
+        #     # except inputgraph.OCError:
+        #     #     print("Can not generate rectangular floorplan.")
+        #     #     graph.irreg_multiple_dual()
+        #     # except inputgraph.BCNError:
+        #     graph.irreg_single_dual()
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
 
         elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(f"FloorPlan Exist: {graph.floorplan_exist}")
+            # graph.irreg_multiple_dual()
+            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # print(f"FloorPlan Exist: {graph.floorplan_exist}")
             # while(graph.floorplan_exist == False):
             #     old_dims = [min_width, max_width, min_height,
             #                 max_height, symm_string, min_aspect, max_aspect]
@@ -350,6 +354,7 @@ class App:
             #                         symm_string, min_aspect, max_aspect, plot_width, plot_height)
             # end = time.time()
             # printe("Time taken: " + str((end-start)*1000) + " ms")
+
             graph_data = {
                 'room_x': graph.room_x,
                 'room_y': graph.room_y,
@@ -361,18 +366,18 @@ class App:
                 'irreg_nodes': graph.irreg_nodes1
             }
 
-        else:
-            graph.irreg_single_dual()
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
+        # else:
+        #     graph.irreg_single_dual()
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
 
         # print(graph_data['room_x'].shape[0])
         self.draw_one_rfp(graph_data)
@@ -410,7 +415,7 @@ class App:
         # if self.irreg_check != 1:
         draw.draw_rdg(graph_data, 1, self.pen, 1,
                       list(self.colors_map.values()), self.input.rooms, 200)
-        draw.drawgrid(self.pen)
+        # draw.drawgrid(self.pen)
 
     def default_dim(self):
         min_width = []
@@ -506,63 +511,71 @@ class App:
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
 
-        if self.dimCheckVar.get() == 1:
-            print("[LOG] Dimensioned selected")
+        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
+        self.dim_params = [min_width, max_width, min_height, max_height,
+                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
-            # print(graphs)
-            my_plot(graphs)
-            plt.show()
-            # nodecnt = len(graphs[0].nodes)
-            print("[LOG] Now will wait for dimensions input")
+        for i in range(len(self.graphs)):
+            graph = inputgraph.InputGraph(
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+            graph.irreg_multiple_dual()
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            print(graph.floorplan_exist)
+            if (graph.floorplan_exist):
+                self.graph_objs.append(graph)
 
-            # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-            #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-            # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-            #     old_dims, nodecnt)
-            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
-            self.dim_params = [min_width, max_width, min_height, max_height,
-                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        print("[LOG] Dimensioned selected")
 
-            # dim_graphdata = dimensioning_part(graphs, coord_list)
-            print("[LOG] Dimensioned floorplan object\n")
-            # print(dim_graphdata)
+        # print(graphs)
+        my_plot(graphs)
+        plt.show()
+        # nodecnt = len(graphs[0].nodes)
+        print("[LOG] Now will wait for dimensions input")
 
-            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+        # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+        #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+        # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        #     old_dims, nodecnt)
 
-            # self.draw_one_rfp(dim_graphdata)
+        # dim_graphdata = dimensioning_part(graphs, coord_list)
+        print("[LOG] Dimensioned floorplan object\n")
+        # print(dim_graphdata)
 
-            # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
-            # print(f"number of rfps = {len(output_rfps)}")
-            # self.output_rfps = output_rfps
+        print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            self.output_found = True
-            self.curr_rfp = -1
+        # self.draw_one_rfp(dim_graphdata)
 
-            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+        # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+        # print(f"number of rfps = {len(output_rfps)}")
+        # self.output_rfps = output_rfps
 
-            # print(f"one rfp = {output_rfps[0]}")
+        self.output_found = True
+        self.curr_rfp = -1
 
-            self.handle_next_btn()
+        # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-        else:
-            # print(graphs)
-            my_plot(graphs)
-            plt.show()
+        # print(f"one rfp = {output_rfps[0]}")
 
-            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+        # else:
+        #     # print(graphs)
+        #     my_plot(graphs)
+        #     plt.show()
 
-            # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
-            # print(f"number of rfps = {len(output_rfps)}")
-            # self.output_rfps = output_rfps
+        #     print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            self.output_found = True
-            self.curr_rfp = -1
+        #     # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+        #     # print(f"number of rfps = {len(output_rfps)}")
+        #     # self.output_rfps = output_rfps
 
-            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+        #     self.output_found = True
+        #     self.curr_rfp = -1
 
-            # print(f"one rfp = {output_rfps[0]}")
+        #     # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-            self.handle_next_btn()
+        #     # print(f"one rfp = {output_rfps[0]}")
+        print(f"Number of Floor Plans : {len(self.graph_objs)}")
+        self.handle_next_btn()
 
     def run_Irreg_Button_click(self):
         print("[LOG] Irregular Floorplans Button Clicked")
@@ -582,64 +595,75 @@ class App:
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
 
-        if self.dimCheckVar.get() == 1:
-            print("[LOG] Dimensioned selected")
+        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
+        self.dim_params = [min_width, max_width, min_height, max_height,
+                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
-            # print(graphs)
-            my_plot(graphs)
-            plt.show()
+        for i in range(len(self.graphs)):
+            graph = inputgraph.InputGraph(
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+            graph.irreg_multiple_dual()
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            print(graph.floorplan_exist)
+            if (graph.floorplan_exist):
+                self.graph_objs.append(graph)
 
-            # nodecnt = len(graphs[0].nodes)
-            print("[LOG] Now will wait for dimensions input")
+        # if self.dimCheckVar.get() == 1:
+        print("[LOG] Dimensioned selected")
 
-            # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-            #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-            # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-            #     old_dims, nodecnt)
-            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
-            self.dim_params = [min_width, max_width, min_height, max_height,
-                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        # print(graphs)
+        my_plot(graphs)
+        plt.show()
 
-            # dim_graphdata = dimensioning_part(graphs, coord_list)
-            print("[LOG] Dimensioned floorplan object\n")
-            # print(dim_graphdata)
+        # nodecnt = len(graphs[0].nodes)
+        print("[LOG] Now will wait for dimensions input")
 
-            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+        # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+        #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+        # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        #     old_dims, nodecnt)
 
-            # self.draw_one_rfp(dim_graphdata)
+        # dim_graphdata = dimensioning_part(graphs, coord_list)
+        print("[LOG] Dimensioned floorplan object\n")
+        # print(dim_graphdata)
 
-            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
-            # print(f"number of rfps = {len(output_rfps)}")
-            # self.output_rfps = output_rfps
+        print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            self.output_found = True
-            self.curr_rfp = -1
+        # self.draw_one_rfp(dim_graphdata)
 
-            # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+        # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
+        # print(f"number of rfps = {len(output_rfps)}")
+        # self.output_rfps = output_rfps
 
-            # print(f"one rfp = {output_rfps[0]}")
+        self.output_found = True
+        self.curr_rfp = -1
 
-            self.handle_next_btn()
+        # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
-        else:
-            # print(graphs)
-            my_plot(graphs)
-            plt.show()
+        # print(f"one rfp = {output_rfps[0]}")
 
-            print(f"{len(graphs)} output_graphs = {str(graphs)}")
+        # else:
+        #     # print(graphs)
+        #     my_plot(graphs)
+        #     plt.show()
 
-            # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
-            # print(f"number of irfps = {len(output_rfps)}")
-            # self.output_rfps = output_rfps
+        #     print(f"{len(graphs)} output_graphs = {str(graphs)}")
 
-            self.output_found = True
-            self.curr_rfp = -1
+        #     # output_rfps = multigraph_to_rfp(graphs, rectangular=False)
+        #     # print(f"number of irfps = {len(output_rfps)}")
+        #     # self.output_rfps = output_rfps
 
-            # print(f"{len(output_rfps)} output irfps = {str(output_rfps)}")
+        #     self.output_found = True
+        #     self.curr_rfp = -1
 
-            # print(f"one irfp = {output_rfps[0]}")
+        #     # print(f"{len(output_rfps)} output irfps = {str(output_rfps)}")
 
-            self.handle_next_btn()
+        #     # print(f"one irfp = {output_rfps[0]}")
+
+        print(f"Number of Floor Plans : {len(self.graph_objs)}")
+
+        self.handle_next_btn()
 
     def create_inputgraph_json(self):
         input = {}

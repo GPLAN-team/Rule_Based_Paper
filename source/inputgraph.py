@@ -277,18 +277,18 @@ class InputGraph:
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
                 rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
-            print("**************")
-            print(i, encoded_matrix)
+            # print("**************")
+            # print(i, encoded_matrix)
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
 
             [boolean, ver_list, hor_list] = bc.block_checker(
                 encoded_matrix_deepcopy, symm_rooms)
-            print([boolean, ver_list, hor_list])
+            # print([boolean, ver_list, hor_list])
             if boolean:
                 [width, height, hor_dgph, status] = fpts.floorplan_to_st(
                     encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar,
                     max_ar, plot_width, plot_height)
-                print([width, height, hor_dgph, status])
+                # print([width, height, hor_dgph, status])
             else:
                 status = False
             if (status == False):

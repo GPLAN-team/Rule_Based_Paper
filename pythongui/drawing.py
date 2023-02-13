@@ -40,67 +40,7 @@ def find_points(x1, y1, x2, y2,
     return [(x7, y7), (x8, y8)], first_rect, second_rect
 
 
-def drawy(val, trtl):
 
-    # set position
-    trtl.up()
-    trtl.setpos(val, -250)
-    trtl.down()
-
-    # line
-    trtl.forward(500)
-
-    # another line
-    # trtl.backward(500)
-
-    # set position again
-    # trtl.up()
-    # trtl.setpos(val+40, -100)
-    # trtl.down()
-
-
-def drawx(val, trtl):
-
-    # set position
-    trtl.up()
-    trtl.setpos(-250, val)
-    trtl.down()
-
-    # line
-    trtl.forward(500)
-
-    # another line
-    # trtl.backward(500)
-
-    # set position again
-    # trtl.up()
-    # trtl.setpos(-100, val+40)
-    # trtl.down()
-
-
-def drawgrid(trtl):
-    trtl.setpos(-100, -100)
-    trtl.speed(500)
-    trtl.left(90)
-    trtl.color(.1, .1, .1)
-    for i in range(20):
-        # drawy(-300+40*(i+1), trtl)
-        trtl.up()
-        trtl.setpos(-400+40*(i+1), -400)
-        trtl.down()
-
-        # line
-        trtl.forward(800)
-
-    trtl.right(90)
-    for i in range(20):
-        # drawx(200-40*(i+1), trtl)
-        trtl.up()
-        trtl.setpos(-400, -400+40*(i+1))
-        trtl.down()
-
-        # line
-        trtl.forward(800)
 
 # Draw rectangular dual of graph
 
@@ -182,7 +122,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     scale = 200*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
-    origin = {'x': origin - 400, 'y': -100}
+    origin = {'x': origin - 400, 'y': -300}
     for i in range(graph_data['room_x'].shape[0]):
         if graph_data['room_width'][i] == 0 or i in graph_data['extranodes']:
             continue
@@ -223,27 +163,52 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
         if (i not in graph_data['mergednodes']):
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
-            pen.write(room_names[i])
+            pen.write(room_names[i], font=("Arial", 12, "normal"))
             pen.penup()
         if (i in graph_data['mergednodes'] and mode == 2):
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
-            pen.write(room_names[i])
+            pen.write(room_names[i], font=("Arial", 12, "normal"))
             pen.penup()
     value = 1
     if (len(graph_data['area']) != 0):
-        pen.setposition(dim[0] * scale + origin['x']+50,
+        pen.setposition(dim[0] * scale + origin['x']-650,
                         dim[1] * scale + origin['y']-30)
         pen.write('Area of Each Room', font=("Arial", 20, "normal"))
         for i in range(0, len(graph_data['area'])):
             if i in graph_data['extranodes']:
                 continue
-            pen.setposition(dim[0] * scale + origin['x']+50,
+            pen.setposition(dim[0] * scale + origin['x']-650,
                             dim[1] * scale + origin['y']-30-value*30)
             pen.write('Room ' + str(i) + ': ' +
                       str(graph_data['area'][i]), font=("Arial", 15, "normal"))
             pen.penup()
             value += 1
+    pen.setpos(-100, -100)
+    pen.speed(500)
+    pen.left(90)
+    pen.width(2)
+    pen.color("seagreen")
+    # {-200,-300}, passing through this point
+    limit = 40
+    grid_size = scale
+    left_grid = 5
+    for i in range(-left_grid, limit+1):
+        pen.up()
+        pen.setpos(-200+grid_size*(i), -300-grid_size*(left_grid))
+        pen.down()
+
+        # line
+        pen.forward((limit+left_grid)*grid_size)
+
+    pen.right(90)
+    for i in range(-left_grid, limit):
+        pen.up()
+        pen.setpos(-200-grid_size*(left_grid), -300+grid_size*(i))
+        pen.down()
+
+        # line
+        pen.forward((limit+left_grid)*grid_size)
 
 
 def draw_poly(graph_data, count, pen, mode, color_list, room_names, origin, outer_boundary, shape):
