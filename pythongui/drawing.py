@@ -40,8 +40,6 @@ def find_points(x1, y1, x2, y2,
     return [(x7, y7), (x8, y8)], first_rect, second_rect
 
 
-
-
 # Draw rectangular dual of graph
 
 
@@ -156,39 +154,11 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                     [y_index] + graph_data['room_height'][y_index]) * scale + origin['y'] + 200)
     # pen.write(count, font=("Arial", 20, "normal"))
     pen.penup()
-    for i in range(graph_data['room_x'].shape[0]):
-        if i in graph_data['extranodes']:
-            continue
-        pen.color('black')
-        if (i not in graph_data['mergednodes']):
-            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
-                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
-            pen.write(room_names[i], font=("Arial", 12, "normal"))
-            pen.penup()
-        if (i in graph_data['mergednodes'] and mode == 2):
-            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
-                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
-            pen.write(room_names[i], font=("Arial", 12, "normal"))
-            pen.penup()
-    value = 1
-    if (len(graph_data['area']) != 0):
-        pen.setposition(dim[0] * scale + origin['x']-650,
-                        dim[1] * scale + origin['y']-30)
-        pen.write('Area of Each Room', font=("Arial", 20, "normal"))
-        for i in range(0, len(graph_data['area'])):
-            if i in graph_data['extranodes']:
-                continue
-            pen.setposition(dim[0] * scale + origin['x']-650,
-                            dim[1] * scale + origin['y']-30-value*30)
-            pen.write('Room ' + str(i) + ': ' +
-                      str(graph_data['area'][i]), font=("Arial", 15, "normal"))
-            pen.penup()
-            value += 1
     pen.setpos(-100, -100)
     pen.speed(500)
     pen.left(90)
     pen.width(2)
-    pen.color("seagreen")
+    pen.color("springgreen")
     # {-200,-300}, passing through this point
     limit = 40
     grid_size = scale
@@ -209,6 +179,43 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
         # line
         pen.forward((limit+left_grid)*grid_size)
+
+    for i in range(graph_data['room_x'].shape[0]):
+        if i in graph_data['extranodes']:
+            continue
+        pen.color('black')
+        if (i not in graph_data['mergednodes']):
+            pen.penup()
+            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
+            pen.write(room_names[i], font=("Arial", 14, "normal"))
+            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-12)
+            pen.write(f"({str(graph_data['area'][i])})", font=(
+                "Arial", 14, "normal"))
+        if (i in graph_data['mergednodes'] and mode == 2):
+            pen.penup()
+
+            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
+            pen.write(room_names[i], font=("Arial", 14, "normal"))
+            pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-12)
+            pen.write(str(graph_data['area'][i]), font=("Arial", 14, "normal"))
+    # value = 1
+    # if (len(graph_data['area']) != 0):
+    #     pen.setposition(dim[0] * scale + origin['x']-650,
+    #                     dim[1] * scale + origin['y']-30)
+    #     pen.write('Area of Each Room', font=("Arial", 20, "normal"))
+    #     for i in range(0, len(graph_data['area'])):
+    #         if i in graph_data['extranodes']:
+    #             continue
+    #         pen.setposition(dim[0] * scale + origin['x']-650,
+    #                         dim[1] * scale + origin['y']-30-value*30)
+    #         pen.write('Room ' + str(i) + ': ' +
+    #                   str(graph_data['area'][i]), font=("Arial", 15, "normal"))
+    #         pen.penup()
+    #         value += 1
 
 
 def draw_poly(graph_data, count, pen, mode, color_list, room_names, origin, outer_boundary, shape):
