@@ -973,7 +973,7 @@ class App:
     def recall_adj_constraints_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
-        adj_cons_label = tk.Label(frame, text="Door Connections")
+        adj_cons_label = tk.Label(frame, text="Adjacencies")
         adj_cons_label.grid(row=0, padx=5, pady=5)
 
         self.adj_cons_frame_list = []
