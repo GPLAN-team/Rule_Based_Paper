@@ -47,7 +47,7 @@ def draw_grid(pen, scale, coord):
     pen.speed(0)
     pen.left(90)
     pen.width(2)
-    pen.color("springgreen")
+    pen.color("aliceblue")
     # {-200,-300}, passing through this point
     limit = 40
     grid_size = scale
@@ -219,6 +219,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
             pen.write(room_names[i], font=("Arial", 14, "normal"))
+            pen.color('darkred')
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
 
@@ -232,6 +233,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             pen.write(room_names[i], font=("Arial", 14, "normal"))
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
+            pen.color('darkred')
             pen.write(str(graph_data['area'][i]), font=("Arial", 14, "normal"))
     # value = 1
     # if (len(graph_data['area']) != 0):
@@ -247,9 +249,6 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     #                   str(graph_data['area'][i]), font=("Arial", 15, "normal"))
     #         pen.penup()
     #         value += 1
-    print("*****************")
-    print(coordinates[0][0][0][0] * scale + origin['x'],
-          coordinates[0][0][0][1] * scale + origin['y'])
     return scale, [coordinates[0][0][0][0] * scale + origin['x'],
                    coordinates[0][0][0][1] * scale + origin['y']]
 
