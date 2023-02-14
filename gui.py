@@ -68,7 +68,7 @@ class App:
         self.initialise_root()
         self.add_logo()
         self.custom_rfp_section()
-        self.properties_section()
+        # self.properties_section()
         self.modification_section()
         self.rfp_draw_section()
         self.room_check = []
@@ -81,6 +81,8 @@ class App:
         self.colors_map = {}
         self.irreg_check = 0
         self.graph_objs = []
+        self.grid_scale = 0
+        self.grid_coord = []
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -115,23 +117,29 @@ class App:
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
         self.dimCheckVar = tk.IntVar(value=1)
+        self.gridCheckVar = tk.IntVar()
         # self.dimCheckVar = 1
         # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
         #                                  command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
 
         # self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
-    def properties_section(self):
-        self.properties_frame = tk.Frame(self.root)
-        self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
+        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15,
+                                          command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
 
-        self.colors_table_frame = tk.Frame(self.properties_frame)
-        self.colors_table_frame.grid()
-        self.colors_table_canvas = tk.Canvas(
-            self.colors_table_frame, width=300, height=500)
-        self.colors_table_canvas.grid()
+        self.grid_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.update_colors_table()
+    # def properties_section(self):
+        # self.properties_frame = tk.Frame(self.root)
+        # self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
+
+        # self.colors_table_frame = tk.Frame(self.properties_frame)
+        # self.colors_table_frame.grid()
+        # self.colors_table_canvas = tk.Canvas(
+        #     self.colors_table_frame, width=300, height=500)
+        # self.colors_table_canvas.grid()
+
+        # self.update_colors_table()
 
     def modification_section(self):
         self.modify_frame = tk.Frame(self.root)
@@ -179,7 +187,7 @@ class App:
         # self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
         self.rfp_canvas = turtle.ScrolledCanvas(
-            self.rfp_draw_frame, width=800, height=600)
+            self.rfp_draw_frame, width=1100, height=550)
         self.rfp_canvas.bind("<Double-Button-1>", self.zoom)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
         self.tscreen = turtle.TurtleScreen(self.rfp_canvas)
@@ -197,6 +205,10 @@ class App:
         if self.curr_rfp == 0:
             tk.messagebox.showwarning("The Start", "Please try new options")
             return
+
+        if self.gridCheckVar.get() == 1:
+            self.grid_Button.deselect()
+
         self.curr_rfp -= 1
         graph = self.graph_objs[self.curr_rfp]
 
@@ -290,6 +302,9 @@ class App:
             tk.messagebox.showwarning(
                 "The End", "You have exhausted all the options")
             return
+
+        if self.gridCheckVar.get() == 1:
+            self.grid_Button.deselect()
 
         self.curr_rfp += 1
         graph = self.graph_objs[self.curr_rfp]
@@ -386,14 +401,14 @@ class App:
         self.root.destroy()
         exit()
 
-    def update_colors_table(self):
+    # def update_colors_table(self):
 
-        self.colors_table_canvas.delete("all")
-        for i, each_room in enumerate(self.input.rooms.values()):
-            self.colors_table_canvas.create_rectangle(
-                100, 100 + i*30, 120, 120 + i*30, fill=self.colors_map[each_room])
-            self.colors_table_canvas.create_text(
-                200, 105 + i*30, text=each_room)
+    #     self.colors_table_canvas.delete("all")
+    #     for i, each_room in enumerate(self.input.rooms.values()):
+    #         self.colors_table_canvas.create_rectangle(
+    #             100, 100 + i*30, 120, 120 + i*30, fill=self.colors_map[each_room])
+    #         self.colors_table_canvas.create_text(
+    #             200, 105 + i*30, text=each_room)
 
     def draw_one_rfp(self, graph_data, origin=(0, 0), scale=1):
         x, y = origin
@@ -411,10 +426,10 @@ class App:
             #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
             #     # self.rfp_canvas.create_text( x + scale*(each_room['left'] + each_room['width']/2), y + scale * (each_room['top'] + each_room['height']/2), text=self.input.rooms[each_room['label']], font= helv8)
 
-        self.update_colors_table()
+        # self.update_colors_table()
         # if self.irreg_check != 1:
-        draw.draw_rdg(graph_data, 1, self.pen, 1,
-                      list(self.colors_map.values()), self.input.rooms, 200)
+        self.grid_scale, self.grid_coord = draw.draw_rdg(graph_data, 1, self.pen, 1,
+                                                         list(self.colors_map.values()), self.input.rooms, 200)
         # draw.drawgrid(self.pen)
 
     def default_dim(self):
@@ -503,6 +518,8 @@ class App:
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
 
+        self.graph_objs = []
+
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
@@ -586,6 +603,8 @@ class App:
 
     def run_Irreg_Button_click(self):
         print("[LOG] Irregular Floorplans Button Clicked")
+
+        self.graph_objs = []
 
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
@@ -741,6 +760,17 @@ class App:
     def dimensioned_checkbox_click(self):
         check = "Checked" if self.dimCheckVar.get() == 1 else "Unchecked"
         print("[LOG] Dimensioned checkbox ", check)
+
+    def grid_checkbox_click(self):
+        check = "Checked" if self.dimCheckVar.get() == 1 else "Unchecked"
+        print("[LOG] Grid checkbox ", check)
+        if self.grid_scale == 0:
+            tk.messagebox.showwarning(
+                "The End", "You need to draw the floor plan first")
+            self.grid_Button.deselect()
+            return
+        else:
+            draw.draw_grid(self.pen, self.grid_scale, self.grid_coord)
 
     def recall_room_list_frame(self, frame):
 

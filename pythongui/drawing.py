@@ -42,6 +42,33 @@ def find_points(x1, y1, x2, y2,
 
 # Draw rectangular dual of graph
 
+def draw_grid(pen, scale, coord):
+    pen.setpos(-100, -100)
+    pen.speed(0)
+    pen.left(90)
+    pen.width(2)
+    pen.color("springgreen")
+    # {-200,-300}, passing through this point
+    limit = 40
+    grid_size = scale
+    left_grid = 15
+    for i in range(-left_grid, limit+1):
+        pen.up()
+        pen.setpos(coord[0]+grid_size*(i), coord[1]-grid_size*(left_grid))
+        pen.down()
+
+        # line
+        pen.forward((limit+left_grid)*grid_size)
+
+    pen.right(90)
+    for i in range(-left_grid, limit):
+        pen.up()
+        pen.setpos(coord[0]-grid_size*(left_grid), coord[1]+grid_size*(i))
+        pen.down()
+
+        # line
+        pen.forward((limit+left_grid)*grid_size)
+
 
 def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     coordinates = {}
@@ -154,31 +181,34 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                     [y_index] + graph_data['room_height'][y_index]) * scale + origin['y'] + 200)
     # pen.write(count, font=("Arial", 20, "normal"))
     pen.penup()
-    pen.setpos(-100, -100)
-    pen.speed(500)
-    pen.left(90)
-    pen.width(2)
-    pen.color("springgreen")
-    # {-200,-300}, passing through this point
-    limit = 40
-    grid_size = scale
-    left_grid = 5
-    for i in range(-left_grid, limit+1):
-        pen.up()
-        pen.setpos(-200+grid_size*(i), -300-grid_size*(left_grid))
-        pen.down()
 
-        # line
-        pen.forward((limit+left_grid)*grid_size)
+    # Grid
 
-    pen.right(90)
-    for i in range(-left_grid, limit):
-        pen.up()
-        pen.setpos(-200-grid_size*(left_grid), -300+grid_size*(i))
-        pen.down()
+    # pen.setpos(-100, -100)
+    # pen.speed(500)
+    # pen.left(90)
+    # pen.width(2)
+    # pen.color("springgreen")
+    # # {-200,-300}, passing through this point
+    # limit = 40
+    # grid_size = scale
+    # left_grid = 5
+    # for i in range(-left_grid, limit+1):
+    #     pen.up()
+    #     pen.setpos(-200+grid_size*(i), -300-grid_size*(left_grid))
+    #     pen.down()
 
-        # line
-        pen.forward((limit+left_grid)*grid_size)
+    #     # line
+    #     pen.forward((limit+left_grid)*grid_size)
+
+    # pen.right(90)
+    # for i in range(-left_grid, limit):
+    #     pen.up()
+    #     pen.setpos(-200-grid_size*(left_grid), -300+grid_size*(i))
+    #     pen.down()
+
+    #     # line
+    #     pen.forward((limit+left_grid)*grid_size)
 
     for i in range(graph_data['room_x'].shape[0]):
         if i in graph_data['extranodes']:
@@ -190,7 +220,8 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
             pen.write(room_names[i], font=("Arial", 14, "normal"))
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
-                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-12)
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
+
             pen.write(f"({str(graph_data['area'][i])})", font=(
                 "Arial", 14, "normal"))
         if (i in graph_data['mergednodes'] and mode == 2):
@@ -200,7 +231,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y'])
             pen.write(room_names[i], font=("Arial", 14, "normal"))
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
-                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-12)
+                            ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
             pen.write(str(graph_data['area'][i]), font=("Arial", 14, "normal"))
     # value = 1
     # if (len(graph_data['area']) != 0):
@@ -216,6 +247,11 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     #                   str(graph_data['area'][i]), font=("Arial", 15, "normal"))
     #         pen.penup()
     #         value += 1
+    print("*****************")
+    print(coordinates[0][0][0][0] * scale + origin['x'],
+          coordinates[0][0][0][1] * scale + origin['y'])
+    return scale, [coordinates[0][0][0][0] * scale + origin['x'],
+                   coordinates[0][0][0][1] * scale + origin['y']]
 
 
 def draw_poly(graph_data, count, pen, mode, color_list, room_names, origin, outer_boundary, shape):
