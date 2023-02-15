@@ -12,9 +12,9 @@ import pythongui.gui as gui
 import source.inputgraph as inputgraph
 import pythongui.drawing as draw
 import pythongui.dimensiongui as dimgui
-# import circulation as cir
+import circulation as cir
 import matplotlib.pyplot as plt
-
+import copy
 # import checker
 # from tkinter import messagebox
 # import dimension_gui as dimgui
@@ -543,16 +543,18 @@ def run():
                         gclass.output_data.append(graph_data)
                         gclass.dimensional_constraints = dimensional_constraints
                         gclass.ptpg = graph
-                        # gclass.ocan.add_tab()
-                        # gclass.pen = gclass.ocan.getpen()
-                        # gclass.pen.speed(0)
-                        # draw.draw_rdg(graph_data
-                        #     ,1
-                        #     ,gclass.pen
-                        #     ,1
-                        #     ,gclass.value[6]
-                        #     ,[]
-                        #     ,origin)
+                        print_all_rfp = False
+                        if print_all_rfp == True:
+                            gclass.ocan.add_tab()
+                            gclass.pen = gclass.ocan.getpen()
+                            gclass.pen.speed(0)
+                            draw.draw_rdg(graph_data
+                                ,1
+                                ,gclass.pen
+                                ,1
+                                ,gclass.value[6]
+                                ,[]
+                                ,origin)
             elif (gclass.command == "poly"):  # Polygonal Floorplan
                 start = time.time()
                 # graph.irreg_single_dual()
@@ -642,6 +644,7 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
 
     g = nx.Graph()
     edge_set = gclass.value[2]
+    entry = gclass.entry_door
 
     for x in edge_set:
         g.add_edge(x[0], x[1])
@@ -662,11 +665,50 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
         circulation_obj.dimension_constraints = dim_constraints
     # circulation_result = circulation_obj.circulation_algorithm(entry[0], entry[1])
     # circulation_result = circulation_obj.multiple_circulation(coord)
-    circulation_result = circulation_obj.circulation_algorithm()
+    circulation_result = circulation_obj.circulation_algorithm(entry[0],entry[1])
     if circulation_result == 0:
         return None
     
     if remove_corridor == True:
+        # Created a deepcopy of object to display circulation before
+        # we display GUI for removing corridor
+        circ = copy.deepcopy(circulation_obj)
+        circ.adjust_RFP_to_circulation()
+
+        # Printing how much shift was done for each room
+        for room in circ.RFP.rooms:
+            print("Room ",room.id, ":")
+            print("Push top edge by: ", room.rel_push_T)
+            print("Push bottom edge by: ", room.rel_push_B)
+            print("Push left edge by: ", room.rel_push_L)
+            print("Push right edge by: ", room.rel_push_R)
+            print(room.target)
+            print('\n')
+
+        room_x1 = []
+        room_y1 = []
+        room_height1 = []
+        room_width1 = []
+
+        # Getting the required values
+        for room in circ.RFP.rooms:
+            room_x1.append(room.top_left_x)
+            room_y1.append(room.bottom_right_y)
+            room_height1.append(abs(room.top_left_y - room.bottom_right_y))
+            room_width1.append(abs(room.top_left_x - room.bottom_right_x))
+
+        graph_data1 = {}
+        graph_data1['room_x'] = np.array(room_x1)
+        graph_data1['room_y'] = np.array(room_y1)
+        graph_data1['room_height'] = np.array(room_height1)
+        graph_data1['room_width'] = np.array(room_width1)
+        graph_data1['area'] = np.array(circulation_obj.room_area)
+        graph_data1['extranodes'] = graph_data['extranodes']
+        graph_data1['mergednodes'] = graph_data['mergednodes']
+        graph_data1['irreg_nodes'] = graph_data['irreg_nodes']
+        draw.draw_rdg(graph_data1, 1, gclass.pen, 1, gclass.value[6], [], origin)
+
+        # Now going back to flow of removing circulation
         corridors = circulation_obj.adjacency
         rem_edges = gclass.remove_corridor_gui(corridors)
 
@@ -706,7 +748,6 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
     graph_data['room_width'] = np.array(room_width)
     graph_data['area'] = np.array(circulation_obj.room_area)
     return (graph_data, circulation_obj.is_dimensioning_successful)
-
 
 def plot(graph: nx.Graph,m: int) -> None:
     """Plots thr graph using matplotlib
