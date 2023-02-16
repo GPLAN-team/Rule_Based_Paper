@@ -195,7 +195,7 @@ class App:
         # self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
 
         self.rfp_canvas = turtle.ScrolledCanvas(
-            self.rfp_draw_frame, width=1000, height=550)
+            self.rfp_draw_frame, width=900, height=550)
         self.rfp_canvas.bind("<Double-Button-1>", self.zoom)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
         self.tscreen = turtle.TurtleScreen(self.rfp_canvas)
