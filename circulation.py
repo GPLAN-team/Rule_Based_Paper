@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
 import itertools
-import bdy
+# import bdy
 from typing import List, Tuple
 
 class Point:
@@ -65,39 +65,39 @@ class circulation:
         # self.room_height = []
         self.is_dimensioning_successful = False    
     
-    def multiple_circulation(self,coord:List) -> None:
+    # def multiple_circulation(self,coord:List) -> None:
 
-        self.find_exterior_edges(coord)
-        print("Exterior edges:")
-        print(self.exterior_edges)
+    #     self.find_exterior_edges(coord)
+    #     print("Exterior edges:")
+    #     print(self.exterior_edges)
 
-        for x in self.exterior_edges:
-            self.circulation_algorithm(x[0],x[1])
-            self.multiple_circ.append(self.circulation_graph)
+    #     for x in self.exterior_edges:
+    #         self.circulation_algorithm(x[0],x[1])
+    #         self.multiple_circ.append(self.circulation_graph)
     
-    def find_exterior_edges(self, coord: List) -> None:
-        """This function finds the exterior edges of the graph input by the user
+    # def find_exterior_edges(self, coord: List) -> None:
+    #     """This function finds the exterior edges of the graph input by the user
 
-        Args:
-            coord (List): This is the list of coordinates of the vertices of the graph
-        """
-        graph1 = deepcopy(self.graph)
-        adj = nx.to_numpy_matrix(graph1)
-        edgecnt = adj.sum()/2
-        edgeset =[]
-        for i in range(len(graph1)):
-            for j in range(i+1, len(graph1)):
-                if(adj[i,j] == 1):
-                    edgeset.append((i,j))
-        bdy_obj = bdy.Boundary(len(graph1), edgecnt, edgeset, coord)
-        boundary = bdy_obj.identify_bdy()
-        for x in boundary:
-            if len(x) == 2:
-                self.exterior_edges.append(x)
+    #     Args:
+    #         coord (List): This is the list of coordinates of the vertices of the graph
+    #     """
+    #     graph1 = deepcopy(self.graph)
+    #     adj = nx.to_numpy_matrix(graph1)
+    #     edgecnt = adj.sum()/2
+    #     edgeset =[]
+    #     for i in range(len(graph1)):
+    #         for j in range(i+1, len(graph1)):
+    #             if(adj[i,j] == 1):
+    #                 edgeset.append((i,j))
+    #     bdy_obj = bdy.Boundary(len(graph1), edgecnt, edgeset, coord)
+    #     boundary = bdy_obj.identify_bdy()
+    #     for x in boundary:
+    #         if len(x) == 2:
+    #             self.exterior_edges.append(x)
             
-            else:
-                for i in range(len(x) - 1):
-                    self.exterior_edges.append([x[i], x[i+1]])
+    #         else:
+    #             for i in range(len(x) - 1):
+    #                 self.exterior_edges.append([x[i], x[i+1]])
 
 
     def remove_corridor(self,graph:nx.Graph,v1:int = 0,v2:int = 1)->None:
@@ -432,6 +432,11 @@ class circulation:
         """
 
         common_edge = (0,0,0,0,(room1.id,"Null"))
+
+        print("In find common edges: room1.tly= ",room1.top_left_y)
+        print("In find common edges: room1.bry= ",room1.bottom_right_y)
+        print("In find common edges: room2.tly= ",room2.top_left_y)
+        print("In find common edges: room2.bry= ",room2.bottom_right_y)
         # Case1: The rooms are vertically (same y coordinates)
         # Room1 is below Room2
         if room1.top_left_y == room2.bottom_right_y:
