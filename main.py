@@ -48,130 +48,139 @@ def run():
         gclass.textbox.insert('end', "\n")
 
     warnings.filterwarnings("ignore")
-    gclass = gui.gui_class() 
+    gclass = gui.gui_class()
 
     dim_circ = False
 
-    while (gclass.command!="end"):
-        if(gclass.command=="dissection"):
+    while (gclass.command != "end"):
+        if (gclass.command == "dissection"):
             make_dissection_corridor(gclass)
         else:
-            graph = inputgraph.InputGraph(gclass.value[0]
-                                          , gclass.value[1]
-                                          , gclass.value[2]
-                                          , gclass.value[7])
-                        # Get node coordinates
+            graph = inputgraph.InputGraph(
+                gclass.value[0], gclass.value[1], gclass.value[2], gclass.value[7])
+            # Get node coordinates
             node_coord = graph.coordinates
             origin = 0
-            if(gclass.command == "circulation"): # For spanning circulation
+            if (gclass.command == "circulation"):  # For spanning circulation
                 is_dimensioned = False
                 remove_corridor = False
                 dim_constraints = []
-                if (gclass.value[8] == 0 and gclass.value[9] == 0): #Non-dimensioned single circulation
+                # Non-dimensioned single circulation
+                if (gclass.value[8] == 0 and gclass.value[9] == 0):
                     start = time.time()
                     graph.irreg_single_dual()
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
                     print("type of roomx " + str(type(graph.room_x)))
                     graph_data = {
+                        'room_x': graph.room_x,
+                        'room_y': graph.room_y,
+                        'room_width': graph.room_width,
+                        'room_height': graph.room_height,
+                        # 'room_x_bottom_left': graph.room_x_bottom_left,
+                        # 'room_x_bottom_right': graph.room_x_bottom_right,
+                        # 'room_x_top_left': graph.room_x_top_left,
+                        # 'room_x_top_right': graph.room_x_top_right,
+                        # 'room_y_left_bottom': graph.room_y_left_bottom,
+                        # 'room_y_right_bottom': graph.room_y_right_bottom,
+                        # 'room_y_left_top': graph.room_y_left_top,
+                        # 'room_y_right_top': graph.room_y_right_top,
+                        'area': graph.area,
+                        'extranodes': graph.extranodes,
+                        'mergednodes': graph.mergednodes,
+                        'irreg_nodes': graph.irreg_nodes1
+                    }
+
+                    # new_graph_data = call_circulation(graph_data, gclass.value[2], gclass.entry_door, gclass.corridor_thickness)
+                    (new_graph_data, success) = call_circulation(graph_data, gclass,
+                                                                 node_coord, is_dimensioned, dim_constraints, remove_corridor)
+                    # If there was some error in algorithm execution new_graph_data will be empty
+                    # we display the pop-up error message
+                    if new_graph_data == None:
+                        tk.messagebox.showerror(
+                            "Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
+
+                    # If no issues we continue to draw the corridor
+                    else:
+                        # draw_circulation(new_graph_data, gclass.ocan.canvas, gclass.value[6], gclass.entry_door)
+                        # draw_circulation(new_graph_data, gclass.pen, gclass.ocan.canvas, gclass.value[6])
+                        draw.draw_rdg(new_graph_data, 1, gclass.pen,
+                                      1, gclass.value[6], [], origin)
+
+                # Dimensioned single circulation
+                elif (gclass.value[8] == 1 and gclass.value[9] == 0):
+                    is_dimensioned = True
+                    feasible_dim = 0
+                    old_dims = [[0] * gclass.value[0], [0] * gclass.value[0], [0] * gclass.value[0], [
+                        0] * gclass.value[0], "", [0] * gclass.value[0], [0] * gclass.value[0]]
+                    min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                        old_dims, gclass.value[0])
+                    dimensional_constraints = [min_width, max_width, min_height, max_height,
+                                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                    start = time.time()
+                    try:
+                        graph.oneconnected_dual("multiple")
+                    except inputgraph.OCError:
+                        gclass.show_warning(
+                            "Can not generate rectangular floorplan.")
+                        graph.irreg_multiple_dual()
+                    except inputgraph.BCNError:
+                        graph.irreg_multiple_dual()
+
+                    graph.single_floorplan(min_width, min_height, max_width, max_height,
+                                           symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                    while (graph.floorplan_exist == False):
+                        old_dims = [min_width, max_width, min_height,
+                                    max_height, symm_string, min_aspect, max_aspect]
+                        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                            old_dims, gclass.value[0])
+                        graph.irreg_multiple_dual()
+                        graph.single_floorplan(min_width, min_height, max_width, max_height,
+                                               symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                    end = time.time()
+                    printe("Time taken: " + str((end-start)*1000) + " ms")
+                    for idx in range(len(graph.room_x)):
+                        graph_data = {
                             'room_x': graph.room_x,
                             'room_y': graph.room_y,
                             'room_width': graph.room_width,
                             'room_height': graph.room_height,
-                            # 'room_x_bottom_left': graph.room_x_bottom_left,
-                            # 'room_x_bottom_right': graph.room_x_bottom_right,
-                            # 'room_x_top_left': graph.room_x_top_left,
-                            # 'room_x_top_right': graph.room_x_top_right,
-                            # 'room_y_left_bottom': graph.room_y_left_bottom,
-                            # 'room_y_right_bottom': graph.room_y_right_bottom,
-                            # 'room_y_left_top': graph.room_y_left_top,
-                            # 'room_y_right_top': graph.room_y_right_top,
                             'area': graph.area,
                             'extranodes': graph.extranodes,
                             'mergednodes': graph.mergednodes,
                             'irreg_nodes': graph.irreg_nodes1
                         }
-                    
-                    # new_graph_data = call_circulation(graph_data, gclass.value[2], gclass.entry_door, gclass.corridor_thickness)
-                    (new_graph_data, success) = call_circulation(graph_data, gclass, node_coord, is_dimensioned, dim_constraints, remove_corridor)
-                    # If there was some error in algorithm execution new_graph_data will be empty
-                    # we display the pop-up error message
-                    if new_graph_data == None:
-                        tk.messagebox.showerror("Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
-                    
-                    # If no issues we continue to draw the corridor
-                    else :
-                        # draw_circulation(new_graph_data, gclass.ocan.canvas, gclass.value[6], gclass.entry_door)
-                        # draw_circulation(new_graph_data, gclass.pen, gclass.ocan.canvas, gclass.value[6])
-                        draw.draw_rdg(new_graph_data, 1, gclass.pen, 1, gclass.value[6], [],origin)
-
-
-                elif(gclass.value[8] == 1 and gclass.value[9] == 0): #Dimensioned single circulation
-                    is_dimensioned = True
-                    feasible_dim = 0
-                    old_dims = [[0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , ""
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]]
-                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                    dimensional_constraints = [min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
-                    start = time.time()
-                    try:
-                        graph.oneconnected_dual("multiple")
-                    except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
-                        graph.irreg_multiple_dual()
-                    except inputgraph.BCNError:
-                        graph.irreg_multiple_dual()
-                    
-                    graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    while(graph.floorplan_exist == False):
-                        old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
-                        min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
-                        graph.irreg_multiple_dual()
-                        graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    end = time.time()
-                    printe("Time taken: " + str((end-start)*1000) + " ms")
-                    for idx in range(len(graph.room_x)):
-                        graph_data = {
-                                'room_x': graph.room_x,
-                                'room_y': graph.room_y,
-                                'room_width': graph.room_width,
-                                'room_height': graph.room_height,
-                                'area': graph.area,
-                                'extranodes': graph.extranodes,
-                                'mergednodes': graph.mergednodes,
-                                'irreg_nodes': graph.irreg_nodes1
-                            }
 
                         # new_graph_data = call_circulation(graph_data, gclass.value[2], gclass.entry_door, gclass.corridor_thickness)
-                        dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
-                        (new_graph_data, success) = call_circulation(graph_data, gclass, node_coord, is_dimensioned, dim_constraints, remove_corridor)
+                        dim_constraints = [
+                            min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+                        (new_graph_data, success) = call_circulation(
+                            graph_data, gclass, node_coord, is_dimensioned, dim_constraints, remove_corridor)
                         print("Constraints: ", dim_constraints)
                         print("New graph data: ", new_graph_data)
-                        print("success: ", success)                        
+                        print("success: ", success)
                         # If there was some error in algorithm execution new_graph_data will be empty
                         # we display the pop-up error message
                         if new_graph_data == None:
-                            tk.messagebox.showerror("Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
-                        
+                            tk.messagebox.showerror(
+                                "Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
+
                         # If no issues we continue to draw the corridor
-                        else :
+                        else:
                             if (success == False):
                                 continue
                             # draw_circulation(new_graph_data, gclass.ocan.canvas, gclass.value[6], gclass.entry_door)
                             # draw_circulation(new_graph_data, gclass.pen, gclass.ocan.canvas, gclass.value[6])
-                            draw.draw_rdg(new_graph_data, 1, gclass.pen, 1, gclass.value[6], [],origin)
+                            draw.draw_rdg(new_graph_data, 1, gclass.pen,
+                                          1, gclass.value[6], [], origin)
                             feasible_dim = 1
                             break
-                    
-                    if(feasible_dim == 0):
-                        tk.messagebox.showerror("Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
-                
-                elif(gclass.value[8] == 0 and gclass.value[9] == 1): # Add/remove
+
+                    if (feasible_dim == 0):
+                        tk.messagebox.showerror(
+                            "Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
+
+                elif (gclass.value[8] == 0 and gclass.value[9] == 1):  # Add/remove
                     remove_corridor = True
                     start = time.time()
                     graph.irreg_single_dual()
@@ -179,30 +188,31 @@ def run():
                     printe("Time taken: " + str((end-start)*1000) + " ms")
                     print("type of roomx " + str(type(graph.room_x)))
                     graph_data = {
-                            'room_x': graph.room_x,
-                            'room_y': graph.room_y,
-                            'room_width': graph.room_width,
-                            'room_height': graph.room_height,
-                            'area': graph.area,
-                            'extranodes': graph.extranodes,
-                            'mergednodes': graph.mergednodes,
-                            'irreg_nodes': graph.irreg_nodes1
-                        }
-                    
-                    (new_graph_data, success) = call_circulation(graph_data, gclass, node_coord, is_dimensioned, dim_constraints, remove_corridor)
-                    
+                        'room_x': graph.room_x,
+                        'room_y': graph.room_y,
+                        'room_width': graph.room_width,
+                        'room_height': graph.room_height,
+                        'area': graph.area,
+                        'extranodes': graph.extranodes,
+                        'mergednodes': graph.mergednodes,
+                        'irreg_nodes': graph.irreg_nodes1
+                    }
+
+                    (new_graph_data, success) = call_circulation(graph_data, gclass,
+                                                                 node_coord, is_dimensioned, dim_constraints, remove_corridor)
+
                     # If there was some error in algorithm execution new_graph_data will be empty
                     # we display the pop-up error message
                     if new_graph_data == None:
-                        tk.messagebox.showerror("Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
-                    
+                        tk.messagebox.showerror(
+                            "Error", "ERROR!! THE INITIAL CHOSEN ENTRY EDGE MUST BE EXTERIOR EDGE")
+
                     # If no issues we continue to draw the corridor
-                    else :
+                    else:
                         # draw_circulation(new_graph_data, gclass.ocan.canvas, gclass.value[6], gclass.entry_door)
                         # draw_circulation(new_graph_data, gclass.pen, gclass.ocan.canvas, gclass.value[6])
-                        draw.draw_rdg(new_graph_data, 1, gclass.pen, 1, gclass.value[6], [],origin)
-
-
+                        draw.draw_rdg(new_graph_data, 1, gclass.pen,
+                                      1, gclass.value[6], [], origin)
 
             elif (gclass.command == "single"):  # Single Irregular Dual/Floorplan
                 if (gclass.value[4] == 0):  # Non-Dimensioned single dual
@@ -221,21 +231,11 @@ def run():
                         'irreg_nodes': graph.irreg_nodes1
                     }
                     gclass.output_data.append(graph_data)
-                    draw.draw_rdg(graph_data
-                                  , 1
-                                  , gclass.pen
-                                  , 1
-                                  , gclass.value[6]
-                                  , []
-                                  , origin)
+                    draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                                  gclass.value[6], [], origin)
                 else:  # Dimensioned single floorplan
-                    old_dims = [[0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , ""
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]]
+                    old_dims = [[0] * gclass.value[0], [0] * gclass.value[0], [0] * gclass.value[0], [
+                        0] * gclass.value[0], "", [0] * gclass.value[0], [0] * gclass.value[0]]
                     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
                         old_dims, gclass.value[0])
                     dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect,
@@ -243,35 +243,35 @@ def run():
                     gclass.dimensional_constraints = dimensional_constraints
                     start = time.time()
                     graph.irreg_multiple_dual()
-                    graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
-                    while(graph.floorplan_exist == False):
-                        old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
-                        min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
+                    graph.single_floorplan(min_width, min_height, max_width, max_height,
+                                           symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                    while (graph.floorplan_exist == False):
+                        old_dims = [min_width, max_width, min_height,
+                                    max_height, symm_string, min_aspect, max_aspect]
+                        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                            old_dims, gclass.value[0])
                         graph.irreg_multiple_dual()
-                        graph.single_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                        graph.single_floorplan(min_width, min_height, max_width, max_height,
+                                               symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
                     graph_data = {
-                            'room_x': graph.room_x,
-                            'room_y': graph.room_y,
-                            'room_width': graph.room_width,
-                            'room_height': graph.room_height,
-                            'area': graph.area,
-                            'extranodes': graph.extranodes,
-                            'mergednodes': graph.mergednodes,
-                            'irreg_nodes': graph.irreg_nodes1
-                        }
-                    draw.draw_rdg(graph_data
-                            ,1
-                            ,gclass.pen
-                            ,1
-                            ,gclass.value[6]
-                            ,[]
-                            ,origin)
-                            
+                        'room_x': graph.room_x,
+                        'room_y': graph.room_y,
+                        'room_width': graph.room_width,
+                        'room_height': graph.room_height,
+                        'area': graph.area,
+                        'extranodes': graph.extranodes,
+                        'mergednodes': graph.mergednodes,
+                        'irreg_nodes': graph.irreg_nodes1
+                    }
+                    draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                                  gclass.value[6], [], origin)
+
             elif gclass.command == "letter_shape":
                 start = time.time()
-                inputgraph.lettershape(graph, gclass.app.nodes_data, gclass.letter)
+                inputgraph.lettershape(
+                    graph, gclass.app.nodes_data, gclass.letter)
                 end = time.time()
                 graph_data = {
                     'room_x': graph.room_x,
@@ -283,13 +283,8 @@ def run():
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-                draw.draw_rdg(graph_data
-                              , 1
-                              , gclass.pen
-                              , 1
-                              , gclass.value[6]
-                              , []
-                              , origin)
+                draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                              gclass.value[6], [], origin)
 
             elif (gclass.command == "staircase_shaped"):
                 start = time.time()
@@ -305,20 +300,16 @@ def run():
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-                draw.draw_rdg(graph_data
-                              , 1
-                              , gclass.pen
-                              , 1
-                              , gclass.value[6]
-                              , []
-                              , origin)
+                draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                              gclass.value[6], [], origin)
 
-            elif(gclass.command == "multiple"):#Multiple Irregular Dual/Floorplan
-                if(gclass.value[4] == 0):#Non-Dimensioned multiple dual
+            elif (gclass.command == "multiple"):  # Multiple Irregular Dual/Floorplan
+                if (gclass.value[4] == 0):  # Non-Dimensioned multiple dual
                     start = time.time()
                     graph.irreg_multiple_dual()
                     end = time.time()
-                    printe("Average Time taken: " + str(((end - start) * 1000) / graph.fpcnt) + " ms")
+                    printe("Average Time taken: " +
+                           str(((end - start) * 1000) / graph.fpcnt) + " ms")
                     printe("Number of floorplans: " + str(graph.fpcnt))
                     for idx in range(graph.fpcnt):
                         graph_data = {
@@ -342,25 +333,22 @@ def run():
                         #     ,[]
                         #     ,origin)
                         # origin += 1000
-                        
+
                         # gclass.ocan.add_tab()
                         # gclass.pen = gclass.ocan.getpen()
                         # gclass.pen.speed(0)
-                else:#Dimensioned multiple floorplans
-                    old_dims = [[0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]
-                                , ""
-                                , [0] * gclass.value[0]
-                                , [0] * gclass.value[0]]
-                    min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, gclass.value[0])
+                else:  # Dimensioned multiple floorplans
+                    old_dims = [[0] * gclass.value[0], [0] * gclass.value[0], [0] * gclass.value[0], [
+                        0] * gclass.value[0], "", [0] * gclass.value[0], [0] * gclass.value[0]]
+                    min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                        old_dims, gclass.value[0])
                     start = time.time()
                     graph.irreg_multiple_dual()
-                    graph.multiple_floorplan(min_width,min_height,max_width,max_height,symm_string, min_aspect, max_aspect, plot_width, plot_height)
+                    graph.multiple_floorplan(min_width, min_height, max_width, max_height,
+                                             symm_string, min_aspect, max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end-start)*1000) + " ms")
-                    printe("Number of floorplans: " +  str(len(graph.room_x)))
+                    printe("Number of floorplans: " + str(len(graph.room_x)))
                     for idx in range(len(graph.room_x)):
                         graph_data = {
                             'room_x': graph.room_x[idx],
@@ -385,17 +373,18 @@ def run():
                         #     ,gclass.value[6]
                         #     ,[]
                         #     ,origin)
-                        
+
                         # gclass.ocan.add_tab()
                         # gclass.pen = gclass.ocan.getpen()
                         # gclass.pen.speed(0)
-            elif(gclass.command == "single_oc"):
-                if(gclass.value[4] == 0): #Non-Dimensioned single rectangular dual
+            elif (gclass.command == "single_oc"):
+                if (gclass.value[4] == 0):  # Non-Dimensioned single rectangular dual
                     start = time.time()
                     try:
                         graph.oneconnected_dual("single")
                     except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
+                        gclass.show_warning(
+                            "Can not generate rectangular floorplan.")
                         graph.irreg_single_dual()
                     except inputgraph.BCNError:
                         graph.irreg_single_dual()
@@ -411,35 +400,27 @@ def run():
                         'mergednodes': graph.mergednodes,
                         'irreg_nodes': graph.irreg_nodes1
                     }
-                    draw.draw_rdg(graph_data
-                                  , 1
-                                  , gclass.pen
-                                  , 1
-                                  , gclass.value[6]
-                                  , []
-                                  , origin)
+                    draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                                  gclass.value[6], [], origin)
                 else:  # Dimensioned single floorplan
-                    old_dims = [[0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , ""
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]]
+                    old_dims = [[0] * gclass.value[0], [0] * gclass.value[0], [0] * gclass.value[0], [
+                        0] * gclass.value[0], "", [0] * gclass.value[0], [0] * gclass.value[0]]
                     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
                         old_dims, gclass.value[0])
                     start = time.time()
                     try:
                         graph.oneconnected_dual("multiple")
                     except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
+                        gclass.show_warning(
+                            "Can not generate rectangular floorplan.")
                         graph.irreg_multiple_dual()
                     except inputgraph.BCNError:
                         graph.irreg_multiple_dual()
                     graph.single_floorplan(min_width, min_height, max_width, max_height, symm_string, min_aspect,
                                            max_aspect, plot_width, plot_height)
                     while (graph.floorplan_exist == False):
-                        old_dims = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect]
+                        old_dims = [min_width, max_width, min_height,
+                                    max_height, symm_string, min_aspect, max_aspect]
                         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
                             old_dims, gclass.value[0])
                         graph.multiple_dual()
@@ -459,25 +440,22 @@ def run():
                     }
 
                     gclass.output_data.append(graph_data)
-                    draw.draw_rdg(graph_data
-                                  , 1
-                                  , gclass.pen
-                                  , 1
-                                  , gclass.value[6]
-                                  , []
-                                  , origin)
+                    draw.draw_rdg(graph_data, 1, gclass.pen, 1,
+                                  gclass.value[6], [], origin)
             elif (gclass.command == "multiple_oc"):
                 if (gclass.value[4] == 0):  # Non-Dimensioned multiple dual
                     start = time.time()
                     try:
                         graph.oneconnected_dual("multiple")
                     except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
+                        gclass.show_warning(
+                            "Can not generate rectangular floorplan.")
                         graph.irreg_multiple_dual()
                     except inputgraph.BCNError:
                         graph.irreg_multiple_dual()
                     end = time.time()
-                    printe("Average Time taken: " + str(((end - start) * 1000) / graph.fpcnt) + " ms")
+                    printe("Average Time taken: " +
+                           str(((end - start) * 1000) / graph.fpcnt) + " ms")
                     printe("Number of floorplans: " + str(graph.fpcnt))
                     gclass.multiple_output_found = 1
 
@@ -504,27 +482,23 @@ def run():
                         # gclass.pen = gclass.ocan.getpen()
                         # gclass.pen.speed(0)
                 else:
-                    old_dims = [[0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]
-                        , ""
-                        , [0] * gclass.value[0]
-                        , [0] * gclass.value[0]]
+                    old_dims = [[0] * gclass.value[0], [0] * gclass.value[0], [0] * gclass.value[0], [
+                        0] * gclass.value[0], "", [0] * gclass.value[0], [0] * gclass.value[0]]
                     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
                         old_dims, gclass.value[0])
                     dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect,
-                                            max_aspect, plot_width, plot_height]
+                                               max_aspect, plot_width, plot_height]
                     start = time.time()
                     try:
                         graph.oneconnected_dual("multiple")
                     except inputgraph.OCError:
-                        gclass.show_warning("Can not generate rectangular floorplan.")
+                        gclass.show_warning(
+                            "Can not generate rectangular floorplan.")
                         graph.irreg_multiple_dual()
                     except inputgraph.BCNError:
                         graph.irreg_multiple_dual()
                     graph.multiple_floorplan(min_width, min_height, max_width, max_height, symm_string, min_aspect,
-                                            max_aspect, plot_width, plot_height)
+                                             max_aspect, plot_width, plot_height)
                     end = time.time()
                     printe("Time taken: " + str((end - start) * 1000) + " ms")
                     printe("Number of floorplans: " + str(len(graph.room_x)))
@@ -548,13 +522,8 @@ def run():
                             gclass.ocan.add_tab()
                             gclass.pen = gclass.ocan.getpen()
                             gclass.pen.speed(0)
-                            draw.draw_rdg(graph_data
-                                ,1
-                                ,gclass.pen
-                                ,1
-                                ,gclass.value[6]
-                                ,[]
-                                ,origin)
+                            draw.draw_rdg(graph_data, 1, gclass.pen,
+                                          1, gclass.value[6], [], origin)
             elif (gclass.command == "poly"):  # Polygonal Floorplan
                 start = time.time()
                 # graph.irreg_single_dual()
@@ -574,12 +543,8 @@ def run():
                 #         'irreg_nodes': graph.irreg_nodes1
                 #     }
                 # gclass.output_data.append(graph_data)
-                draw.draw_poly(gclass.canonicalObject.graph_data,1
-                        ,gclass.pen
-                        ,1
-                        ,gclass.value[6]
-                        ,[]
-                        ,origin,gclass.outer_boundary, gclass.shape)
+                draw.draw_poly(gclass.canonicalObject.graph_data, 1, gclass.pen, 1, gclass.value[6], [
+                ], origin, gclass.outer_boundary, gclass.shape)
 
             gclass.time_taken = (end-start)*1000
             gclass.num_rfp = len(graph.room_x)
@@ -610,7 +575,8 @@ def make_dissection_corridor(gclass):
     for i in range(1, 10):
         colors[m + i - 1] = '#FF4C4C'
         rnames.append("")
-    parameters = [len(spanned), spanned.size(), spanned.edges(), 0, 0, rnames, colors]
+    parameters = [len(spanned), spanned.size(),
+                  spanned.edges(), 0, 0, rnames, colors]
     C = ptpg.PTPG(parameters)
     C.create_single_dual(1, gclass.pen, gclass.textbox)
     gclass.ocan.add_cir_tab()
@@ -648,12 +614,13 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
 
     for x in edge_set:
         g.add_edge(x[0], x[1])
-    
+
     n = len(g)
 
     rooms = []
     for i in range(n):
-        rooms.append(cir.Room(i, graph_data.get("room_x")[i], graph_data.get("room_y")[i] + graph_data.get("room_height")[i], graph_data.get("room_x")[i] + graph_data.get("room_width")[i], graph_data.get("room_y")[i]))
+        rooms.append(cir.Room(i, graph_data.get("room_x")[i], graph_data.get("room_y")[i] + graph_data.get(
+            "room_height")[i], graph_data.get("room_x")[i] + graph_data.get("room_width")[i], graph_data.get("room_y")[i]))
 
     # cir.plot(g,n)
     rfp = cir.RFP(g, rooms)
@@ -665,10 +632,11 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
         circulation_obj.dimension_constraints = dim_constraints
     # circulation_result = circulation_obj.circulation_algorithm(entry[0], entry[1])
     # circulation_result = circulation_obj.multiple_circulation(coord)
-    circulation_result = circulation_obj.circulation_algorithm(entry[0],entry[1])
+    circulation_result = circulation_obj.circulation_algorithm(
+        entry[0], entry[1])
     if circulation_result == 0:
         return None
-    
+
     if remove_corridor == True:
         # Created a deepcopy of object to display circulation before
         # we display GUI for removing corridor
@@ -677,7 +645,7 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
 
         # Printing how much shift was done for each room
         for room in circ.RFP.rooms:
-            print("Room ",room.id, ":")
+            print("Room ", room.id, ":")
             print("Push top edge by: ", room.rel_push_T)
             print("Push bottom edge by: ", room.rel_push_B)
             print("Push left edge by: ", room.rel_push_L)
@@ -706,23 +674,24 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
         graph_data1['extranodes'] = graph_data['extranodes']
         graph_data1['mergednodes'] = graph_data['mergednodes']
         graph_data1['irreg_nodes'] = graph_data['irreg_nodes']
-        draw.draw_rdg(graph_data1, 1, gclass.pen, 1, gclass.value[6], [], origin)
+        draw.draw_rdg(graph_data1, 1, gclass.pen, 1,
+                      gclass.value[6], [], origin)
 
         # Now going back to flow of removing circulation
         corridors = circulation_obj.adjacency
         rem_edges = gclass.remove_corridor_gui(corridors)
 
         for x in rem_edges:
-            circulation_obj.remove_corridor(circulation_obj.circulation_graph,x[0],x[1])
-        
-        
+            circulation_obj.remove_corridor(
+                circulation_obj.circulation_graph, x[0], x[1])
+
     # To remove entry corridor alone we are just shifting rooms by looking at second corridor vertex
     # Done by shifting the range left bound in for loop of adjust_RFP_to_circulation()
     circulation_obj.adjust_RFP_to_circulation()
 
     # Printing how much shift was done for each room
     for room in circulation_obj.RFP.rooms:
-        print("Room ",room.id, ":")
+        print("Room ", room.id, ":")
         print("Push top edge by: ", room.rel_push_T)
         print("Push bottom edge by: ", room.rel_push_B)
         print("Push left edge by: ", room.rel_push_L)
@@ -749,24 +718,28 @@ def call_circulation(graph_data, gclass, coord, is_dimensioned, dim_constraints,
     graph_data['area'] = np.array(circulation_obj.room_area)
     return (graph_data, circulation_obj.is_dimensioning_successful)
 
-def plot(graph: nx.Graph,m: int) -> None:
+
+def plot(graph: nx.Graph, m: int) -> None:
     """Plots thr graph using matplotlib
 
     Args:
         graph (Networkx graph): The graph to plot
         m (integer): Number of vertices in the graph
     """
-    pos=nx.spring_layout(graph) # positions for all nodes
-    nx.draw_networkx(graph,pos, label=None,node_size=400 ,node_color='#4b8bc8',font_size=12, font_color='k', font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
-    nx.draw_networkx_edges(graph,pos)
-    nx.draw_networkx_nodes(graph,pos,
-                        nodelist=list(range(m,len(graph))),
-                        node_color='r',
-                        node_size=500,
-                    alpha=1)
+    pos = nx.spring_layout(graph)  # positions for all nodes
+    nx.draw_networkx(graph, pos, label=None, node_size=400, node_color='#4b8bc8', font_size=12,
+                     font_color='k', font_family='sans-serif', font_weight='normal', alpha=1, bbox=None, ax=None)
+    nx.draw_networkx_edges(graph, pos)
+    nx.draw_networkx_nodes(graph, pos,
+                           nodelist=list(range(m, len(graph))),
+                           node_color='r',
+                           node_size=500,
+                           alpha=1)
     plt.show()
 
 # def draw_circulation(graph_data, canvas, color_list,entry):
+
+
 def draw_circulation(graph_data, pen, canvas, color_list):
     """This is the draw function specifically for the circulation module
 
@@ -776,41 +749,46 @@ def draw_circulation(graph_data, pen, canvas, color_list):
         canvas (output_canvas class in gui.py): To draw the rooms
         color_list (list): Color of each room
     """
-    
-    origin_x, origin_y = -200,-100
+
+    origin_x, origin_y = -200, -100
     scale = 50
     room_x = graph_data["room_x"]
     room_y = graph_data["room_y"]
     room_height = graph_data["room_height"]
     room_width = graph_data["room_width"]
     for i in range(len(room_x)):
-        canvas.create_rectangle(origin_x + scale*room_x[i], origin_y + scale*room_y[i], origin_x + scale*(room_x[i] + room_width[i]), origin_y + scale*(room_y[i] + room_height[i]), fill = color_list[i])
-        canvas.create_text(origin_x + scale*(room_x[i] + room_width[i]/2), origin_y + scale*(room_y[i] + room_height[i]/2), text = str(i))
-    
+        canvas.create_rectangle(origin_x + scale*room_x[i], origin_y + scale*room_y[i], origin_x + scale*(
+            room_x[i] + room_width[i]), origin_y + scale*(room_y[i] + room_height[i]), fill=color_list[i])
+        canvas.create_text(origin_x + scale*(room_x[i] + room_width[i]/2), origin_y + scale*(
+            room_y[i] + room_height[i]/2), text=str(i))
+
     # Printing dimensions in case it is dimensioned
     # Gets the max x coordinate (rightmost end of floorplan)
-    x_max = np.max(graph_data['room_x']) + graph_data['room_width'][np.argmax(graph_data['room_x'])]
+    x_max = np.max(graph_data['room_x']) + \
+        graph_data['room_width'][np.argmax(graph_data['room_x'])]
     # Gets the max y coordinate (topmost end of floorplan)
     y_max = np.max(graph_data['room_y'])
 
-
-
-    value = 1 # variable to write next area in next line
+    value = 1  # variable to write next area in next line
     pen.penup()
-    if(len(graph_data['area']) != 0):
-        pen.setposition(x_max* scale + origin_x + 50, y_max* scale + origin_y - 30)
-        pen.write('Dimensions of Each Room' ,font=("Arial", 20, "normal"))
-        for i in range(0,len(graph_data['area'])):
+    if (len(graph_data['area']) != 0):
+        pen.setposition(x_max * scale + origin_x + 50,
+                        y_max * scale + origin_y - 30)
+        pen.write('Dimensions of Each Room', font=("Arial", 20, "normal"))
+        for i in range(0, len(graph_data['area'])):
             if i in graph_data['extranodes']:
                 continue
-            pen.setposition(x_max* scale + origin_x+50, y_max* scale + origin_y - 30 - value*30)
-            pen.write('Room ' + str(i)+ ': Width= '+ str(round(graph_data['room_width'][i],1)) + ' Height= ' + str(round(graph_data['room_height'][i], 1)),font=("Arial", 15, "normal"))
+            pen.setposition(x_max * scale + origin_x+50,
+                            y_max * scale + origin_y - 30 - value*30)
+            pen.write('Room ' + str(i) + ': Width= ' + str(round(graph_data['room_width'][i], 1)) + ' Height= ' + str(
+                round(graph_data['room_height'][i], 1)), font=("Arial", 15, "normal"))
             pen.penup()
             # Moving pen to next line
-            value+=1
+            value += 1
 
     # draw door
     # print("Entry: ", entry)
+
 
 if __name__ == "__main__":
     run()

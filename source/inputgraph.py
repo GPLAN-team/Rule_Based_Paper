@@ -20,7 +20,7 @@ from random import randint
 from .graphoperations import biconnectivity as bcn
 from .graphoperations import oneconnectivity as onc
 from .graphoperations import operations as opr
-from .graphoperations import graph_crossings as gc
+from .graphoperations import graph_crossings1 as gc
 from .irregular import shortcutresolver as sr
 from .boundary import cip as cip
 from .boundary import news as news
@@ -277,18 +277,16 @@ class InputGraph:
             rel_matrix = self.rel_matrix_list[i]
             encoded_matrix = opr.get_encoded_matrix(
                 rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
-            # print("**************")
-            # print(i, encoded_matrix)
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
 
             [boolean, ver_list, hor_list] = bc.block_checker(
                 encoded_matrix_deepcopy, symm_rooms)
-            # print([boolean, ver_list, hor_list])
+            print([boolean, ver_list, hor_list])
             if boolean:
                 [width, height, hor_dgph, status] = fpts.floorplan_to_st(
                     encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar,
                     max_ar, plot_width, plot_height)
-                # print([width, height, hor_dgph, status])
+                print([width, height, hor_dgph, status])
             else:
                 status = False
             if (status == False):
@@ -509,6 +507,8 @@ class InputGraph:
             height = np.transpose(height)
             self.room_width[i] = width.flatten()
             self.room_height[i] = height.flatten()
+            self.room_x[i], self.room_y[i] = dual.get_coordinates(encoded_matrix, rel_matrix.shape[0],
+                                                                  self.room_width[i], self.room_height[i], hor_dgph)
             for j in range(0, len(self.room_x[i])):
                 self.room_x[i][j] = round(self.room_x[i][j], 3)
             for j in range(0, len(self.room_y[i])):
@@ -541,8 +541,8 @@ class InputGraph:
         Returns:
             None
         """
-        # if (bcn.is_biconnected(self.matrix)):
-        #     raise BCNError
+        if (bcn.is_biconnected(self.matrix)):
+            raise BCNError
 
         # Identifying cut-vertices
         matrix = copy.deepcopy(self.matrix)
