@@ -8,6 +8,8 @@ import itertools
 # import bdy
 from typing import List, Tuple
 
+i = 0
+
 class Point:
     def __init__(self, x: float, y: float):
         self.x = x
@@ -234,7 +236,7 @@ class circulation:
         graph = deepcopy(self.graph)
         # Use to_numpy_array instead of to_numpy_matrix if Networkx 3.0 or above
         # print(nx.to_numpy_matrix(graph))
-        print(nx.to_numpy_array(graph))
+        # print(nx.to_numpy_array(graph))
         # n is the number of vertices in the initial graph
         n = len(graph)
         m = n
@@ -294,12 +296,11 @@ class circulation:
 
         Args:
             corridor_vertex (Networkx node): Node corresponding to the corridor for which we need to find the neighbors
-            # v1 (int, optional): First endpoint of the exterior edge to start the circulation algorithm. Defaults to 1.
-            # v2 (int, optional): Second endpoint of the exterior edge to start the circulation algorithm. Defaults to 2.
 
         Returns:
             [a,b]: pair of rooms that the corridor_vertex is adjacent to
         """
+        print(f"STEP {i}.1 OF CIRCULATION - DONE")
         # Gets the tuple corresponding to the key value (key = corridor_vertex)
         [a,b] = self.adjacency.get(corridor_vertex)
         
@@ -324,13 +325,17 @@ class circulation:
         print("Last corridor: ",end)
         for corridor in range(start + 1, end + 1):
             if corridor in list(self.adjacency.keys()):
+                global i
+                i +=1
+                # Step 1 - get the rooms the corridor connects
                 [room1, room2] = self.corridor_boundary_rooms(corridor)
+                # Step 2 - add the corridor space between room1 and room2
                 self.add_corridor_between_2_rooms(self.RFP.rooms[room1],self.RFP.rooms[room2])
             else:
                 continue
         
-        # For rooms that are connected by corridors we directly assign relative push values
-        # as calculated in add_corridor_between_rooms fn
+        # Step 3 - For rooms that are connected by corridors we directly assign relative push values
+        # as calculated in add_corridor_between_2_rooms fn
         for room in self.RFP.rooms:
             if(room.target.get('T') != 0):
                 room.rel_push_T = room.target.get('T')
@@ -344,8 +349,11 @@ class circulation:
             if(room.target.get('R') != 0):
                 room.rel_push_R = room.target.get('R')
 
+        # Step 4 - Make the changes to the coordinates
         for room in self.RFP.rooms:
             self.push_edges(room)
+        
+        # Step 5 (optional) - if dimensioned circulation, then display and check the dimensions
         print(self.dimensions)
         if(self.is_dimensioned == True):
             is_feasible = self.check_dimensions_feasibility()
@@ -366,10 +374,15 @@ class circulation:
             room1 (int): Room index of first room 
             room2 (int): Room index of second room
         """
-
+        print(f"STEP {i}.2 OF CIRCULATION....IN PROCESS")
         # This tuple has 5 elements, namely the x and y of left end of common edge, x and y of right end of common edge
         #  and the direction of common edge with respect to room1 (N/S/E/W)
         common_edge = self.find_common_edges(room1, room2)
+
+        # Note: T - top edge, B - bottom edge, L - left edge, R - right edge
+        # Note: N - north, S - south, E - east, W - west
+        # Note: (room1.id, "S", "T", room2.id, "N", "B") means that the top edge of room 1 has to be moved South
+        # and the bottom edge of room 2 has to be moved North
 
         # Forming the gap between room1 and room2 first
         if(common_edge[4][1] == "N"):
@@ -430,13 +443,12 @@ class circulation:
             [tuple]: This tuple has 5 elements, namely the x and y of left end of common edge, x and y of right end of common edge
                      and the direction of common edge with respect to room1 (N/S/E/W)
         """
-
         common_edge = (0,0,0,0,(room1.id,"Null"))
 
-        print("In find common edges: room1.tly= ",room1.top_left_y)
-        print("In find common edges: room1.bry= ",room1.bottom_right_y)
-        print("In find common edges: room2.tly= ",room2.top_left_y)
-        print("In find common edges: room2.bry= ",room2.bottom_right_y)
+        # print("In find common edges: room1.tly= ",room1.top_left_y)
+        # print("In find common edges: room1.bry= ",room1.bottom_right_y)
+        # print("In find common edges: room2.tly= ",room2.top_left_y)
+        # print("In find common edges: room2.bry= ",room2.bottom_right_y)
         # Case1: The rooms are vertically (same y coordinates)
         # Room1 is below Room2
         if room1.top_left_y == room2.bottom_right_y:
@@ -459,7 +471,7 @@ class circulation:
 
     def find_common_neighbors(self,room1: Room,room2: Room, last_visited: Room) -> list:
         """For each common neighbor of room1 and room2, checks if that neighbor shares an edge with
-           room1 or room2 along the direction of common edge between room1 and room2. After each check it appends
+           room1 or room2 along the direction of common edge between room1 and room2. After each check append
            the neighbor, the orientation of common edge and the direction in which the room has to be shifted to form
            corridor between room1 and room2.
 
