@@ -210,7 +210,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     #     # line
     #     pen.forward((limit+left_grid)*grid_size)
 
+    # print("AREA: ", graph_data['area'])
     for i in range(graph_data['room_x'].shape[0]):
+        dat = graph_data['area'][i].split(' ',2)
+        area = dat[2]
         if i in graph_data['extranodes']:
             continue
         pen.color('black')
@@ -223,8 +226,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
 
-            pen.write(f"({str(graph_data['area'][i])})", font=(
-                "Arial", 14, "normal"))
+            pen.write(f"({str(area)})", font=("Arial", 14, "normal"))
         if (i in graph_data['mergednodes'] and mode == 2):
             pen.penup()
 
@@ -234,7 +236,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
             pen.color('darkred')
-            pen.write(str(graph_data['area'][i]), font=("Arial", 14, "normal"))
+            pen.write(str(area), font=("Arial", 14, "normal"))
     # value = 1
     # if (len(graph_data['area']) != 0):
     #     pen.setposition(dim[0] * scale + origin['x']-650,
