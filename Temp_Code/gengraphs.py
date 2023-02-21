@@ -318,15 +318,15 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
         else:
             tri_flag.append(False)
 
-    print(len(tri_graphs))
-    print(maxi)
-    print(mini)
+    # print(len(tri_graphs))
+    # print(maxi)
+    # print(mini)
     # for P in tri_graphs:
     #     nx.draw(P, with_labels=True, pos=pos)
     #     plt.show()
 
     # %%
-    print(tri_flag)
+    print(f" Tri Flag: {tri_flag}")
     # %%
     # # ROOM PERMUTATION
     # permutegraphs = []
