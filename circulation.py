@@ -104,6 +104,25 @@ class circulation:
     #             for i in range(len(x) - 1):
     #                 self.exterior_edges.append([x[i], x[i+1]])
 
+    def donot_include(self,graph_size:int, circ:nx.Graph, v: int = 0) -> None:
+        """Use this function to make the room corresponding to v isolated
+
+        Args:
+            graph_size (int): Size of original graph
+            circ (nx.Graph): The circulation graph
+            v (int, optional): Index of the room to be isolated
+        """
+
+        to_remove =[]
+
+        for x in nx.neighbors(circ,v):
+            if(x >= graph_size):
+                to_remove.append(x)
+        
+        for x in to_remove:
+            p = self.corridor_boundary_rooms(x)
+            self.remove_corridor(circ,p[0],p[1])
+
     def remove_corridor(self, graph: nx.Graph, v1: int = 0, v2: int = 1) -> None:
         """To remove corridor vertex between v1 and v2 if exists
         Args:

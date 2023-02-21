@@ -15,6 +15,7 @@ import Temp_Code.gengraphs as gengraphs
 import source.inputgraph as inputgraph
 from pythongui import dimensiongui as dimgui
 import circulation as cir
+import math
 
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
@@ -1012,6 +1013,19 @@ class App:
         edge_set = edges
         corridor_thickness = 0.3
 
+        # # To get the corridor thickness
+        # width = np.amax(graph_data['room_width'])
+        # height = np.amax(graph_data['room_height'])
+        # if (width == 0):
+        #     width = 1
+        # if (height == 0):
+        #     height = 1
+        # if (width < height):
+        #     width = height
+        # scale = 200*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
+
+        # corridor_thickness = scale
+
         for x in edge_set:
             g.add_edge(x[0], x[1])
 
@@ -1026,6 +1040,9 @@ class App:
         rfp = cir.RFP(g, rooms)
 
         circulation_obj = cir.circulation(g, corridor_thickness, rfp)
+
+        i = self.room_mapping.index('WC 1')
+
         # circulation_obj = cir.circulation(g, rfp)
         if is_dimensioned == True:
             circulation_obj.is_dimensioned = True
@@ -1035,6 +1052,9 @@ class App:
         circulation_result = circulation_obj.circulation_algorithm()
         if circulation_result == 0:
             return None
+        
+        # Else do not include the WC 1
+        circulation_obj.donot_include(len(g),circulation_obj.circulation_graph,i)
 
         # if remove_corridor == True:
         #     # Created a deepcopy of object to display circulation before
