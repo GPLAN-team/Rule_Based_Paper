@@ -144,7 +144,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
         height = 1
     if (width < height):
         width = height
-    scale = 200*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
+    scale = 150*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
     origin = {'x': origin - 400, 'y': -300}
@@ -212,8 +212,11 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
     # print("AREA: ", graph_data['area'])
     for i in range(graph_data['room_x'].shape[0]):
-        dat = graph_data['area'][i].split(' ',2)
-        area = dat[2]
+        try:
+            dat = graph_data['area'][i].split(' ', 2)
+            area = dat[2]
+        except:
+            area = graph_data['area'][i]
         if i in graph_data['extranodes']:
             continue
         pen.color('black')

@@ -219,54 +219,80 @@ class App:
             self.grid_Button.deselect()
 
         self.curr_rfp -= 1
-        graph = self.graph_objs[self.curr_rfp]
+        graph_data = self.graph_objs[self.curr_rfp]
 
         # graph = inputgraph.InputGraph(
         #     self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
 
-        if (self.circ_val == 1):
-            print("Condition : Circulation Irregular")
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
+        # if (self.circ_val == 1):
+        #     print("Condition : Circulation Irregular")
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
 
-        elif (self.dimCheckVar.get() == 1 and self.irreg_check == 1):
-            print("Condition : Dimensioned Irregular")
-            # try:
-            #     graph.oneconnected_dual("multiple")
-            # except inputgraph.OCError:
-            #     print("Can not generate rectangular floorplan.")
-            #     graph.irreg_multiple_dual()
-            # except inputgraph.BCNError:
-            # graph.irreg_multiple_dual()
-            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
-        # elif (self.irreg_check == 1):
-        #     print("Condition : Non dimensioned Irregular")
+        # elif (self.dimCheckVar.get() == 1 and self.irreg_check == 1):
+        #     print("Condition : Dimensioned Irregular")
         #     # try:
         #     #     graph.oneconnected_dual("multiple")
         #     # except inputgraph.OCError:
         #     #     print("Can not generate rectangular floorplan.")
         #     #     graph.irreg_multiple_dual()
         #     # except inputgraph.BCNError:
-        #     graph.irreg_single_dual()
+        #     # graph.irreg_multiple_dual()
+        #     # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+        #     #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+        #     graph_data = {
+        #         'room_x': graph.room_x,
+        #         'room_y': graph.room_y,
+        #         'room_width': graph.room_width,
+        #         'room_height': graph.room_height,
+        #         'area': graph.area,
+        #         'extranodes': graph.extranodes,
+        #         'mergednodes': graph.mergednodes,
+        #         'irreg_nodes': graph.irreg_nodes1
+        #     }
+        # # elif (self.irreg_check == 1):
+        # #     print("Condition : Non dimensioned Irregular")
+        # #     # try:
+        # #     #     graph.oneconnected_dual("multiple")
+        # #     # except inputgraph.OCError:
+        # #     #     print("Can not generate rectangular floorplan.")
+        # #     #     graph.irreg_multiple_dual()
+        # #     # except inputgraph.BCNError:
+        # #     graph.irreg_single_dual()
+        # #     graph_data = {
+        # #         'room_x': graph.room_x,
+        # #         'room_y': graph.room_y,
+        # #         'room_width': graph.room_width,
+        # #         'room_height': graph.room_height,
+        # #         'area': graph.area,
+        # #         'extranodes': graph.extranodes,
+        # #         'mergednodes': graph.mergednodes,
+        # #         'irreg_nodes': graph.irreg_nodes1
+        # #     }
+
+        # elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
+        #     # graph.irreg_multiple_dual()
+        #     # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+        #     #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+        #     # print(graph.floorplan_exist)
+        #     # while(graph.floorplan_exist == False):
+        #     #     old_dims = [min_width, max_width, min_height,
+        #     #                 max_height, symm_string, min_aspect, max_aspect]
+        #     #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        #     #         old_dims, nodecnt)
+        #     #     graph.multiple_dual()
+        #     #     graph.single_floorplan(min_width, min_height, max_width, max_height,
+        #     #                         symm_string, min_aspect, max_aspect, plot_width, plot_height)
+        #     # end = time.time()
+        #     # printe("Time taken: " + str((end-start)*1000) + " ms")
         #     graph_data = {
         #         'room_x': graph.room_x,
         #         'room_y': graph.room_y,
@@ -278,44 +304,18 @@ class App:
         #         'irreg_nodes': graph.irreg_nodes1
         #     }
 
-        elif (self.dimCheckVar.get() == 1 and self.irreg_check == 0):
-            # graph.irreg_multiple_dual()
-            # graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-            #                        self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            # print(graph.floorplan_exist)
-            # while(graph.floorplan_exist == False):
-            #     old_dims = [min_width, max_width, min_height,
-            #                 max_height, symm_string, min_aspect, max_aspect]
-            #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-            #         old_dims, nodecnt)
-            #     graph.multiple_dual()
-            #     graph.single_floorplan(min_width, min_height, max_width, max_height,
-            #                         symm_string, min_aspect, max_aspect, plot_width, plot_height)
-            # end = time.time()
-            # printe("Time taken: " + str((end-start)*1000) + " ms")
-            graph_data = {
-                'room_x': graph.room_x,
-                'room_y': graph.room_y,
-                'room_width': graph.room_width,
-                'room_height': graph.room_height,
-                'area': graph.area,
-                'extranodes': graph.extranodes,
-                'mergednodes': graph.mergednodes,
-                'irreg_nodes': graph.irreg_nodes1
-            }
-
-        # else:
-        #     graph.irreg_single_dual()
-        #     graph_data = {
-        #         'room_x': graph.room_x,
-        #         'room_y': graph.room_y,
-        #         'room_width': graph.room_width,
-        #         'room_height': graph.room_height,
-        #         'area': graph.area,
-        #         'extranodes': graph.extranodes,
-        #         'mergednodes': graph.mergednodes,
-        #         'irreg_nodes': graph.irreg_nodes1
-        #     }
+        # # else:
+        # #     graph.irreg_single_dual()
+        # #     graph_data = {
+        # #         'room_x': graph.room_x,
+        # #         'room_y': graph.room_y,
+        # #         'room_width': graph.room_width,
+        # #         'room_height': graph.room_height,
+        # #         'area': graph.area,
+        # #         'extranodes': graph.extranodes,
+        # #         'mergednodes': graph.mergednodes,
+        # #         'irreg_nodes': graph.irreg_nodes1
+        # #     }
 
         self.draw_one_rfp(graph_data)
 
@@ -484,7 +484,7 @@ class App:
                 max_aspect.append(2)
             elif (room == "Kitchen"):
                 min_width.append(6)
-                min_height.append(5)
+                min_height.append(8)
                 max_width.append(14)
                 max_height.append(13)
                 min_aspect.append(0.7)
@@ -501,7 +501,7 @@ class App:
                 min_height.append(9)
                 max_width.append(13)
                 max_height.append(14)
-                min_aspect.append(1)
+                min_aspect.append(.7)
                 max_aspect.append(2.2)
             elif (room == "WC 1"):
                 min_width.append(6)
