@@ -87,6 +87,7 @@ class App:
         self.grid_scale = 0
         self.grid_coord = []
         self.circ_val = 0
+        self.circ_graphs = []
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -329,6 +330,7 @@ class App:
 
         self.curr_rfp += 1
         graph_data = self.graph_objs[self.curr_rfp]
+        cir.plot(self.circ_graphs[self.curr_rfp], len(self.circ_graphs[self.curr_rfp]))
 
         # graph = inputgraph.InputGraph(
         #     self.graphs_param[self.curr_rfp][0], self.graphs_param[self.curr_rfp][1], self.graphs_param[self.curr_rfp][2], self.graphs_param[self.curr_rfp][3])
@@ -906,6 +908,7 @@ class App:
                     # graph.room_height = new_graph_data['room_height']
                     # graph.area = new_graph_data['area']
                     self.graph_objs.append(new_graph_data)
+                    self.circ_graphs.append(self.graphs[i])
 
                     feasible_dim = 1
                     # break
@@ -1025,16 +1028,26 @@ class App:
         # cir.plot(g,n)
         rfp = cir.RFP(g, rooms)
 
+        i = self.room_mapping.index('WC 1')
+        entry0 = self.room_mapping.index('Living Room')
+        entry1 = self.room_mapping.index('Kitchen')
+
         circulation_obj = cir.circulation(g, corridor_thickness, rfp)
+        
         # circulation_obj = cir.circulation(g, rfp)
         if is_dimensioned == True:
             circulation_obj.is_dimensioned = True
             circulation_obj.dimension_constraints = dim_constraints
         # circulation_result = circulation_obj.circulation_algorithm(entry[0], entry[1])
         # circulation_result = circulation_obj.multiple_circulation(coord)
-        circulation_result = circulation_obj.circulation_algorithm()
+        circulation_result = circulation_obj.circulation_algorithm(entry0,entry1)
         if circulation_result == 0:
             return None
+        
+        # print("ADJACENCIES: ",circulation_obj.adjacency)
+        
+        # Else do not include WC1
+        circulation_obj.donot_include(len(g),circulation_obj.circulation_graph,i)
 
         # if remove_corridor == True:
         #     # Created a deepcopy of object to display circulation before

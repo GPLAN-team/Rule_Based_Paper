@@ -119,7 +119,9 @@ class circulation:
             if(x >= graph_size):
                 to_remove.append(x)
         
+        # print("To remove: ")
         for x in to_remove:
+            # print(x)
             p = self.corridor_boundary_rooms(x)
             self.remove_corridor(circ,p[0],p[1])
 
@@ -862,7 +864,7 @@ def main():
         room2 = Room("1", tl_x2, tl_y2, br_x2, br_y2)
 
         rfp1 = RFP(g1, [room1, room2])
-        circulation_obj1 = circulation(g1, rfp1, room1, room2)
+        circulation_obj1 = circulation(g1, 0.1,rfp1)
         common_edge1 = circulation_obj1.find_common_edges(room1, room2)
         print("Common edge case1:", common_edge1)
 
@@ -880,7 +882,7 @@ def main():
         room4 = Room("1", tl_x4, tl_y4, br_x4, br_y4)
 
         rfp2 = RFP(g2, [room3, room4])
-        circulation_obj2 = circulation(g2, rfp2, room3, room4)
+        circulation_obj2 = circulation(g2, 0.1, rfp2)
         common_edge2 = circulation_obj2.find_common_edges(room3, room4)
         print("Common edge case2:", common_edge2)
 
@@ -898,7 +900,7 @@ def main():
         room6 = Room("1", tl_x6, tl_y6, br_x6, br_y6)
 
         rfp3 = RFP(g3, [room5, room6])
-        circulation_obj3 = circulation(g3, rfp3, room5, room6)
+        circulation_obj3 = circulation(g3, 0.1, rfp3)
         common_edge3 = circulation_obj3.find_common_edges(room5, room6)
         print("Common edge case3:", common_edge3)
 
@@ -916,7 +918,7 @@ def main():
         room8 = Room("1", tl_x8, tl_y8, br_x8, br_y8)
 
         rfp4 = RFP(g4, [room7, room8])
-        circulation_obj4 = circulation(g4, rfp4, room7, room8)
+        circulation_obj4 = circulation(g4, 0.1, rfp4)
         common_edge4 = circulation_obj4.find_common_edges(room7, room8)
         print("Common edge case4:", common_edge4)
 
@@ -952,7 +954,7 @@ def main():
 
         rfp = RFP(g, [room1, room2, room3, room4])
 
-        circulation_obj = circulation(g, rfp, room1, room3)
+        circulation_obj = circulation(g, 0.1, rfp)
         circulation_obj.find_common_neighbors(room1, room3, -1)
 
     def test_move_edges():
@@ -987,7 +989,7 @@ def main():
 
         rfp = RFP(g, [room1, room2, room3, room4])
 
-        circulation_obj = circulation(g, rfp)
+        circulation_obj = circulation(g, 0.1, rfp)
         circulation_obj.add_corridor_between_2_rooms(room1, room3)
         for room in circulation_obj.RFP.rooms:
             print("Room ", room.id, ":")
@@ -1029,7 +1031,7 @@ def main():
 
         rfp = RFP(g, [room1, room2, room3, room4])
 
-        circulation_obj = circulation(g, rfp)
+        circulation_obj = circulation(g, 0.1, rfp)
         """, room1, room3)"""
         door1 = int(input("Enter one end of entry edge: "))
         door2 = int(input("Enter other end of entry edge: "))
@@ -1088,7 +1090,7 @@ def main():
     def test_multiple_circ():
         # Example1
         g1, coord1 = wheel_graph(10)
-        circ_obj1 = circulation(g1)
+        circ_obj1 = circulation(g1,0.1)
         circ_obj1.multiple_circulation(coord1)
         print("Number of multiple circulations: ", end=" ")
         print(len(circ_obj1.multiple_circ))
@@ -1111,8 +1113,8 @@ def main():
     # test_comm_edges()
     # test_comm_neighbors()
     # test_move_edges()
-    # test_adjust_RFP_to_circ()
-    test_remove_corridor()
+    test_adjust_RFP_to_circ()
+    # test_remove_corridor()
     # test_multiple_circ()
 
 
