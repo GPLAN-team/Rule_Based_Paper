@@ -1040,7 +1040,7 @@ class App:
             circulation_obj.dimension_constraints = dim_constraints
         # circulation_result = circulation_obj.circulation_algorithm(entry[0], entry[1])
         # circulation_result = circulation_obj.multiple_circulation(coord)
-        circulation_result = circulation_obj.circulation_algorithm(entry0,entry1)
+        circulation_result = circulation_obj.circulation_algorithm(entry0+1,entry1+1)
         if circulation_result == 0:
             return None
         
