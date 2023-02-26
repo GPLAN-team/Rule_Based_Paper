@@ -144,7 +144,12 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
         height = 1
     if (width < height):
         width = height
-    scale = 150*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
+    top_y = (float)(max(list(graph_data['room_y'])))
+    bottom_y = (float)(min(list(graph_data['room_y'])) - height)
+    print(f"TOP Y : {top_y} , BOTTOM Y : {bottom_y}\n")
+    scale = 400/(top_y - bottom_y)
+    print(scale)
+    # scale = 150*(math.exp(-0.30*height+math.log(0.8)) + 0.1)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
     origin = {'x': origin - 400, 'y': -300}
@@ -213,7 +218,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     # print("AREA: ", graph_data['area'])
     for i in range(graph_data['room_x'].shape[0]):
         try:
-            dat = graph_data['area'][i].split(' ', 2)
+            dat = graph_data['area'][i].split(':', 2)
             area = dat[2]
         except:
             area = graph_data['area'][i]

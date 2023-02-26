@@ -110,8 +110,8 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
 		if min_height_mod[i] > max_height_mod[i]:
 			flag1 = 1
 	if flag1 == 1:
-		print(
-			"For the given aspect ratio constraints and dimensions room cannot be drawn \n Rooms considering the given dimensions alone is being explored")
+		# print(
+		# 	"For the given aspect ratio constraints and dimensions room cannot be drawn \n Rooms considering the given dimensions alone is being explored")
 		b_min_HOR = np.dot(np.array(min_height), -1)
 		b_max_HOR = np.array(max_height)
 		b_min_HOR = np.transpose(b_min_HOR)

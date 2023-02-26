@@ -350,7 +350,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     # SEPARATING TRIANGLES
     # Get all cycles of length 3
     septri_info = []
-    for P in tri_graphs:
+    for P in permgraphs:
         all_cliques = list(nx.enumerate_all_cliques(P))
         all_triangles = [sorted(i) for i in all_cliques if len(i) == 3]
         all_triangles = [list(triangle)

@@ -9,21 +9,26 @@ For more info:
 from operator import le
 from turtle import right
 import numpy as np
+
+
 class Point:
-    def __init__(self,x: float,y: float) -> None:
+    def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+
 
 def display(p: Point, q: Point) -> str:
 
     return "{(" + str(p.x) + ", " + str(p.y) + "), " + "(" + str(q.x) + ", " + str(q.y) + ")}"
 
+
 def eq(p: Point, q: Point) -> bool:
 
-    if((p.x == q.x) and (p.y == q.y)):
+    if ((p.x == q.x) and (p.y == q.y)):
         return True
-    
+
     return False
+
 
 def sort_by_x(points: list) -> list:
     """
@@ -38,7 +43,8 @@ def sort_by_x(points: list) -> list:
     # Basis of sorting is x coordinate of left endpoint
     # So key is the 0th element of each tuple in the list
 
-    return sorted(points, key= lambda p: p.x)
+    return sorted(points, key=lambda p: p.x)
+
 
 def orientation(p1: Point, p2: Point, p3: Point) -> int:
     """
@@ -63,17 +69,18 @@ def orientation(p1: Point, p2: Point, p3: Point) -> int:
     """
     val = ((p2.y - p1.y) * (p3.x - p2.x)) - ((p2.x - p1.x) * (p3.y - p2.y))
     if (val > 0):
-         
+
         # Clockwise orientation
         return 1
     elif (val < 0):
-         
+
         # Counterclockwise orientation
         return 2
     else:
-         
+
         # Collinear orientation
         return 0
+
 
 def onSegment(p1: Point, p2: Point, p3: Point) -> bool:
     """
@@ -87,12 +94,13 @@ def onSegment(p1: Point, p2: Point, p3: Point) -> bool:
     Returns:
         bool: Returns true if p2 lies on the segment p1p3 else returns false
     """
-    if ( (p2.x <= max(p1.x, p3.x)) and (p2.x >= min(p1.x, p3.x)) and
-           (p2.y <= max(p1.y, p3.y)) and (p2.y >= min(p1.y, p3.y))):
+    if ((p2.x <= max(p1.x, p3.x)) and (p2.x >= min(p1.x, p3.x)) and
+            (p2.y <= max(p1.y, p3.y)) and (p2.y >= min(p1.y, p3.y))):
         return True
     return False
 
-def doIntersect_endpts(p1: Point,q1: Point,p2: Point,q2: Point) -> bool:
+
+def doIntersect_endpts(p1: Point, q1: Point, p2: Point, q2: Point) -> bool:
     """
     (Note: In this function if one of the wnspoints of line1 is same as an endpoint of line2 we don't consider it as intersection)
     For intersection of two lines line1 having endpoints p1, q1 and line2 having endpoints p2, q2 we have the following cases:
@@ -114,43 +122,44 @@ def doIntersect_endpts(p1: Point,q1: Point,p2: Point,q2: Point) -> bool:
     Returns:
         bool: Returns True if line1 and line2 intersect 
     """
-     
+
     # Find the 4 orientations required for
     # the general and special cases
     o1 = orientation(p1, q1, p2)
     o2 = orientation(p1, q1, q2)
     o3 = orientation(p2, q2, p1)
     o4 = orientation(p2, q2, q1)
- 
+
     # Any two of the endpoints are equal
-    if((eq(p1,p2)) or (eq(p1,q2)) or (eq(q1,p2)) or (eq(q1,q2))):
+    if ((eq(p1, p2)) or (eq(p1, q2)) or (eq(q1, p2)) or (eq(q1, q2))):
         return False
-    
+
     # All endpoints are distinct
-    else:    
+    else:
         # General case
         if ((o1 != o2) and (o3 != o4)):
             return True
-    
+
         # Special Cases
         # p1 , q1 and p2 are collinear and p2 lies on segment p1q1
         if ((o1 == 0) and onSegment(p1, p2, q1)):
             return True
-    
+
         # p1 , q1 and q2 are collinear and q2 lies on segment p1q1
         if ((o2 == 0) and onSegment(p1, q2, q1)):
             return True
-    
+
         # p2 , q2 and p1 are collinear and p1 lies on segment p2q2
         if ((o3 == 0) and onSegment(p2, p1, q2)):
             return True
-    
+
         # p2 , q2 and q1 are collinear and q1 lies on segment p2q2
         if ((o4 == 0) and onSegment(p2, q1, q2)):
             return True
-    
+
         # If none of the cases
         return False
+
 
 def get_points_edges(x_list: list, y_list: list, adj: np.array) -> list and dict:
     """
@@ -169,23 +178,23 @@ def get_points_edges(x_list: list, y_list: list, adj: np.array) -> list and dict
 
     # Creates list of points by converting it to class objects
     for i in range(len(x_list)):
-        points.append(Point(x_list[i],y_list[i]))
-    
+        points.append(Point(x_list[i], y_list[i]))
+
     edges = dict()
 
     # If two vertices are adjacent, we assign the edge an id (key of dict)
     # and denote edge by list of point objects [left_pt, right_point] (val of the dict)
     key_var = 0
     for i in range(len(x_list)):
-        for j in range(i+1,len(y_list)):
+        for j in range(i+1, len(y_list)):
 
             if (adj[i][j] == 1):
-                if(points[i].x <= points[j].x):
+                if (points[i].x <= points[j].x):
                     edges[key_var] = [points[i], points[j]]
                 else:
                     edges[key_var] = [points[j], points[i]]
                 key_var += 1
-    
+
     return points, edges
 
 
@@ -216,7 +225,7 @@ def check_intersection(x_coord: list, y_coord: list, A: np.array) -> bool:
     traversed = []
 
     # We have a sorted list of points for traversal
-    sorted_by_x = sorted(points, key= lambda p : p.x)
+    sorted_by_x = sorted(points, key=lambda p: p.x)
 
     # indices_p gives us the edge labels which contain the point x
     indices_p = [i for i, x in enumerate(left_pts) if x == sorted_by_x[0]]
@@ -229,7 +238,7 @@ def check_intersection(x_coord: list, y_coord: list, A: np.array) -> bool:
     for p in sorted_by_x:
         # print("point ", display(p,p))
         # If it is left endpoint of an edge, add it edge id to traversed
-        if(p in left_pts):
+        if (p in left_pts):
             # Get all indices where p is the left endpoint
             indices_p = [i for i, x in enumerate(left_pts) if x == p]
             # print("indices_p: ", indices_p)
@@ -240,103 +249,115 @@ def check_intersection(x_coord: list, y_coord: list, A: np.array) -> bool:
             # print("traversed: ", traversed)
             # We don't need to check if edges added together intersect
             # since they have a common endpoint
-            if(len(traversed) > len(indices_p)):
+            if (len(traversed) > len(indices_p)):
 
                 for i in indices_p:
                     # for j in range(len(traversed) - len(indices_p) - check_count, len(traversed) - len(indices_p)):
                     for j in range(0, len(traversed) - len(indices_p)):
-                    
+
                         t = traversed[j]
                         # print(t)
                         # print(edges.get(i)[0], edges.get(i)[1], edges.get(t)[0], edges.get(t)[1])
-                        if(doIntersect_endpts(edges.get(i)[0], edges.get(i)[1], edges.get(t)[0], edges.get(t)[1])):
+                        if (doIntersect_endpts(edges.get(i)[0], edges.get(i)[1], edges.get(t)[0], edges.get(t)[1])):
                             return True
                         else:
                             pass
-            
+
             # Since edges of first point have been added
             else:
                 pass
 
             check_count = len(indices_p)
-        
+
         # If it is right endpoint of an edge, the corresponding edge id is removed from traversed
         prev_index = 0
         while ((p in right_pts) and (right_pts.index(p) in traversed)):
             # print(prev_index, right_pts.index(p, prev_index))
-            indices = [i for i,x in enumerate(right_pts) if x == p]
+            indices = [i for i, x in enumerate(right_pts) if x == p]
             for i in indices:
                 traversed.remove(i)
-                print("Removed index: " + str(i))
-            if((len(traversed) == 0) and (p == sorted_by_x[-1])):
+                # print("Removed index: " + str(i))
+            if ((len(traversed) == 0) and (p == sorted_by_x[-1])):
                 return False
             # prev_index = right_pts.index(p, prev_index)
-            print("here in removal")
-            
+            # print("here in removal")
+
         # if((p in right_pts) and (right_pts.index(p) in traversed)):
         #     traversed.remove(right_pts.index(p))
         #     if((len(traversed) == 0) and (p == sorted_by_x[-1])):
         #         return False
-        
-        if((len(traversed) == 0) and (p == sorted_by_x[-1])):
-                return False
+
+        if ((len(traversed) == 0) and (p == sorted_by_x[-1])):
+            return False
+
 
 def main():
     def test_orientation() -> None:
         p1 = Point(0, 0)
         p2 = Point(4, 4)
         p3 = Point(1, 2)
-        
+
         o = orientation(p1, p2, p3)
-        
+
         if (o == 0):
-            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" + str(p2.x) + ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): Linear")
+            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" +
+                  str(p2.x) + ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): Linear")
         elif (o == 1):
-            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" + str(p2.x) + ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): Clockwise")
+            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" +
+                  str(p2.x) + ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): Clockwise")
         else:
-            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" + str(p2.x) + ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): CounterClockwise")
-        
+            print("Orientation of the points: (" + str(p1.x) + ", " + str(p1.y) + "), (" + str(p2.x) +
+                  ", " + str(p2.y) + "), (" + str(p3.x) + ", " + str(p3.y) + "): CounterClockwise")
+
     def test_doIntersect_endpts() -> None:
         p1 = Point(1, 1)
         q1 = Point(10, 1)
         p2 = Point(1, 2)
         q2 = Point(10, 2)
-        
+
         if doIntersect_endpts(p1, q1, p2, q2):
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: Yes")
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: Yes")
         else:
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: No")
-        
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: No")
+
         p1 = Point(10, 0)
         q1 = Point(0, 10)
         p2 = Point(0, 0)
-        q2 = Point(10,10)
-        
+        q2 = Point(10, 10)
+
         if doIntersect_endpts(p1, q1, p2, q2):
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: Yes")
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: Yes")
         else:
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: No")
-        
-        p1 = Point(-5,-5)
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: No")
+
+        p1 = Point(-5, -5)
         q1 = Point(0, 0)
         p2 = Point(1, 1)
         q2 = Point(10, 10)
-        
+
         if doIntersect_endpts(p1, q1, p2, q2):
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: Yes")
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: Yes")
         else:
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: No")
-        
-        p1 = Point(-5,-5)
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: No")
+
+        p1 = Point(-5, -5)
         q1 = Point(0, 0)
         p2 = Point(0, 0)
         q2 = Point(10, 11)
-        
+
         if doIntersect_endpts(p1, q1, p2, q2):
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: Yes")
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: Yes")
         else:
-            print("Does the lines l1 joining " + display(p1,q1) + "and l2 joining " + display(p2,q2) + "?: No")
-    
+            print("Does the lines l1 joining " + display(p1, q1) +
+                  "and l2 joining " + display(p2, q2) + "?: No")
+
     def test_check_intersection():
 
         # # Example 1 (Expected output: Not planar)
@@ -347,7 +368,7 @@ def main():
         #     print("Your graph is not planar")
         # else:
         #     print("Your graph is planar")
-        
+
         # # Example 2 (Expected output: Planar)
         # x2 = np.array([0, 5, 20, 5])
         # y2 = np.array([10, 0, 10, 20])
@@ -365,7 +386,7 @@ def main():
         #     print("Your graph is not planar")
         # else:
         #     print("Your graph is planar")
-        
+
         # # Example 4 (Expected output: Not planar)
         # x4 = np.array([0, 2, 5, 9, 5, 2])
         # y4 = np.array([10, 0, 0, 10, 20, 20])
@@ -374,7 +395,7 @@ def main():
         #     print("Your graph is not planar")
         # else:
         #     print("Your graph is planar")
-        
+
         # # Example 5 (Expected output: Non-planar)
         # x5 = np.array([244,235,352,359])
         # y5 = np.array([253,122,105,324])
@@ -383,7 +404,7 @@ def main():
         #     print("Your graph is not planar")
         # else:
         #     print("Your graph is planar")
-        
+
         # # Example 6 (Expected output: Non-planar)
         # x6 = np.array([0,10,15,18,25,35,45])
         # y6 = np.array([10,15,0,7,13,2,10])
@@ -398,7 +419,7 @@ def main():
         #     print("Your graph is not planar")
         # else:
         #     print("Your graph is planar")
-        
+
         # # Example 7 (Expected output: Non-planar)
         # x7 = np.array([0,5,10,5,15])
         # y7 = np.array([10,0,10,15,5])
@@ -413,8 +434,8 @@ def main():
         #     print("Your graph is planar")
 
         # Example 8 (Expected output: Non-planar)
-        x8 = np.array([2,4,5,4,2,1,2,4])
-        y8 = np.array([4,4,2,0,0,2,2,2])
+        x8 = np.array([2, 4, 5, 4, 2, 1, 2, 4])
+        y8 = np.array([4, 4, 2, 0, 0, 2, 2, 2])
         A8 = np.array([[0, 1, 0, 0, 0, 1, 0, 1],
                        [1, 0, 1, 0, 0, 0, 1, 0],
                        [0, 1, 0, 1, 0, 0, 0, 0],
@@ -423,14 +444,13 @@ def main():
                        [1, 0, 0, 0, 1, 0, 0, 0],
                        [0, 1, 0, 0, 0, 0, 0, 0],
                        [1, 0, 0, 0, 0, 0, 0, 0]])
-        
-        if(check_intersection(x8,y8,A8)):
+
+        if (check_intersection(x8, y8, A8)):
             print("Your graph is not planar")
         else:
             print("Your graph is planar")
 
     test_check_intersection()
-    
 
 
 if __name__ == "__main__":

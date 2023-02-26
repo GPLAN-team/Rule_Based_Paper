@@ -281,12 +281,12 @@ class InputGraph:
 
             [boolean, ver_list, hor_list] = bc.block_checker(
                 encoded_matrix_deepcopy, symm_rooms)
-            print([boolean, ver_list, hor_list])
+            # print([boolean, ver_list, hor_list])
             if boolean:
                 [width, height, hor_dgph, status] = fpts.floorplan_to_st(
                     encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar,
                     max_ar, plot_width, plot_height)
-                print([width, height, hor_dgph, status])
+                # print([width, height, hor_dgph, status])
             else:
                 status = False
             if (status == False):
