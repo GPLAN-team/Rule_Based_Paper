@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from FastPLAN import FastPLAN
 from input import Input
@@ -1013,7 +1014,18 @@ class App:
         g = nx.Graph()
         remove_corridor = False
         edge_set = edges
-        corridor_thickness = 0.3
+
+        width = np.amax(graph_data['room_width'])
+        height = np.amax(graph_data['room_height'])
+        if (width == 0):
+            width = 1
+        if (height == 0):
+            height = 1
+        if (width < height):
+            width = height
+        scale = 150*(math.exp(-0.30*width+math.log(0.8)) + 0.1)
+
+        corridor_thickness = scale
 
         for x in edge_set:
             g.add_edge(x[0], x[1])
