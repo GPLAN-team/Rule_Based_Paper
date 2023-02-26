@@ -16,6 +16,7 @@ import Temp_Code.gengraphs as gengraphs
 import source.inputgraph as inputgraph
 from pythongui import dimensiongui as dimgui
 import circulation as cir
+import source.lettershape.lshape.Lshaped as Lshaped
 
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
@@ -176,18 +177,22 @@ class App:
         self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15,
                                     command=self.run_Irreg_Button_click)
         self.run_button.grid(row=6, column=0, padx=10, pady=10)
+        
+        self.run_button = tk.Button(self.modify_frame, text="L-Shaped floorplan", font=helv15,
+                                    command=self.run_Lshaped_Button_click)
+        self.run_button.grid(row=7, column=0, padx=10, pady=10)
 
         self.prev_btn = tk.Button(
             self.modify_frame, text="Previous", font=helv15, command=self.handle_prev_btn)
-        self.prev_btn.grid(row=7, column=0, padx=10, pady=10)
+        self.prev_btn.grid(row=8, column=0, padx=10, pady=10)
 
         self.next_btn = tk.Button(
             self.modify_frame, text="Next", font=helv15, command=self.handle_next_btn)
-        self.next_btn.grid(row=8, column=0, padx=10, pady=10)
+        self.next_btn.grid(row=9, column=0, padx=10, pady=10)
 
         self.exit_btn = tk.Button(
             self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
-        self.exit_btn.grid(row=9, column=0, padx=11, pady=10)
+        self.exit_btn.grid(row=10, column=0, padx=11, pady=10)
 
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
         #                              command=self.run_Circ_Button_click)
@@ -759,6 +764,133 @@ class App:
 
         print(f"Number of Floor Plans : {len(self.graph_objs)}")
 
+        self.handle_next_btn()
+
+    def run_Lshaped_Button_click(self):
+        print("[LOG] L-Shaped Floorplans Button Clicked")
+
+        self.graph_objs = []
+
+        print(f"Room List is {list(self.input.rooms.values())}")
+        print(f"Doors List is {self.input.adjacencies}")
+        print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
+        self.create_inputgraph_json()
+        # graphs = runner(False)
+        self.interior_rooms.sort()
+        print("Exterior rooms: ", self.exterior_rooms,
+              "  Interior rooms: ", self.interior_rooms)
+        self.graphs, coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+        graphs = self.graphs
+        self.input.add_rooms_from(self.room_mapping)
+        self.input.add_doors_from(adjacencies_modified)
+        self.input.add_non_adjacencies_from(non_adjacencies_modified)
+
+        min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
+        self.dim_params = [min_width, max_width, min_height, max_height,
+                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+
+        for i in range(len(self.graphs)):
+            graph = inputgraph.InputGraph(
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+            
+            Lshaped.LShapedFloorplan(graph, gclass.app.nodes_data)
+            
+            graph.rel_matrix_list.append(graph.matrix) #All rels are in it. Currently we have only 1.
+                    
+            # Since multiple rfp are generated before calling single_floorplan, all the parameters need to be
+            # converted list of lists
+            temp_lst = []
+            temp_lst.append(graph.extranodes)
+            graph.extranodes = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.mergednodes)
+            graph.mergednodes = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.irreg_nodes1)
+            graph.irreg_nodes1 = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.room_x)
+            graph.room_x = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.room_y)
+            graph.room_y = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.room_width)
+            graph.room_width = temp_lst
+            temp_lst = []
+            temp_lst.append(graph.room_height)
+            graph.room_height = temp_lst
+            
+            graph.nodecnt -= 4 # Because Lshaped was counting NESW as well
+                    
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
+                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            print(graph.floorplan_exist)
+            if (graph.floorplan_exist):
+                graph_data = {
+                    'room_x': graph.room_x,
+                    'room_y': graph.room_y,
+                    'room_width': graph.room_width,
+                    'room_height': graph.room_height,
+                    'area': graph.area,
+                    'extranodes': graph.extranodes,
+                    'mergednodes': graph.mergednodes,
+                    'irreg_nodes': graph.irreg_nodes1
+                }
+                self.graph_objs.append(graph_data)
+                self.floorplan_graphs.append(self.graphs[i])
+
+        print("[LOG] Dimensioned selected")
+
+        # print(graphs)
+        my_plot(graphs)
+        plt.show()
+        # nodecnt = len(graphs[0].nodes)
+        print("[LOG] Now will wait for dimensions input")
+
+        # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+        #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+        # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+        #     old_dims, nodecnt)
+
+        # dim_graphdata = dimensioning_part(graphs, coord_list)
+        print("[LOG] Dimensioned floorplan object\n")
+        # print(dim_graphdata)
+
+        print(f"{len(graphs)} output_graphs = {str(graphs)}")
+
+        # self.draw_one_rfp(dim_graphdata)
+
+        # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+        # print(f"number of rfps = {len(output_rfps)}")
+        # self.output_rfps = output_rfps
+
+        self.output_found = True
+        self.curr_rfp = -1
+
+        # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+
+        # print(f"one rfp = {output_rfps[0]}")
+
+        # else:
+        #     # print(graphs)
+        #     my_plot(graphs)
+        #     plt.show()
+
+        #     print(f"{len(graphs)} output_graphs = {str(graphs)}")
+
+        #     # output_rfps = multigraph_to_rfp(graphs, rectangular=True)
+        #     # print(f"number of rfps = {len(output_rfps)}")
+        #     # self.output_rfps = output_rfps
+
+        #     self.output_found = True
+        #     self.curr_rfp = -1
+
+        #     # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
+
+        #     # print(f"one rfp = {output_rfps[0]}")
+        print(f"Number of Floor Plans : {len(self.graph_objs)}")
         self.handle_next_btn()
 
     # def run_Circ_Button_click(self):
