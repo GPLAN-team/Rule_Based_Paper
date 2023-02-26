@@ -218,8 +218,8 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     # print("AREA: ", graph_data['area'])
     for i in range(graph_data['room_x'].shape[0]):
         try:
-            dat = graph_data['area'][i].split(':', 2)
-            area = dat[2]
+            dat = graph_data['area'][i].split(':')
+            area = dat[-1]
         except:
             area = graph_data['area'][i]
         if i in graph_data['extranodes']:
