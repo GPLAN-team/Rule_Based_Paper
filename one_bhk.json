@@ -1,5 +1,5 @@
 {
-    "rooms": ["Living Room", "Bed Room 1", "Kitchen", "WC"],
+    "rooms": ["Living", "Bed 1", "Kitchen", "WC 1"],
     "adjacency_constraints": [
     ]
 }

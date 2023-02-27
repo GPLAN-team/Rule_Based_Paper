@@ -494,7 +494,7 @@ class App:
         plot_width = -1
         plot_height = -1
         for i, room in self.input.rooms.items():
-            if (room == "Living Room"):
+            if (room == "Living"):
                 min_width.append(9)
                 min_height.append(11)
                 max_width.append(14)
@@ -508,14 +508,14 @@ class App:
                 max_height.append(13)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
-            elif (room == "Bed Room 2"):
+            elif (room == "Bed 2"):
                 min_width.append(7)
                 min_height.append(7)
                 max_width.append(12)
                 max_height.append(11)
                 min_aspect.append(0.5)
                 max_aspect.append(2)
-            elif (room == "Bed Room 1"):
+            elif (room == "Bed 1"):
                 min_width.append(8)
                 min_height.append(9)
                 max_width.append(13)
@@ -536,14 +536,14 @@ class App:
                 max_height.append(7)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
-            elif (room == "Store Room"):
+            elif (room == "Store"):
                 min_width.append(4)
                 min_height.append(4)
                 max_width.append(8)
                 max_height.append(8)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
-            elif (room == "Dining Room"):
+            elif (room == "Dining"):
                 min_width.append(5)
                 min_height.append(5)
                 max_width.append(9)
@@ -1177,7 +1177,7 @@ class App:
         rfp = cir.RFP(g, rooms)
 
         i = self.room_mapping.index('WC 1')
-        entry0 = self.room_mapping.index('Living Room')
+        entry0 = self.room_mapping.index('Living')
         entry1 = self.room_mapping.index('Kitchen')
 
         circulation_obj = cir.circulation(g, corridor_thickness, rfp)
@@ -1405,7 +1405,7 @@ class App:
             each_room_label = tk.Label(frame, text=each_room)
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
-            if (each_room == "Dining Room" or each_room == "Store Room"):
+            if (each_room == "Dining" or each_room == "Store"):
                 each_remove_room_btn = tk.Button(
                     frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
                 each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
