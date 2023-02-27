@@ -1161,7 +1161,7 @@ class App:
 
         scale = self.grid_scale
 
-        corridor_thickness = 0.3
+        corridor_thickness = 1.0
 
         for x in edge_set:
             g.add_edge(x[0], x[1])
