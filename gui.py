@@ -16,6 +16,7 @@ import Temp_Code.gengraphs as gengraphs
 import source.inputgraph as inputgraph
 from pythongui import dimensiongui as dimgui
 import circulation as cir
+from os.path import exists
 import source.lettershape.lshape.Lshaped as Lshaped
 
 helv15 = ("Helvetica", 15, "bold")
@@ -177,7 +178,7 @@ class App:
         self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15,
                                     command=self.run_Irreg_Button_click)
         self.run_button.grid(row=6, column=0, padx=10, pady=10)
-        
+
         self.run_button = tk.Button(self.modify_frame, text="L-Shaped floorplan", font=helv15,
                                     command=self.run_Lshaped_Button_click)
         self.run_button.grid(row=7, column=0, padx=10, pady=10)
@@ -568,7 +569,38 @@ class App:
             min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
+    def filename(self):
+        s = ""
+        t = ""
+        if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
+            if (len(self.interior_rooms) == 2):
+                s = "Dint"
+                t = "Sint"
+            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+                s = "Dint"
+                t = "S"
+            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+                s = "D"
+                t = "Sint"
+            else:
+                s = "D"
+                t = "S"
+        elif ("Dining" in self.input.rooms.values()):
+            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+                s = "Dint"
+            else:
+                s = "D"
+        elif ("Store" in self.input.rooms.values()):
+            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+                t = "Sint"
+            else:
+                t = "S"
+        self.filename = f"graphs/{s}{t}.pkl"
+
     def run_Rect_Button_click(self):
+        self.filename()
+        if (not (exists(self.filename))):
+            print("File exists")
         print("[LOG] Rectangular Floorplans Button Clicked")
 
         self.graph_objs = []
@@ -793,11 +825,12 @@ class App:
         for i in range(len(self.graphs)):
             graph = inputgraph.InputGraph(
                 self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
-            
+
             Lshaped.LShapedFloorplan(graph, gclass.app.nodes_data)
-            
-            graph.rel_matrix_list.append(graph.matrix) #All rels are in it. Currently we have only 1.
-                    
+
+            # All rels are in it. Currently we have only 1.
+            graph.rel_matrix_list.append(graph.matrix)
+
             # Since multiple rfp are generated before calling single_floorplan, all the parameters need to be
             # converted list of lists
             temp_lst = []
@@ -821,9 +854,9 @@ class App:
             temp_lst = []
             temp_lst.append(graph.room_height)
             graph.room_height = temp_lst
-            
-            graph.nodecnt -= 4 # Because Lshaped was counting NESW as well
-                    
+
+            graph.nodecnt -= 4  # Because Lshaped was counting NESW as well
+
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
@@ -1159,7 +1192,7 @@ class App:
         remove_corridor = False
         edge_set = edges
 
-        scale = self.grid_scale
+        # scale = self.grid_scale
 
         corridor_thickness = .7
 
@@ -1368,27 +1401,27 @@ class App:
         check = "Checked" if self.circCheckVar.get() == 1 else "Unchecked"
         print("[LOG] Circ checkbox ", check)
         # print(f"SELF.GRAPH_OBJ Length: {len(self.graph_objs)}\n")
-        try:
-            feasible_dim = 0
-            print(f"OLD GRAPH DATA: {self.graph_objs[self.curr_rfp]}")
-            (new_graph_data, success) = self.call_circulation(
-                self.graph_objs[self.curr_rfp], self.floorplan_graphs[self.curr_rfp].edges, True, self.dim_constraints, False)
-            print(f"NEW GRAPH DATA: {new_graph_data}")
-            if (success == False):
-                tk.messagebox.showwarning(
-                    "The End", "Success False, Circulation not possible")
-                return
-            self.draw_one_rfp(new_graph_data)
-
-            feasible_dim = 1
-            # break
-
-            if (feasible_dim == 0):
-                tk.messagebox.showerror(
-                    "Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
-        except:
+        # try:
+        feasible_dim = 0
+        print(f"OLD GRAPH DATA: {self.graph_objs[self.curr_rfp]}")
+        (new_graph_data, success) = self.call_circulation(
+            self.graph_objs[self.curr_rfp], self.floorplan_graphs[self.curr_rfp].edges, True, self.dim_constraints, False)
+        print(f"NEW GRAPH DATA: {new_graph_data}")
+        if (success == False):
             tk.messagebox.showwarning(
-                "The End", "Circulation not possible")
+                "The End", "Success False, Circulation not possible")
+            return
+        self.draw_one_rfp(new_graph_data)
+
+        feasible_dim = 1
+        # break
+
+        if (feasible_dim == 0):
+            tk.messagebox.showerror(
+                "Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
+        # except:
+        #     tk.messagebox.showwarning(
+        #         "The End", "Circulation not possible")
 
     def recall_room_list_frame(self, frame):
 

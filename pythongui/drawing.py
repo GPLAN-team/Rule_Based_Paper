@@ -149,11 +149,20 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     # print(f"TOP Y : {top_y} , BOTTOM Y : {bottom_y}\n")
     # scale = 450/(top_y - bottom_y)
 
-    area_sum = (float)(sum(list((graph_data['area']))))
-    scale = pow((300*400)/area_sum, 1/2)
+    # area_sum = (sum(list((graph_data['area']))))
+    area_list = []
+    for i in range(graph_data['room_x'].shape[0]):
+        try:
+            dat = graph_data['area'][i].split(':')
+            area_list.append(float(dat[-1]))
+        except:
+            area_list.append(graph_data['area'][i])
 
-    # print(scale)
+    area_sum = sum(area_list)
+    scale = pow((300*400)/area_sum, 1/2)
+    print(f"\n{graph_data['area']}")
     # scale = 150*(math.exp(-0.30*height+math.log(0.8)) + 0.1)
+    print(scale)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
     origin = {'x': origin - 400, 'y': -300}
