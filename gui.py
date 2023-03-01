@@ -1194,7 +1194,7 @@ class App:
 
         # scale = self.grid_scale
 
-        corridor_thickness = .7
+        corridor_thickness = 1
 
         for x in edge_set:
             g.add_edge(x[0], x[1])
@@ -1401,27 +1401,27 @@ class App:
         check = "Checked" if self.circCheckVar.get() == 1 else "Unchecked"
         print("[LOG] Circ checkbox ", check)
         # print(f"SELF.GRAPH_OBJ Length: {len(self.graph_objs)}\n")
-        # try:
-        feasible_dim = 0
-        print(f"OLD GRAPH DATA: {self.graph_objs[self.curr_rfp]}")
-        (new_graph_data, success) = self.call_circulation(
-            self.graph_objs[self.curr_rfp], self.floorplan_graphs[self.curr_rfp].edges, True, self.dim_constraints, False)
-        print(f"NEW GRAPH DATA: {new_graph_data}")
-        if (success == False):
+        try:
+            feasible_dim = 0
+            print(f"OLD GRAPH DATA: {self.graph_objs[self.curr_rfp]}")
+            (new_graph_data, success) = self.call_circulation(
+                self.graph_objs[self.curr_rfp], self.floorplan_graphs[self.curr_rfp].edges, True, self.dim_constraints, False)
+            print(f"NEW GRAPH DATA: {new_graph_data}")
+            if (success == False):
+                tk.messagebox.showwarning(
+                    "The End", "Success False, Circulation not possible")
+                return
+            self.draw_one_rfp(new_graph_data)
+
+            feasible_dim = 1
+            # break
+
+            if (feasible_dim == 0):
+                tk.messagebox.showerror(
+                    "Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
+        except:
             tk.messagebox.showwarning(
-                "The End", "Success False, Circulation not possible")
-            return
-        self.draw_one_rfp(new_graph_data)
-
-        feasible_dim = 1
-        # break
-
-        if (feasible_dim == 0):
-            tk.messagebox.showerror(
-                "Error", "ERROR!! NO CIRCULATION POSSIBLE FOR GIVEN DIMENSIONS")
-        # except:
-        #     tk.messagebox.showwarning(
-        #         "The End", "Circulation not possible")
+                "The End", "Circulation not possible")
 
     def recall_room_list_frame(self, frame):
 
