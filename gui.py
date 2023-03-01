@@ -505,7 +505,7 @@ class App:
             elif (room == "Kitchen"):
                 min_width.append(6)
                 min_height.append(8)
-                max_width.append(14)
+                max_width.append(10)
                 max_height.append(13)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
@@ -514,14 +514,14 @@ class App:
                 min_height.append(7)
                 max_width.append(12)
                 max_height.append(11)
-                min_aspect.append(0.5)
-                max_aspect.append(2)
+                min_aspect.append(0.7)
+                max_aspect.append(2.2)
             elif (room == "Bed 1"):
                 min_width.append(8)
                 min_height.append(9)
                 max_width.append(13)
                 max_height.append(14)
-                min_aspect.append(1)
+                min_aspect.append(.7)
                 max_aspect.append(2.2)
             elif (room == "WC 1"):
                 min_width.append(6)
@@ -546,16 +546,16 @@ class App:
                 max_aspect.append(2.2)
             elif (room == "Dining"):
                 min_width.append(5)
-                min_height.append(5)
+                min_height.append(4)
                 max_width.append(9)
-                max_height.append(9)
+                max_height.append(8)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
             elif (room == "Office"):
                 min_width.append(5)
-                min_height.append(5)
+                min_height.append(4)
                 max_width.append(9)
-                max_height.append(9)
+                max_height.append(8)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
             else:
