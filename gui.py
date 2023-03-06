@@ -143,6 +143,10 @@ class App:
 
         self.circ_Button.grid(row=0, column=5, padx=10, pady=10)
 
+        self.showGraph_Button = tk.Button(self.custom_rfp_choice_frame, text="Show Current Graph", font=helv15,
+                                          command=self.showGraph_Button_click)
+        self.showGraph_Button.grid(row=0, column=6, padx=10, pady=10)
+
     # def properties_section(self):
         # self.properties_frame = tk.Frame(self.root)
         # self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
@@ -597,6 +601,24 @@ class App:
                 t = "S"
         self.filename = f"graphs/{s}{t}.pkl"
 
+    def showGraph_Button_click(self):
+        print("Showing Graph of current floor plan")
+        # print(len(self.currentGraph))
+        self.my_plot_current(self.floorplan_graphs[self.curr_rfp])
+        plt.show()
+
+    def my_plot_current(self, current, figsize=14, dotsize=20):
+        num = 1
+        fig = plt.figure()
+        k = int(np.sqrt(num))
+        i = 1
+        # making graph
+        plt.subplot(k+1, k+1, i+1)
+        gnx = nx.Graph(current)
+        nx.draw_kamada_kawai(
+            gnx, node_size=100, with_labels=True, node_color='orange', font_size=10)
+        print('.', end='')
+
     def run_Rect_Button_click(self):
         self.filename()
         if (not (exists(self.filename))):
@@ -642,6 +664,7 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
+
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
 
@@ -739,6 +762,8 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
+                print(
+                    f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
 

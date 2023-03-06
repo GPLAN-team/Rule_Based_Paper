@@ -156,7 +156,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             dat = graph_data['area'][i].split(':')
             area_list.append(float(dat[-1]))
         except:
-            area_list.append(graph_data['area'][i])
+            try:
+                area_list.append(graph_data['area'][i])
+            except:
+                continue
 
     area_sum = sum(area_list)
     scale = pow((300*400)/area_sum, 1/2)
@@ -234,7 +237,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             dat = graph_data['area'][i].split(':')
             area = dat[-1]
         except:
-            area = graph_data['area'][i]
+            try:
+                area_list.append(graph_data['area'][i])
+            except:
+                continue
         if i in graph_data['extranodes']:
             continue
         pen.color('black')
@@ -246,8 +252,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
             pen.color('darkred')
             pen.setposition(((2 * graph_data['room_x'][i]) * scale / 2) + origin['x'] + 5,
                             ((2 * graph_data['room_y'][i] + graph_data['room_height'][i]) * scale / 2) + origin['y']-20)
-
-            pen.write(f"({str(area)})", font=("Arial", 14, "normal"))
+            try:
+                pen.write(f"({str(area)})", font=("Arial", 14, "normal"))
+            except:
+                continue
         if (i in graph_data['mergednodes'] and mode == 2):
             pen.penup()
 
