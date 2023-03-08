@@ -5,10 +5,8 @@
         "WC 2",
         "Bed 2",
         "Kitchen",
-        "Dining",
         "Living",
-        "Store",
-        "Office"
+        "Store"
     ],
     "edges": [
         [
@@ -22,10 +20,6 @@
         [
             5,
             6
-        ],
-        [
-            8,
-            7
         ]
     ]
 }

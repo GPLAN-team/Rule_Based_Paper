@@ -19,6 +19,10 @@ import circulation as cir
 from os.path import exists
 import source.lettershape.lshape.Lshaped as Lshaped
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
 colors = [
@@ -91,6 +95,7 @@ class App:
         self.grid_coord = []
         self.circ_val = 0
         self.floorplan_graphs = []
+        self.current_graphs = []
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -601,23 +606,98 @@ class App:
                 t = "S"
         self.filename = f"graphs/{s}{t}.pkl"
 
+    # def showGraph_Button_click(self):
+    #     print("Showing Graph of current floor plan")
+    #     # print(len(self.currentGraph))
+    #     self.my_plot_current(self.floorplan_graphs[self.curr_rfp])
+    #     plt.show()
+
+    # def my_plot_current(self, current, figsize=14, dotsize=20):
+    #     num = 1
+    #     fig = plt.figure()
+    #     k = int(np.sqrt(num))
+    #     i = 1
+    #     # making graph
+    #     plt.subplot(k+1, k+1, i+1)
+    #     gnx = nx.Graph(current)
+    #     nx.draw_kamada_kawai(
+    #         gnx, node_size=100, with_labels=True, node_color='orange', font_size=10)
+    #     print('.', end='')
+
+
     def showGraph_Button_click(self):
         print("Showing Graph of current floor plan")
-        # print(len(self.currentGraph))
-        self.my_plot_current(self.floorplan_graphs[self.curr_rfp])
-        plt.show()
+        # create a new window
+        graph_window = tk.Toplevel()
+        graph_window.title("Floor Plan Graph")
 
-    def my_plot_current(self, current, figsize=14, dotsize=20):
-        num = 1
-        fig = plt.figure()
-        k = int(np.sqrt(num))
-        i = 1
-        # making graph
-        plt.subplot(k+1, k+1, i+1)
-        gnx = nx.Graph(current)
+        # create a matplotlib figure and plot the graph
+        fig = Figure(figsize=(6, 4), dpi=100)
+        canvas = FigureCanvasTkAgg(fig, master=graph_window)
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        ax = fig.add_subplot(111)
+
+        # create the initial graph
+        self.draw_graph(ax)
+
+        # bind the edge click event to a callback function
+        canvas.mpl_connect('button_press_event', lambda event: self.on_edge_click(event, ax, graph_window))
+
+        # add a button to close the window
+        button = tk.Button(master=graph_window, text="Close", command=graph_window.destroy)
+        button.pack(side=tk.BOTTOM)
+
+    def draw_graph(self, ax):
+        gnx = nx.Graph(self.current_graphs[self.curr_rfp])
         nx.draw_kamada_kawai(
-            gnx, node_size=100, with_labels=True, node_color='orange', font_size=10)
-        print('.', end='')
+            gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
+        ax.set_title("Floor Plan Graph")
+    
+
+    
+
+    def on_edge_click(self, event, ax, graph_window):
+        # get the mouse coordinates and the graph layout
+        x, y = event.xdata, event.ydata
+        pos = nx.kamada_kawai_layout(self.current_graphs[self.curr_rfp])
+
+        # compute the maximum spanning tree of the graph and get its edges in order of increasing weight
+        mst_edges = list(nx.algorithms.tree.mst.maximum_spanning_edges(self.current_graphs[self.curr_rfp], algorithm='kruskal', data=False))
+
+        # find the closest edge to the mouse click among the edges in the maximum spanning tree
+        min_dist = float('inf')
+        closest_edge = None
+        for u, v in mst_edges:
+            # iterate over each edge segment
+            for i in range(len(pos[u])-1):
+                p1 = np.array([pos[u][i], pos[u][i+1]])
+                p2 = np.array([pos[v][i], pos[v][i+1]])
+
+                # calculate the distance from the mouse click to the edge segment
+                dist = np.linalg.norm(np.cross(p2-p1, p1-np.array([x, y])))/np.linalg.norm(p2-p1)
+
+                if dist < min_dist:
+                    min_dist = dist
+                    closest_edge = (u, v)
+        def traingulated(G):
+            for cycle in nx.cycle_basis(G):
+                if len(cycle) >= 4 and not nx.chordal.is_chordal(nx.Graph(G.subgraph(cycle))):
+                    return False
+            return True
+
+        # remove the closest edge and redraw the graph
+        self.current_graphs[self.curr_rfp].remove_edge(*closest_edge)
+        is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
+        if is_triangulate:
+            ax.clear()
+            self.draw_graph(ax)
+            ax.set_title("Floor Plan Graph (click an edge to remove it)")
+
+        else:
+            # show an error message if the graph is not triangulated
+            print("Error: Graph is not triangulated.")
+
+        ax.figure.canvas.draw()
 
     def run_Rect_Button_click(self):
         self.filename()
@@ -666,6 +746,7 @@ class App:
                 }
 
                 self.graph_objs.append(graph_data)
+                self.current_graphs.append(self.graphs[i])
                 self.floorplan_graphs.append(self.graphs[i])
 
         print("[LOG] Dimensioned selected")
