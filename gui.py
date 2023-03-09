@@ -655,7 +655,7 @@ class App:
         button.pack(side=tk.BOTTOM)
 
     def draw_graph(self, ax):
-        gnx = nx.Graph(self.current_graphs[self.curr_rfp])
+        gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
         nx.draw_kamada_kawai(
             gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
         ax.set_title("Floor Plan Graph")
@@ -666,10 +666,10 @@ class App:
     # def on_edge_click(self, event, ax, graph_window):
     #     # get the mouse coordinates and the graph layout
     #     x, y = event.xdata, event.ydata
-    #     pos = nx.kamada_kawai_layout(self.current_graphs[self.curr_rfp])
+    #     pos = nx.kamada_kawai_layout(self.floorplan_graphs[self.curr_rfp])
 
     #     # compute the maximum spanning tree of the graph and get its edges in order of increasing weight
-    #     mst_edges = list(nx.algorithms.tree.mst.maximum_spanning_edges(self.current_graphs[self.curr_rfp], algorithm='kruskal', data=False))
+    #     mst_edges = list(nx.algorithms.tree.mst.maximum_spanning_edges(self.floorplan_graphs[self.curr_rfp], algorithm='kruskal', data=False))
 
     #     # find the closest edge to the mouse click among the edges in the maximum spanning tree
     #     min_dist = float('inf')
@@ -693,8 +693,8 @@ class App:
     #         return True
 
     #     # remove the closest edge and redraw the graph
-    #     self.current_graphs[self.curr_rfp].remove_edge(*closest_edge)
-    #     is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
+    #     self.floorplan_graphs[self.curr_rfp].remove_edge(*closest_edge)
+    #     is_triangulate = traingulated(nx.Graph(self.floorplan_graphs[self.curr_rfp]))
     #     if is_triangulate:
     #         ax.clear()
     #         self.draw_graph(ax)
@@ -709,12 +709,12 @@ class App:
     def on_edge_click(self, event, ax, graph_window):
         # get the mouse coordinates and the graph layout
         x, y = event.xdata, event.ydata
-        pos = nx.kamada_kawai_layout(self.current_graphs[self.curr_rfp])
+        pos = nx.kamada_kawai_layout(self.floorplan_graphs[self.curr_rfp])
 
         # find the clicked edge, if any
         clicked_edge = None
         min_dist = float('inf')
-        for u, v in self.current_graphs[self.curr_rfp].edges():
+        for u, v in self.floorplan_graphs[self.curr_rfp].edges():
             # iterate over each edge segment
             for i in range(len(pos[u])-1):
                 p1 = np.array([pos[u][i], pos[u][i+1]])
@@ -735,8 +735,8 @@ class App:
         if clicked_edge is not None:
             # remove the clicked edge and redraw the graph
 
-            self.current_graphs[self.curr_rfp].remove_edge(*clicked_edge)
-            is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
+            self.floorplan_graphs[self.curr_rfp].remove_edge(*clicked_edge)
+            is_triangulate = traingulated(nx.Graph(self.floorplan_graphs[self.curr_rfp]))
             if is_triangulate:
                 ax.clear()
                 self.draw_graph(ax)
@@ -829,7 +829,6 @@ class App:
                 }
 
                 self.graph_objs.append(graph_data)
-                self.current_graphs.append(self.graphs[i])
                 self.floorplan_graphs.append(self.graphs[i])
 
         print("[LOG] Dimensioned selected")
