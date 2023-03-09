@@ -72,7 +72,7 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
         l = len(W)
         ver_success = True
     else:
-        print(f"\n\nb_ub : {b_VER}\n\nA_ub : {A_VER}\n\n")
+        # print(f"\n\nb_ub : {b_VER.shape[0]}\n\nA_ub : {A_VER.shape[0]}\n\n")
         value_opti_ver = scipy.optimize.linprog(f_VER, A_ub=A_VER, b_ub=b_VER, A_eq=Aeq_VER, b_eq=Beq_VER, bounds=(
             1, None), method='interior-point', callback=None, options=None, x0=None)
         X1 = value_opti_ver['x']

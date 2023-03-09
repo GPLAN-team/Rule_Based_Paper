@@ -13,7 +13,7 @@ import source.inputgraph as inputgraph
 import pythongui.dimensiongui as dimgui
 
 
-def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
+def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
 
     G = nx.Graph()
     # n = input("Enter Outer Boundary Vertices")
@@ -215,6 +215,9 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
     print("Exclusion constraints: ", new_constraints_exc)
 
     # ----------------------------PERMUTATION END ---------------------------
+
+    if (fileExists):
+        return coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc
 
     pos = nx.get_node_attributes(G, 'pos')
     # nx.draw(G, with_labels=True, pos=pos)
@@ -423,7 +426,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
                 count_non_septri += 1
                 final_graphs.append(permgraphs[i])
                 graph_param.append([nodecnt, nx.number_of_edges(
-                    permgraphs[i]), permgraphs[i].edges, coord_list])
+                    permgraphs[i]), permgraphs[i].edges])
         print(count_non_septri, "graphs without separating triangles")
 
     else:
@@ -435,7 +438,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, rect_floorplans=True, adjacenci
                 count_non_septri += 1
                 final_graphs.append(permgraphs[i])
                 graph_param.append([nodecnt, nx.number_of_edges(
-                    permgraphs[i]), permgraphs[i].edges, coord_list])
+                    permgraphs[i]), permgraphs[i].edges])
 
         print(count_non_septri, "graphs with separating triangles")
 

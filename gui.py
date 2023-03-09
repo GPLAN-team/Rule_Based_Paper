@@ -3,6 +3,8 @@ import tkinter as tk
 from FastPLAN import FastPLAN
 from input import Input
 import json
+import os.path
+import pickle
 from FastPLAN.FastPLAN import runner
 from FastPLAN.FastPLAN import my_plot
 import matplotlib.pyplot as plt
@@ -95,7 +97,7 @@ class App:
         self.grid_coord = []
         self.circ_val = 0
         self.floorplan_graphs = []
-        self.current_graphs = []
+        self.arr_altered = False
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -578,7 +580,7 @@ class App:
             min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
-    def filename(self):
+    def GraphStore(self, isRect=True):
         s = ""
         t = ""
         if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
@@ -604,7 +606,12 @@ class App:
                 t = "Sint"
             else:
                 t = "S"
-        self.filename = f"graphs/{s}{t}.pkl"
+        else:
+            s = "default"
+        if (isRect):
+            self.filename = f"graphs/{s}{t}.pkl"
+        else:
+            self.filename = f"graphs/{s}{t}Irreg.pkl"
 
     # def showGraph_Button_click(self):
     #     print("Showing Graph of current floor plan")
@@ -745,9 +752,7 @@ class App:
         ax.figure.canvas.draw()
 
     def run_Rect_Button_click(self):
-        self.filename()
-        if (not (exists(self.filename))):
-            print("File exists")
+
         print("[LOG] Rectangular Floorplans Button Clicked")
 
         self.graph_objs = []
@@ -760,9 +765,42 @@ class App:
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
-        self.graphs, coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
-        graphs = self.graphs
+
+        self.GraphStore(True)
+
+        # coord_list =[]
+        if (not (self.arr_altered) and exists(self.filename)):
+            print("File exists")
+
+        # check_file = os.path.exists(self.filename)
+        # print(check_file)
+        # if (check_file):
+            with open(self.filename, 'rb') as f:
+                list_of_dicts = pickle.load(f)
+
+            graphs = [nx.Graph(graph) for graph in list_of_dicts]
+
+            self.graphs = graphs
+            self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            self.graphs_param = []
+            for G in graphs:
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
+                    G), G.edges])
+
+        elif (not (self.arr_altered) and not (exists(self.filename))):
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+            list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
+
+            with open(self.filename, 'wb') as f:
+                pickle.dump(list_of_dicts, f)
+        else:
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
@@ -773,7 +811,7 @@ class App:
 
         for i in range(len(self.graphs)):
             graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
@@ -859,9 +897,42 @@ class App:
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
-        self.graphs, coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        graphs = self.graphs
+
+        self.GraphStore(False)
+
+        # coord_list =[]
+        if (not (self.arr_altered) and exists(self.filename)):
+            print("File exists")
+
+        # check_file = os.path.exists(self.filename)
+        # print(check_file)
+        # if (check_file):
+            with open(self.filename, 'rb') as f:
+                list_of_dicts = pickle.load(f)
+
+            graphs = [nx.Graph(graph) for graph in list_of_dicts]
+
+            self.graphs = graphs
+            self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            self.graphs_param = []
+            for G in graphs:
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
+                    G), G.edges])
+
+        elif (not (self.arr_altered) and not (exists(self.filename))):
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+            list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
+
+            with open(self.filename, 'wb') as f:
+                pickle.dump(list_of_dicts, f)
+        else:
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
@@ -872,7 +943,7 @@ class App:
 
         for i in range(len(self.graphs)):
             graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
@@ -1644,6 +1715,7 @@ class App:
         room_win.wait_window()
 
     def handle_add_new_room_btn(self, new_room, prev_room_list_frame):
+        self.arr_altered = True
         idx = len(self.input.rooms)
         try:
             self.input.rooms[idx] = new_room.get("1.0", "end")
@@ -1657,6 +1729,7 @@ class App:
         # self.recall_room_list_frame(prev_room_list_frame)
 
     def handle_remove_room_btn(self, room_id, room_win):
+
         print(f"room to remove is {room_id}")
         self.input.rooms.pop(room_id)
         # self.room_label_list[room_id].destroy()
@@ -1775,6 +1848,7 @@ class App:
         doors_win.wait_variable()
 
     def handle_add_new_adj_btn(self, frame):
+        self.arr_altered = True
         right = self.new_adj_text_right.get()
         left = self.new_adj_text_left.get()
         rule_dict = self.input.rooms
@@ -1783,6 +1857,7 @@ class App:
         self.recall_adj_constraints_frame(frame)
 
     def handle_add_new_non_adj_btn(self, frame):
+        self.arr_altered = True
         right = self.new_non_adj_text_right.get()
         left = self.new_non_adj_text_left.get()
         rule_dict = self.input.rooms
@@ -1791,12 +1866,14 @@ class App:
         self.recall_non_adj_constraints_frame(frame)
 
     def handle_remove_adj_rule_btn(self, frame: tk.Frame, rule):
+        self.arr_altered = True
         print(f"rule to remove {rule}")
         print(f"current adjs is {self.input.adjacencies}")
         self.input.adjacencies.remove(rule)
         self.recall_adj_constraints_frame(frame)
 
     def handle_remove_non_adj_rule_btn(self, frame: tk.Frame, rule):
+        self.arr_altered = True
         print(f"rule to remove {rule}")
         print(f"current non-adjs is {self.input.adjacencies}")
         self.input.non_adjacencies.remove(rule)
