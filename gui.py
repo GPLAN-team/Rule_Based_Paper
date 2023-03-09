@@ -656,18 +656,58 @@ class App:
 
     
 
+    # def on_edge_click(self, event, ax, graph_window):
+    #     # get the mouse coordinates and the graph layout
+    #     x, y = event.xdata, event.ydata
+    #     pos = nx.kamada_kawai_layout(self.current_graphs[self.curr_rfp])
+
+    #     # compute the maximum spanning tree of the graph and get its edges in order of increasing weight
+    #     mst_edges = list(nx.algorithms.tree.mst.maximum_spanning_edges(self.current_graphs[self.curr_rfp], algorithm='kruskal', data=False))
+
+    #     # find the closest edge to the mouse click among the edges in the maximum spanning tree
+    #     min_dist = float('inf')
+    #     closest_edge = None
+    #     for u, v in mst_edges:
+    #         # iterate over each edge segment
+    #         for i in range(len(pos[u])-1):
+    #             p1 = np.array([pos[u][i], pos[u][i+1]])
+    #             p2 = np.array([pos[v][i], pos[v][i+1]])
+
+    #             # calculate the distance from the mouse click to the edge segment
+    #             dist = np.linalg.norm(np.cross(p2-p1, p1-np.array([x, y])))/np.linalg.norm(p2-p1)
+
+    #             if dist < min_dist:
+    #                 min_dist = dist
+    #                 closest_edge = (u, v)
+    #     def traingulated(G):
+    #         for cycle in nx.cycle_basis(G):
+    #             if len(cycle) >= 4 and not nx.chordal.is_chordal(nx.Graph(G.subgraph(cycle))):
+    #                 return False
+    #         return True
+
+    #     # remove the closest edge and redraw the graph
+    #     self.current_graphs[self.curr_rfp].remove_edge(*closest_edge)
+    #     is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
+    #     if is_triangulate:
+    #         ax.clear()
+    #         self.draw_graph(ax)
+    #         ax.set_title("Floor Plan Graph (click an edge to remove it)")
+
+    #     else:
+    #         # show an error message if the graph is not triangulated
+    #         print("Error: Graph is not triangulated.")
+
+    #     ax.figure.canvas.draw()
+
     def on_edge_click(self, event, ax, graph_window):
         # get the mouse coordinates and the graph layout
         x, y = event.xdata, event.ydata
         pos = nx.kamada_kawai_layout(self.current_graphs[self.curr_rfp])
 
-        # compute the maximum spanning tree of the graph and get its edges in order of increasing weight
-        mst_edges = list(nx.algorithms.tree.mst.maximum_spanning_edges(self.current_graphs[self.curr_rfp], algorithm='kruskal', data=False))
-
-        # find the closest edge to the mouse click among the edges in the maximum spanning tree
+        # find the clicked edge, if any
+        clicked_edge = None
         min_dist = float('inf')
-        closest_edge = None
-        for u, v in mst_edges:
+        for u, v in self.current_graphs[self.curr_rfp].edges():
             # iterate over each edge segment
             for i in range(len(pos[u])-1):
                 p1 = np.array([pos[u][i], pos[u][i+1]])
@@ -676,26 +716,31 @@ class App:
                 # calculate the distance from the mouse click to the edge segment
                 dist = np.linalg.norm(np.cross(p2-p1, p1-np.array([x, y])))/np.linalg.norm(p2-p1)
 
-                if dist < min_dist:
+                if dist < min_dist and dist < 0.05:  # check if the distance is small enough to be considered a click on the edge
                     min_dist = dist
-                    closest_edge = (u, v)
+                    clicked_edge = (u, v)
         def traingulated(G):
             for cycle in nx.cycle_basis(G):
                 if len(cycle) >= 4 and not nx.chordal.is_chordal(nx.Graph(G.subgraph(cycle))):
                     return False
             return True
 
-        # remove the closest edge and redraw the graph
-        self.current_graphs[self.curr_rfp].remove_edge(*closest_edge)
-        is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
-        if is_triangulate:
-            ax.clear()
-            self.draw_graph(ax)
-            ax.set_title("Floor Plan Graph (click an edge to remove it)")
+        if clicked_edge is not None:
+            # remove the clicked edge and redraw the graph
 
+            self.current_graphs[self.curr_rfp].remove_edge(*clicked_edge)
+            is_triangulate = traingulated(nx.Graph(self.current_graphs[self.curr_rfp]))
+            if is_triangulate:
+                ax.clear()
+                self.draw_graph(ax)
+                ax.set_title("Floor Plan Graph (click an edge to remove it)")
+            else:
+                # show an error message if the graph is not triangulated
+                ax.set_title("Floor Plan Graph - Cannot remove edge because graph is not triangulated")
+                print("Error: Graph is not triangulated.")
         else:
-            # show an error message if the graph is not triangulated
-            print("Error: Graph is not triangulated.")
+            # do nothing if the click is on white space
+            pass
 
         ax.figure.canvas.draw()
 
