@@ -228,7 +228,7 @@ def my_plot(graphs, figsize = 14 , dotsize = 20):
         # print("The Graph is planar: " + str(nx.check_planarity(g)[0]))
         plt.subplot(k+1,k+1,i+1)
         gnx = nx.Graph(g)
-        nx.draw_kamada_kawai(gnx, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10)
+        nx.draw(gnx, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10)
         print('.', end='')
         i+=1
 

@@ -160,9 +160,9 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
     area_sum = sum(area_list)
     scale = pow((300*400)/area_sum, 1/2)
-    print(f"\n{graph_data['area']}")
+    print(f"\nGraph area: {graph_data['area']}")
     # scale = 150*(math.exp(-0.30*height+math.log(0.8)) + 0.1)
-    print(scale)
+    print("Scale: ", scale)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
     origin = {'x': origin - 400, 'y': -300}
@@ -273,8 +273,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     #                   str(graph_data['area'][i]), font=("Arial", 15, "normal"))
     #         pen.penup()
     #         value += 1
-    return scale, [coordinates[0][0][0][0] * scale + origin['x'],
-                   coordinates[0][0][0][1] * scale + origin['y']]
+    return scale, [coordinates[0][0][0][0] * scale + origin['x'], coordinates[0][0][0][1] * scale + origin['y']]
 
 
 def draw_poly(graph_data, count, pen, mode, color_list, room_names, origin, outer_boundary, shape):

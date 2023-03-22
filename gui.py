@@ -76,13 +76,19 @@ hex_colors = [
 
 class App:
     def __init__(self) -> None:
-        self.input = Input()
-        self.initialise_root()
-        self.add_logo()
-        self.custom_rfp_section()
+        self.input = Input()  #setting rooms, adjacencies and non-adjacencies list values
+
+        print("intialise_root() called.")
+        self.initialise_root() # sets title
+        print("add_logo() called.")
+        self.add_logo() # sets name
+        print("custom_rfp_section() called.")
+        self.custom_rfp_section() # sets the horizontal toolbox
         # self.properties_section()
-        self.modification_section()
-        self.rfp_draw_section()
+        print("modification_section() called.")
+        self.modification_section() # sets the vertical toolbox
+        print("rfp_draw_section() called.")
+        self.rfp_draw_section() # creates canvas where floorplans are displayed
         self.room_check = []
         self.room_checkobj = []
         self.room_freq = []
@@ -116,48 +122,45 @@ class App:
 
     def custom_rfp_section(self):
         self.custom_rfp_choice_frame = tk.Frame(self.root)
-        # master = self.custom_rfp_choice_frame
         self.custom_rfp_choice_frame.grid(row=0, column=1, padx=10, pady=10)
-        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15,
-                                       command=self.oneBHK_Button_click)
+        # master = self.custom_rfp_choice_frame
+        
+        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15, command=self.oneBHK_Button_click)
         self.oneBHK_Button.grid(row=0, column=0, padx=10, pady=10)
-        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv15,
-                                       command=self.twoBHK_Button_click)
+        
+        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv15, command=self.twoBHK_Button_click)
         self.twoBHK_Button.grid(row=0, column=1, padx=10, pady=10)
-        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv15,
-                                         command=self.threeBHK_Button_click)
+        
+        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv15, command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
-        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15,
-                                      command=self.reset_Button_click)
+        
+        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15, command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
         self.dimCheckVar = tk.IntVar(value=1)
         self.gridCheckVar = tk.IntVar()
         self.circCheckVar = tk.IntVar()
-        # self.dimCheckVar = 1
-        # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15,
-        #                                  command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
 
+        # self.dimCheckVar = 1
+        # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15, command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
         # self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15,
-                                          command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
-
+        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15, command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
         self.grid_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15,
-                                          command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
-
+        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15, command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
         self.circ_Button.grid(row=0, column=5, padx=10, pady=10)
 
-        self.showGraph_Button = tk.Button(self.custom_rfp_choice_frame, text="Show Current Graph", font=helv15,
-                                          command=self.showGraph_Button_click)
+        self.showGraph_Button = tk.Button(self.custom_rfp_choice_frame, text="Show Current Graph", font=helv15, command=self.showGraph_Button_click)
         self.showGraph_Button.grid(row=0, column=6, padx=10, pady=10)
+
+        self.changeDimButton = tk.Button(self.custom_rfp_choice_frame, text="Change Room Dimensions", font=helv15, command=self.changeDimButtonClick)
+        self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
+
 
     # def properties_section(self):
         # self.properties_frame = tk.Frame(self.root)
         # self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
-
         # self.colors_table_frame = tk.Frame(self.properties_frame)
         # self.colors_table_frame.grid()
         # self.colors_table_canvas = tk.Canvas(
@@ -170,40 +173,31 @@ class App:
         self.modify_frame = tk.Frame(self.root)
         self.modify_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        self.modify_rooms_button = tk.Button(self.modify_frame, text="Modify Rooms", font=helv15,
-                                             command=self.modify_rooms_Button_click)
+        self.modify_rooms_button = tk.Button(self.modify_frame, text="Modify Rooms", font=helv15, command=self.modify_rooms_Button_click)
         self.modify_rooms_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.modify_doors_button = tk.Button(self.modify_frame, text="Adjacencies", font=helv15,
-                                             command=self.modify_doors_Button_click)
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Adjacencies", font=helv15, command=self.modify_doors_Button_click)
         self.modify_doors_button.grid(row=3, column=0, padx=10, pady=10)
 
-        self.modify_doors_button = tk.Button(self.modify_frame, text="Non-Adjacencies", font=helv15,
-                                             command=self.modify_non_adj_Button_click)
+        self.modify_doors_button = tk.Button(self.modify_frame, text="Non-Adjacencies", font=helv15, command=self.modify_non_adj_Button_click)
         self.modify_doors_button.grid(row=4, column=0, padx=10, pady=10)
 
-        self.run_button = tk.Button(self.modify_frame, text="Rectangular floorplan", font=helv15,
-                                    command=self.run_Rect_Button_click)
+        self.run_button = tk.Button(self.modify_frame, text="Rectangular floorplan", font=helv15, command=self.run_Rect_Button_click)
         self.run_button.grid(row=5, column=0, padx=10, pady=10)
 
-        self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15,
-                                    command=self.run_Irreg_Button_click)
+        self.run_button = tk.Button(self.modify_frame, text="Irregular floorplan", font=helv15, command=self.run_Irreg_Button_click)
         self.run_button.grid(row=6, column=0, padx=10, pady=10)
 
-        self.run_button = tk.Button(self.modify_frame, text="L-Shaped floorplan", font=helv15,
-                                    command=self.run_Lshaped_Button_click)
+        self.run_button = tk.Button(self.modify_frame, text="L-Shaped floorplan", font=helv15, command=self.run_Lshaped_Button_click)
         self.run_button.grid(row=7, column=0, padx=10, pady=10)
 
-        self.prev_btn = tk.Button(
-            self.modify_frame, text="Previous", font=helv15, command=self.handle_prev_btn)
+        self.prev_btn = tk.Button( self.modify_frame, text="Previous", font=helv15, command=self.handle_prev_btn)
         self.prev_btn.grid(row=8, column=0, padx=10, pady=10)
 
-        self.next_btn = tk.Button(
-            self.modify_frame, text="Next", font=helv15, command=self.handle_next_btn)
+        self.next_btn = tk.Button( self.modify_frame, text="Next", font=helv15, command=self.handle_next_btn)
         self.next_btn.grid(row=9, column=0, padx=10, pady=10)
 
-        self.exit_btn = tk.Button(
-            self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
+        self.exit_btn = tk.Button( self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
         self.exit_btn.grid(row=10, column=0, padx=11, pady=10)
 
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
@@ -230,8 +224,7 @@ class App:
         self.pen.speed(10000000)
 
     def zoom(self, event):
-        self.canvas.config(width=self.root.winfo_screenwidth(),
-                           height=self.root.winfo_screenheight())
+        self.canvas.config(width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
 
     def handle_prev_btn(self):
 
@@ -347,8 +340,7 @@ class App:
 
     def handle_next_btn(self):
         if self.curr_rfp == len(self.graph_objs) - 1:
-            tk.messagebox.showwarning(
-                "The End", "You have exhausted all the options")
+            tk.messagebox.showwarning("The End", "You have exhausted all the options")
             return
 
         if self.gridCheckVar.get() == 1:
@@ -358,6 +350,8 @@ class App:
 
         self.curr_rfp += 1
         graph_data = self.graph_objs[self.curr_rfp]
+        self.draw_one_rfp(graph_data)
+
         # cir.plot(self.circ_graphs[self.curr_rfp], len(self.circ_graphs[self.curr_rfp]))
 
         # graph = inputgraph.InputGraph(
@@ -456,7 +450,6 @@ class App:
         # #     }
 
         # # print(graph_data['room_x'].shape[0])
-        self.draw_one_rfp(graph_data)
 
     def handle_exit_btn(self):
         self.root.destroy()
@@ -482,8 +475,7 @@ class App:
 
         for i, each_room in enumerate(self.input.rooms.values()):
             #     print(f"each room {each_room}")
-            self.colors_map[self.input.rooms[i]
-                            ] = hex_colors[i]
+            self.colors_map[self.input.rooms[i]] = hex_colors[i]
             # if self.irreg_check == 1:
             #     self.rfp_canvas.create_rectangle(x + scale * each_room['left'], y + scale * each_room['top'], x + scale * (
             #         each_room['left'] + each_room['width']), y + scale * (each_room['top'] + each_room['height']), fill=hex_colors[each_room['label']])
@@ -491,8 +483,7 @@ class App:
 
         # self.update_colors_table()
         # if self.irreg_check != 1:
-        self.grid_scale, self.grid_coord = draw.draw_rdg(graph_data, 1, self.pen, 1,
-                                                         list(self.colors_map.values()), self.input.rooms, 200)
+        self.grid_scale, self.grid_coord = draw.draw_rdg(graph_data, 1, self.pen, 1, list(self.colors_map.values()), self.input.rooms, 200)
         # draw.drawgrid(self.pen)
 
     def default_dim(self):
@@ -655,6 +646,14 @@ class App:
                            command=graph_window.destroy)
         button.pack(side=tk.BOTTOM)
 
+    def changeDimButtonClick(self):
+        if self.grid_scale == 0:
+            tk.messagebox.showwarning("The End", "You need to draw the floor plan first")
+            return
+        else:
+            print("[LOG] two BHK Button Clicked")
+            return
+
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
         nx.draw_kamada_kawai(
@@ -765,8 +764,7 @@ class App:
         self.create_inputgraph_json()
         # graphs = runner(False)
         self.interior_rooms.sort()
-        print("Exterior rooms: ", self.exterior_rooms,
-              "  Interior rooms: ", self.interior_rooms)
+        print("Exterior rooms: ", self.exterior_rooms, "\nInterior rooms: ", self.interior_rooms)
 
         # self.GraphStore(True)
 
@@ -812,17 +810,16 @@ class App:
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
-        self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
-            graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            # representing node count, edge count, edge set, node coordinates as the 4-tuple
             graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
-            if (graph.floorplan_exist):
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            print("Floorplan exists? ", graph.floorplan_exist)
+            if(graph.floorplan_exist):
+                # considering only those graphs for which floorplan exists
                 graph_data = {
                     'room_x': graph.room_x,
                     'room_y': graph.room_y,
@@ -833,9 +830,10 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
+            else:
+                print("Checking next graph data")
 
         print("[LOG] Dimensioned selected")
 
@@ -843,7 +841,7 @@ class App:
         my_plot(graphs)
         plt.show()
         # nodecnt = len(graphs[0].nodes)
-        print("[LOG] Now will wait for dimensions input")
+        print("[LOG] Waiting for dimensions input")
 
         # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
         #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
@@ -864,7 +862,11 @@ class App:
 
         self.output_found = True
         self.curr_rfp = -1
+        print(f"#Floor Plans : {len(self.graph_objs)}")
+        self.handle_next_btn() # to draw curr_rfp+1 th floorplan
 
+
+        
         # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
         # print(f"one rfp = {output_rfps[0]}")
@@ -886,8 +888,6 @@ class App:
         #     # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
         #     # print(f"one rfp = {output_rfps[0]}")
-        print(f"Number of Floor Plans : {len(self.graph_objs)}")
-        self.handle_next_btn()
 
     def run_Irreg_Button_click(self):
         print("[LOG] Irregular Floorplans Button Clicked")
@@ -949,15 +949,13 @@ class App:
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
-        self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
             graph = inputgraph.InputGraph(
                 self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             graph.irreg_multiple_dual()
-            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
             if (graph.floorplan_exist):
                 graph_data = {
@@ -970,8 +968,7 @@ class App:
                     'mergednodes': graph.mergednodes,
                     'irreg_nodes': graph.irreg_nodes1
                 }
-                print(
-                    f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
+                print(f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
 
@@ -1562,9 +1559,9 @@ class App:
     def oneBHK_Button_click(self):
         print("[LOG] One BHK Button Clicked")
 
-        self.input.reset()
+        self.input.reset() # setting rooms, adjacencies and non-adjacencies list to empty
         with open('./one_bhk.json') as one_file:
-            one_bhk_data = json.load(one_file)
+            one_bhk_data = json.load(one_file) # getting default rooms, adjacencies and non-adjacencies
 
         new_rooms = one_bhk_data['rooms']
         new_adj_list = one_bhk_data['adjacency_constraints']
@@ -1578,22 +1575,22 @@ class App:
     def twoBHK_Button_click(self):
         print("[LOG] two BHK Button Clicked")
 
-        self.input.reset()
+        self.input.reset() # setting rooms, adjacencies and non-adjacencies list to empty
         with open('./two_bhk.json') as one_file:
-            one_bhk_data = json.load(one_file)
+            two_bhk_data = json.load(one_file) # getting default rooms, adjacencies and non-adjacencies
 
-        new_rooms = one_bhk_data['rooms']
-        new_adj_list = one_bhk_data['adjacency_constraints']
-        new_non_adj_list = one_bhk_data['non_adjacency_constraints']
+        # setting default rooms, adjacencies and non-adjacencies
+        new_rooms = two_bhk_data['rooms']
+        new_adj_list = two_bhk_data['adjacency_constraints']
+        new_non_adj_list = two_bhk_data['non_adjacency_constraints']
 
         self.input.add_rooms_from(room_list=new_rooms)
         self.input.add_doors_from(adjcancy_list=new_adj_list)
-        self.input.add_non_adjacencies_from(
-            non_adjacency_list=new_non_adj_list)
+        self.input.add_non_adjacencies_from(non_adjacency_list=new_non_adj_list)
 
-        print(self.input.rooms)
-        print(self.input.adjacencies)
-        print(self.input.non_adjacencies)
+        print("Input rooms: ", self.input.rooms)
+        print("Adjacencies: ", self.input.adjacencies)
+        print("Non-Adjacencies: ", self.input.non_adjacencies)
 
     def threeBHK_Button_click(self):
         print("[LOG] three BHK Button Clicked")
@@ -1672,12 +1669,10 @@ class App:
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
             if (each_room == "Dining" or each_room == "Store"):
-                each_remove_room_btn = tk.Button(
-                    frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
+                each_remove_room_btn = tk.Button(frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
                 each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
 
-                each_intext_room_btn = tk.Button(
-                    frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
+                each_intext_room_btn = tk.Button(frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
                 each_intext_room_btn.grid(row=i+1, column=2, padx=5, pady=5)
 
                 self.interior_rooms_btn_list[each_room] = each_intext_room_btn
@@ -1780,8 +1775,7 @@ class App:
 
         cur_new_adj_frame_row = 0
 
-        add_new_adj_label = tk.Label(
-            add_new_adj_frame, text="Add New Adjacency")
+        add_new_adj_label = tk.Label(add_new_adj_frame, text="Add New Adjacency")
         add_new_adj_label.grid(row=cur_new_adj_frame_row, columnspan=5)
 
         self.new_adj_text_left = tk.StringVar()
@@ -1789,24 +1783,17 @@ class App:
 
         cur_new_adj_frame_row += 1
 
-        new_adj_option_left = tk.OptionMenu(
-            add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
-        new_adj_option_left.grid(
-            row=cur_new_adj_frame_row, column=0, padx=5, pady=5)
+        new_adj_option_left = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_left, *list(self.input.rooms.values()))
+        new_adj_option_left.grid(row=cur_new_adj_frame_row, column=0, padx=5, pady=5)
 
         new_adj_door_sign = tk.Label(add_new_adj_frame, text="<=>")
-        new_adj_door_sign.grid(row=cur_new_adj_frame_row,
-                               column=1, padx=5, pady=5)
+        new_adj_door_sign.grid(row=cur_new_adj_frame_row, column=1, padx=5, pady=5)
 
-        new_adj_option_right = tk.OptionMenu(
-            add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
-        new_adj_option_right.grid(
-            row=cur_new_adj_frame_row, column=2, padx=5, pady=5)
+        new_adj_option_right = tk.OptionMenu(add_new_adj_frame, self.new_adj_text_right, *list(self.input.rooms.values()))
+        new_adj_option_right.grid(row=cur_new_adj_frame_row, column=2, padx=5, pady=5)
 
-        add_new_adj_btn = tk.Button(
-            add_new_adj_frame, text="Add Rule", command=lambda: self.handle_add_new_adj_btn(adj_frame))
-        add_new_adj_btn.grid(row=cur_new_adj_frame_row,
-                             column=3, padx=5, pady=5)
+        add_new_adj_btn = tk.Button(add_new_adj_frame, text="Add Rule", command=lambda: self.handle_add_new_adj_btn(adj_frame))
+        add_new_adj_btn.grid(row=cur_new_adj_frame_row, column=3, padx=5, pady=5)
 
         doors_win.wait_variable()
 
