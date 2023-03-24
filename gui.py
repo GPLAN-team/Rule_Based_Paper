@@ -496,7 +496,7 @@ class App:
         max_aspect = []
         plot_width = -1
         plot_height = -1
-        for i, room in self.input.rooms.items():
+        for _, room in self.input.rooms.items():
             if (room == "Living"):
                 min_width.append(9)
                 min_height.append(11)
@@ -567,8 +567,7 @@ class App:
                 max_height.append(9999)
                 min_aspect.append(0.5)
                 max_aspect.append(2)
-        self.dim_constraints = [
-            min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+        self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
@@ -651,13 +650,67 @@ class App:
             tk.messagebox.showwarning("The End", "You need to draw the floor plan first")
             return
         else:
-            print("[LOG] two BHK Button Clicked")
-            return
+            print("[LOG] Change Dimensions Button Clicked")
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
+            min_width.clear()
+            min_height.clear()
+            for i in range(len(self.graph_objs[self.curr_rfp]["room_width"])):
+                min_width.append(math.floor(self.graph_objs[self.curr_rfp]["room_width"][i]))
+                min_height.append(math.floor(self.graph_objs[self.curr_rfp]["room_height"][i]))
+                # min_width=self.graph_objs[self.curr_rfp]["room_width"]
+                # min_height=self.graph_objs[self.curr_rfp]["room_height"]
+            old_dims = [
+                min_width, max_width,
+                min_height, max_height,
+                symm_string,
+                min_aspect, max_aspect,
+                plot_width, plot_height  
+            ]
+
+            print("\n\ndimgui.fui_fnc() starts: ")
+            min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, self.graphs_param[0][0])
+            # should I write (above) :
+            # self.graphs_param[0][0] or 
+            # self.graph_objs[self.curr_rfp]["nodecnt"]
+            # for #nodes
+            print("dimgui.gui_fnc() ends.\n\n")
+            self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
+            
+            # representing node count, edge count, edge set, node coordinates as the 4-tuple
+            dgraph = inputgraph.InputGraph(self.graph_objs[self.curr_rfp]["nodecnt"], self.graph_objs[self.curr_rfp]["edgecnt"], self.graph_objs[self.curr_rfp]["edgeset"], self.graph_objs[self.curr_rfp]["coord"])
+            # above creates a graph with provided data
+            dgraph.irreg_multiple_dual() # generates dual for the computed graph and corresponding encoded matrix and rel matrix
+            dgraph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
+            print("Floorplan exists? ", dgraph.floorplan_exist)
+            if(dgraph.floorplan_exist):
+                dgraph_data = {
+                    'room_x': dgraph.room_x,
+                    'room_y': dgraph.room_y,
+                    'room_width': dgraph.room_width,
+                    'room_height': dgraph.room_height,
+                    'area': dgraph.area,
+                    'extranodes': dgraph.extranodes,
+                    'mergednodes': dgraph.mergednodes,
+                    'irreg_nodes': dgraph.irreg_nodes1,
+                    'nodecnt': self.graph_objs[self.curr_rfp]["nodecnt"],
+                    'edgecnt': self.graph_objs[self.curr_rfp]["edgecnt"],
+                    'edgeset': self.graph_objs[self.curr_rfp]["edgeset"],
+                    'coord': self.graph_objs[self.curr_rfp]["coord"]
+                }
+                # self.graph_objs.append(graph_data)
+                # self.floorplan_graphs.append(self.graphs[i])
+                # will work only once i.e. the change dimensions will take values of the initial one.
+            else:
+                tk.messagebox.showwarning("The End", "Floorplan doesn't exists with changed dimensions")
+                print("Floorplan doesn't exists with changed dimensions")
+                return
+            
+            self.draw_one_rfp(dgraph_data)
 
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
-        nx.draw_kamada_kawai(
-            gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
+        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
         ax.set_title("Floor Plan Graph")
 
     # def on_edge_click(self, event, ax, graph_window):
@@ -757,7 +810,6 @@ class App:
         print("[LOG] Rectangular Floorplans Button Clicked")
 
         self.graph_objs = []
-
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
@@ -805,6 +857,11 @@ class App:
             self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
         graphs = self.graphs
 
+        # print("\nprinting dimension starts")
+        # print(f"numrows graphs_param: {len(self.graphs_param)}, numcols graphs_param: {len(self.graphs_param[0])}")
+        # print(f"numrows coord_list: {len(self.coord_list)}, numcols coord_list: {len(self.coord_list[0])}")
+        # print("printing dimension ends\n")
+
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
         self.input.add_non_adjacencies_from(non_adjacencies_modified)
@@ -813,10 +870,12 @@ class App:
         self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
-            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
-            graph.irreg_multiple_dual()
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            # above creates a graph with provided data
+            graph.irreg_multiple_dual() # generates dual for the computed graph and corresponding encoded matrix and rel matrix
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
             print("Floorplan exists? ", graph.floorplan_exist)
             if(graph.floorplan_exist):
                 # considering only those graphs for which floorplan exists
@@ -828,12 +887,16 @@ class App:
                     'area': graph.area,
                     'extranodes': graph.extranodes,
                     'mergednodes': graph.mergednodes,
-                    'irreg_nodes': graph.irreg_nodes1
+                    'irreg_nodes': graph.irreg_nodes1,
+                    'nodecnt': self.graphs_param[i][0],
+                    'edgecnt': self.graphs_param[i][1],
+                    'edgeset': self.graphs_param[i][2],
+                    'coord': self.coord_list
                 }
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
-            else:
-                print("Checking next graph data")
+            # else:
+            #     print("Checking next graph data")
 
         print("[LOG] Dimensioned selected")
 
@@ -866,7 +929,7 @@ class App:
         self.handle_next_btn() # to draw curr_rfp+1 th floorplan
 
 
-        
+
         # print(f"{len(output_rfps)} output rfps = {str(output_rfps)}")
 
         # print(f"one rfp = {output_rfps[0]}")

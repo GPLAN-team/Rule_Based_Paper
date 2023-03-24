@@ -90,38 +90,38 @@ def gui_fnc(old_dims, nodes):
         text_room[i] = tk.Label(root, text="Room" + str(i), font=("Times New Roman", 8))
 
         text_room[i].place(relx=0.20 + 0.20 * i_value_x,
-                           rely=0.3 + (0.025 * i_value_y),
+                           rely=0.3 + (0.030 * i_value_y),
                            anchor='ne')
         value_width.append("value_width" + str(i))
         value_width[i] = tk.Entry(root, width=5, textvariable=w[i])
         value_width[i].place(relx=0.30 + 0.20 * i_value_x,
-                             rely=0.3 + (0.025) * i_value_y,
+                             rely=0.3 + (0.030) * i_value_y,
                              anchor='ne')
         value_width1.append("value_width1" + str(i))
         value_width1[i] = tk.Entry(root, width=5, textvariable=w1[i])
         value_width1[i].place(relx=0.40 + 0.20 * i_value_x,
-                              rely=0.3 + (0.025) * i_value_y,
+                              rely=0.3 + (0.030) * i_value_y,
                               anchor='ne')
         value_area.append("value_area" + str(i))
         value_area[i] = tk.Entry(root, width=5, textvariable=minA[i])
         value_area[i].place(relx=0.50 + 0.20 * i_value_x,
-                            rely=0.3 + (0.025) * i_value_y,
+                            rely=0.3 + (0.030) * i_value_y,
                             anchor='ne')
         value_area1.append("value_area1" + str(i))
         value_area1[i] = tk.Entry(root, width=5, textvariable=maxA[i])
         value_area1[i].place(relx=0.60 + 0.20 * i_value_x,
-                             rely=0.3 + (0.025) * i_value_y,
+                             rely=0.3 + (0.030) * i_value_y,
                              anchor='ne')
         value_min_aspect_ratio.append("value_aspect_min" + str(i))
         value_min_aspect_ratio[i] = tk.Entry(root, width=5, textvariable=min_ar[i])
         value_min_aspect_ratio[i].place(relx=0.70 + 0.20 * i_value_x,
-                                        rely=0.3 + (0.025) * i_value_y,
+                                        rely=0.3 + (0.030) * i_value_y,
                                         anchor='ne')
 
         value_max_aspect_ratio.append("value_aspect_max" + str(i))
         value_max_aspect_ratio[i] = tk.Entry(root, width=5, textvariable=max_ar[i])
         value_max_aspect_ratio[i].place(relx=0.80 + 0.20 * i_value_x,
-                                        rely=0.3 + (0.025) * i_value_y,
+                                        rely=0.3 + (0.030) * i_value_y,
                                         anchor='ne')
     text_symmetric = tk.Label(root, text="Give symmetric rooms")
     text_symmetric.place(relx=0.4,
@@ -135,16 +135,16 @@ def gui_fnc(old_dims, nodes):
     plot_label.place(relx=0.45, rely=0.5 + 0.025 * nodes)
 
     plot_width_label = tk.Label(root, text="Plot Width :")
-    plot_width_label.place(relx=0.31, rely=0.5 + 0.025 * (nodes+2))
+    plot_width_label.place(relx=0.31, rely=0.5 + 0.030 * (nodes+2))
 
     plot_width_tbox = tk.Entry(root, textvariable=plot_width)
-    plot_width_tbox.place(relx=0.51, rely=0.5 + 0.025 * (nodes+2))
+    plot_width_tbox.place(relx=0.51, rely=0.5 + 0.030 * (nodes+2))
 
     plot_height_label = tk.Label(root, text="Plot Height :")
-    plot_height_label.place(relx=0.31, rely=0.5 + 0.025 * (nodes+3))
+    plot_height_label.place(relx=0.31, rely=0.5 + 0.030 * (nodes+3))
 
     plot_height_tbox = tk.Entry(root, textvariable=plot_height)
-    plot_height_tbox.place(relx=0.51, rely=0.5+ 0.025 * (nodes+3))
+    plot_height_tbox.place(relx=0.51, rely=0.5+ 0.030 * (nodes+3))
 
     def button_clicked():
         for i in range(0, nodes):
