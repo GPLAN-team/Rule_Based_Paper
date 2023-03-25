@@ -24,6 +24,8 @@ import source.lettershape.lshape.Lshaped as Lshaped
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+from pythongui.catalogue_maker import generate_catalogue_dimensioned
+
 
 helv15 = ("Helvetica", 15, "bold")
 helv8 = ("Helvetica", 8, "bold")
@@ -198,7 +200,10 @@ class App:
         self.next_btn.grid(row=9, column=0, padx=10, pady=10)
 
         self.exit_btn = tk.Button( self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
-        self.exit_btn.grid(row=10, column=0, padx=11, pady=10)
+        self.exit_btn.grid(row=10, column=0, padx=10, pady=10)
+        
+        self.downnload_Button = tk.Button(self.modify_frame, text="Download Catalogue", font=helv15, command=self.download_catalogue)
+        self.downnload_Button.grid(row=11, column=0, padx=10, pady=10)
 
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
         #                              command=self.run_Circ_Button_click)
@@ -568,6 +573,7 @@ class App:
                 min_aspect.append(0.5)
                 max_aspect.append(2)
         self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+        self.dimensional_constraints = [min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
@@ -1219,6 +1225,9 @@ class App:
         print(f"Number of Floor Plans : {len(self.graph_objs)}")
         self.handle_next_btn()
 
+    def download_catalogue(self):
+        generate_catalogue_dimensioned(len(self.graph_objs), self.graph_objs, self.dimensional_constraints)
+    
     # def run_Circ_Button_click(self):
 
     #     self.circ_val = 1
