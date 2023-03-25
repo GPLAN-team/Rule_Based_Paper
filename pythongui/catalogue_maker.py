@@ -49,6 +49,18 @@ class PDF(FPDF):
         self.set_fill_color(255, 255, 255) # color for inner rectangle
         self.rect(8.0, 8.0, 194.0,282.0,'FD')
         self.set_margins(left=10, top=10, right=-10)
+            
+    def add_border_and_grid(self, scale):
+        self.add_border()
+        self.set_draw_color(211, 211, 211)
+        x=8.8  #horizontal grid lines
+        while(x<202.0):
+            self.line(x, 10.0, x, 289.0)
+            x = x + scale
+        y=11.2  #vertical grid lines
+        while(y<290.0):
+            self.line(10.0, y, 201.0, y)
+            y = y + scale        
 
     def add_title(self):
         self.set_title(title= "A catalogue of floor plans")
@@ -78,26 +90,14 @@ def make_encoded_matrix(nodecnt, room_x, room_y, room_width, room_height):
                 if encoded_matrix[room_y_arr[node] + height][room_x_arr[node] + width] == -1:
                     encoded_matrix[room_y_arr[node] + height][room_x_arr[node] + width] = node
     return encoded_matrix
-    # for node in range(nodecnt):
-    #     for width in range(room_width[node]):
-    #         for height in range(room_height[node]):
-                
-    # return encoded_matrix
 
-
-
-def draw_one_rfp(pdf: PDF, x, y, rfp_data, grid_w=100, grid_h=100, dimensioned = 0):
-
-    # em = get_encoded_matrix(len(rfp_data['room_x']), rfp_data['room_x'], rfp_data['room_y'], rfp_data['room_width'], rfp_data['room_height'])
-    em = make_encoded_matrix(len(rfp_data['room_x']), rfp_data['room_x'], rfp_data['room_y'], rfp_data['room_width'], rfp_data['room_height'])
-
+def get_scale(rfp_data, grid_w=100, grid_h=100): #Calculates the scaling factor for grid lines and rfp
     min_x = rfp_data['room_x'][0]
     min_y = rfp_data['room_y'][0]
     max_x = rfp_data['room_x'][0] + rfp_data['room_width'][0]
     max_y = rfp_data['room_y'][0] + rfp_data['room_height'][0]
-    # print("min_x, max_x, min_y, max_y" , min_x, max_x, min_y, max_y)
+    
     for each_room in range(len(rfp_data['room_x'])):
-
         min_x = min( min_x,  rfp_data['room_x'][each_room] )
         min_y = min( min_y,  rfp_data['room_y'][each_room] )
         max_x = min( max_x,  rfp_data['room_x'][each_room] + rfp_data['room_width'][each_room] )
@@ -106,27 +106,14 @@ def draw_one_rfp(pdf: PDF, x, y, rfp_data, grid_w=100, grid_h=100, dimensioned =
     plot_width = abs( min_x - max_x)
     plot_height = abs( min_y - max_y)
     scale = max( grid_h/plot_height, grid_w/plot_width) / 8
+    return scale
 
-    # pdf.text(
-    #         x + grid_w,
-    #         y,
-    #         txt = "Dimensions of each room" )
+def draw_one_rfp(pdf: PDF, x, y, rfp_data, grid_w=100, grid_h=100, dimensioned = 0):
+    em = make_encoded_matrix(len(rfp_data['room_x']), rfp_data['room_x'], rfp_data['room_y'], rfp_data['room_width'], rfp_data['room_height'])
 
-    # pdf.set_xy(x + grid_w - 10, y)
-
-
-    # Prints room dimensions sideways
+    scale = get_scale(rfp_data, grid_w, grid_h)
     
-    # pdf.text(x + grid_w, y, 'Dimensions \n')
-    # for each_room in range(len(rfp_data['room_x_top_left'])):
-    #     pdf.text(x + grid_w, y + each_room * 5 + 5, 'Room ' + str(each_room) + ' : ' + str(rfp_data['room_width'][each_room]) + ' X ' + str(rfp_data['room_height'][each_room]) + '\n')
-
-    # print(rfp_data['mergednodes'])
     flag = 0
-    print("####")
-    print(em)
-    print(rfp_data)
-    print("####")
     for each_room in range(len(rfp_data['room_x'])):
         if each_room in rfp_data['extranodes']:
             continue
@@ -140,18 +127,15 @@ def draw_one_rfp(pdf: PDF, x, y, rfp_data, grid_w=100, grid_h=100, dimensioned =
         pdf.set_fill_color(*rgb_colors[each_room])
         pdf.set_draw_color(0,0,0)
         pdf.rect( 
-        x + scale * int(rfp_data['room_x'][each_room]) ,
-        y + scale * int(rfp_data['room_y'][each_room]) , 
-        scale * int(rfp_data['room_width'][each_room]) , 
-        scale * int(rfp_data['room_height'][each_room]) ,
+        x + scale * round(rfp_data['room_x'][each_room], 1) ,
+        y + scale * round(rfp_data['room_y'][each_room], 1) , 
+        scale * round(rfp_data['room_width'][each_room], 1) , 
+        scale * round(rfp_data['room_height'][each_room], 1) ,
         'DF')
 
         if flag == 1:
             flag = 0
             occ = np.where(em == each_room)
-            print("####")
-            print(occ)
-            print("####")
 
             lt = []
             rt = []
@@ -285,16 +269,6 @@ def draw_one_rfp(pdf: PDF, x, y, rfp_data, grid_w=100, grid_h=100, dimensioned =
         line_width = 0.2
         pdf.set_line_width(line_width)
         pdf.set_draw_color(*rgb_colors[each_room])
-        # if rfp_data['room_x_bottom_left'][each_room] != rfp_data['room_x_bottom_right'][each_room]:
-        #     pdf.line(x + scale * rfp_data['room_x_bottom_left'][each_room] + line_width, y + scale * rfp_data['room_y'][each_room], x + scale * rfp_data['room_x_bottom_right'][each_room] - line_width, y + scale * rfp_data['room_y'][each_room])
-        # if rfp_data['room_x_top_left'][each_room] != rfp_data['room_x_top_right'][each_room]:
-        #     pdf.line(x + scale * rfp_data['room_x_top_left'][each_room] + line_width, y + scale * rfp_data['room_y'][each_room] + scale * rfp_data['room_height'][each_room] , x + scale * rfp_data['room_x_top_right'][each_room] - line_width, y + scale * rfp_data['room_y'][each_room] + scale * rfp_data['room_height'][each_room])
-        # if rfp_data['room_y_left_bottom'][each_room] != rfp_data['room_y_left_top'][each_room]:
-        #     pdf.line( x + scale * rfp_data['room_x'][each_room],y + scale * rfp_data['room_y_left_bottom'][each_room] + line_width ,x + scale * rfp_data['room_x'][each_room], y + scale * rfp_data['room_y_left_top'][each_room] - line_width )
-        # if rfp_data['room_y_right_bottom'][each_room] != rfp_data['room_y_right_top'][each_room]:
-        #     pdf.line( x + scale * rfp_data['room_x'][each_room] + scale * rfp_data['room_width'][each_room], y + scale * rfp_data['room_y_right_bottom'][each_room] + line_width , x + scale * rfp_data['room_x'][each_room] + scale * rfp_data['room_width'][each_room], y + scale * rfp_data['room_y_right_top'][each_room] - line_width)
-
-        
         pdf.set_draw_color(0,0,0)
 
 def fill_dimensional_constraints(pdf : PDF, room, dimensional_constraints):
@@ -331,7 +305,8 @@ def fill_dimensional_constraints(pdf : PDF, room, dimensional_constraints):
 
 def add_dimensional_constraints(pdf : PDF, dimensional_constraints, fpcnt, num_rfp):
     [min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height] = dimensional_constraints
-    pdf.multi_cell(100,10, str(num_rfp) + " of " + str(fpcnt) + " possible floor plans satisfy the dimensional constraints \n")
+    if fpcnt is not None:
+        pdf.multi_cell(100,10, str(num_rfp) + " of " + str(fpcnt) + " possible floor plans satisfy the dimensional constraints \n")
     if len(dimensional_constraints) != 0:
         pdf.multi_cell(100, 10, "Dimenstional Constraints \n", 0, 1, 'C')
 
@@ -398,172 +373,122 @@ def add_home_page(pdf, edges, num_rfp, time_taken):
     pdf.add_page()
     pdf.add_border()
     pdf.add_title()
-    save_graph(edges)
-    pdf.multi_cell(100, 10, str( "Adjacency List: " + str(edges)), 0, 1, 'C')
-    # pdf.set_y(pdf.get_y() + 10)
-    x1 = pdf.get_x()
-    y1 = pdf.get_y()
-    pdf.image("./latest_adj_graph.png", x = x1, y = y1, w = 70, h = 70, type = 'png', link = './latest_adj_graph.png')
-    pdf.set_y(pdf.get_y() + 110)
-    pdf.multi_cell(100, 10, "Time taken: " + str(time_taken) + " ms", 0, 1, 'C')
+    if edges is not None:
+        save_graph(edges)
+        pdf.multi_cell(100, 10, str( "Adjacency List: " + str(edges)), 0, 1, 'C')
+        # pdf.set_y(pdf.get_y() + 10)
+        x1 = pdf.get_x()
+        y1 = pdf.get_y()
+        pdf.image("./latest_adj_graph.png", x = x1, y = y1, w = 70, h = 70, type = 'png', link = './latest_adj_graph.png')
+        pdf.set_y(pdf.get_y() + 110)
+    if time_taken is not None:
+        pdf.multi_cell(100, 10, "Time taken: " + str(time_taken) + " ms", 0, 1, 'C')
     pdf.multi_cell(100, 10, "Number of floorplans: " +  str(num_rfp), 0, 1, 'C')
 
 def generate_catalogue(edges, num_rfp, time_taken, output_data, dimensional_constraints ):
-        print("[LOG] Downloading Catalogue")
-        pdf = PDF() 
-        add_home_page(pdf, edges, num_rfp, time_taken)
-        # add_dimensional_constraints(pdf, dimensional_constraints)
-        # origin = [ [75,75], [75,175], [75, 250], [175, 75], [175,175], [175, 250] ]
-        origin_x = 15
-        origin_y = 30
+    print("[LOG] Downloading Catalogue")
+    pdf = PDF() 
+    add_home_page(pdf, edges, num_rfp, time_taken)
+    
+    # origin = [ [75,75], [75,175], [75, 250], [175, 75], [175,175], [175, 250] ]
+    origin_x = 15
+    origin_y = 30
 
-        grid_height = 20
-        grid_width = 20
+    grid_height = 20
+    grid_width = 20
 
-        grid_cols = int( (pdf_w - 50) / grid_width )
-        grid_rows = int( (pdf_h - 70) / grid_height)
-        # print(" cols rows" , grid_cols, grid_rows)
+    grid_cols = int( (pdf_w - 50) / grid_width )
+    grid_rows = int( (pdf_h - 70) / grid_height)
+    
+    rfp_no = 0
+    break_while = 0
+    while rfp_no < num_rfp:
+        
+        pdf.add_page()
+        pdf.add_border()
+        # pdf.add_grid_lines()
+        pdf.cell(40)
+        pdf.cell(100,10, str(rfp_no) + " of " + str(num_rfp) + " Floor Plans",0,1,'C')
 
-        rfp_no = 0
-        break_while = 0
-        while rfp_no < num_rfp:
-            
-            pdf.add_page()
-            pdf.add_border()
-            pdf.cell(40)
-            pdf.cell(100,10, str(rfp_no) + " of " + str(num_rfp) + " Floor Plans",0,1,'C')
+        for i in range(grid_rows):
+            if break_while == 1:
+                break
 
-            for i in range(grid_rows):
-                if break_while == 1:
+            j = 0
+            while j < grid_cols:
+                if rfp_no >= num_rfp:
+                    break_while = 1
                     break
 
-                j = 0
-                while j < grid_cols:
-                    if rfp_no >= num_rfp:
-                        break_while = 1
-                        break
+                rfp_x = origin_x + j * (grid_width + 2)
+                rfp_y = origin_y + i * (grid_height + 2)
+                rfp_data = output_data[rfp_no]
+                draw_one_rfp(pdf, rfp_x, rfp_y, rfp_data, grid_width, grid_height)
+                rfp_no += 1
+                j += 1
+    # pdf.output('latest_catalogue.pdf','F')
+    save(pdf)
 
-                    rfp_x = origin_x + j * (grid_width + 2)
-                    rfp_y = origin_y + i * (grid_height + 2)
-                    rfp_data = output_data[rfp_no]
-                    draw_one_rfp(pdf, rfp_x, rfp_y, rfp_data, grid_width, grid_height)
-                    rfp_no += 1
-                    j += 1
-        pdf.output('latest_catalogue.pdf','F')
+def generate_catalogue_dimensioned(num_rfp, output_data, dimensional_constraints, edges=None, time_taken=None, fpcnt = None):
+    print("[LOG] Downloading Dimensioned Catalogue")
+    pdf = PDF() 
+    add_home_page(pdf, edges, num_rfp, time_taken)
+    add_dimensional_constraints(pdf, dimensional_constraints, fpcnt, num_rfp)
+    
+    # origin = [ [75,75], [75,175], [75, 250], [175, 75], [175,175], [175, 250] ]
+    origin_x = 15
+    origin_y = 30
 
-def generate_catalogue_dimensioned(edges, num_rfp, time_taken, output_data, dimensional_constraints, fpcnt ):
-        print("[LOG] Downloading Dimensioned Catalogue")
-        pdf = PDF() 
-        add_home_page(pdf, edges, num_rfp, time_taken)
-        add_dimensional_constraints(pdf, dimensional_constraints, fpcnt, num_rfp)
-        # origin = [ [75,75], [75,175], [75, 250], [175, 75], [175,175], [175, 250] ]
-        origin_x = 15
-        origin_y = 30
+    grid_height = 50
+    grid_width = 30
 
-        grid_height = 50
-        grid_width = 30
+    grid_cols = int( (pdf_w - 30) / grid_width)
 
-        grid_cols = int( (pdf_w - 30) / grid_width)
+    grid_rows = int( (pdf_h - 30) / grid_height)
+    
+    rfp_no = 0
+    break_while = 0
+    
+    grid_scale = get_scale(output_data[0], grid_width, grid_height) 
+    
+    while rfp_no < num_rfp:
+        
+        pdf.add_page()
+        pdf.add_border_and_grid(grid_scale)
+        pdf.cell(40)
+        pdf.cell(100,10, str(rfp_no) + " of " + str(num_rfp) + " Floor Plans",0,1,'C')
 
-        grid_rows = int( (pdf_h - 30) / grid_height)
-        # print(" cols rows" , grid_cols, grid_rows)
+        for i in range(grid_rows):
+            if break_while == 1:
+                break
 
-        rfp_no = 0
-        break_while = 0
-        while rfp_no < num_rfp:
-            
-            pdf.add_page()
-            pdf.add_border()
-            pdf.cell(40)
-            pdf.cell(100,10, str(rfp_no) + " of " + str(num_rfp) + " Floor Plans",0,1,'C')
-
-            for i in range(grid_rows):
-                if break_while == 1:
+            j = 0
+            while j < grid_cols:
+                if rfp_no >= num_rfp:
+                    break_while = 1
                     break
 
-                j = 0
-                while j < grid_cols:
-                    if rfp_no >= num_rfp:
-                        break_while = 1
-                        break
+                rfp_x = origin_x + j * (grid_width + 2)
+                rfp_y = origin_y + i * (grid_height + 2)
+                rfp_data = output_data[rfp_no]
+                draw_one_rfp(pdf, rfp_x, rfp_y, rfp_data, grid_width, grid_height, dimensioned=1)
+                rfp_no += 1
+                j += 2
+    save(pdf)            
 
-                    rfp_x = origin_x + j * (grid_width + 2)
-                    rfp_y = origin_y + i * (grid_height + 2)
-                    rfp_data = output_data[rfp_no]
-                    draw_one_rfp(pdf, rfp_x, rfp_y, rfp_data, grid_width, grid_height, dimensioned=1)
-                    rfp_no += 1
-                    j += 2
+def save(pdf):
+    win = Tk()
+    win.geometry("250x150")
 
-        win = Tk()
-        win.geometry("750x250")
+    # Define the function
+    def save_file():
+        f = asksaveasfilename(initialfile='Catalogue.pdf', defaultextension=".pdf",
+                                filetypes=[("All Files", "*.*"), ('pdf file', '*.pdf')])
+        pdf.output(f, 'F')
+        print("saved at:", f)
 
-        # Define the function
-        def save_file():
-            f = asksaveasfilename(initialfile='Catalogue.pdf', defaultextension=".pdf",
-                                  filetypes=[("All Files", "*.*"), ('pdf file', '*.pdf')])
-            pdf.output(f, 'F')
-            print("saved at:", f)
-
-        # Create a button
-        btn = Button(win, text="Save", command=lambda: save_file())
-        btn.pack(pady=10)
-        win.after(3000, lambda: win.destroy())
-        win.mainloop()
-
-        # Success alert
-        root = Tk()
-        root.geometry("300x200")
-        w = Label(root, text='Success confirmation', font="30")
-        w.pack()
-        messagebox.showinfo("SUCCESS", "Catalogue downloaded successfully!")
-        root.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# pdf = PDF() #pdf object
-# pdf.add_page()
-# pdf.add_border()
-# pdf.add_title()
-# pdf.set_fill_color(111,111,111)
-# pdf.rect(50,50,50,50,'DF')
-
-# # Set font
-# # pdf.set_font('Arial', 'B', 16)
-# # # Move to 8 cm to the right
-# # pdf.cell(80)
-# # # Centered text in a framed 20*10 mm cell and line break
-# # pdf.cell(20, 10, 'Title', 1, 1, 'C')
-
-
-# pdf.output('test.pdf','F')
+    # Create a button
+    btn = Button(win, text="Save", command=lambda: save_file())
+    btn.pack(pady=10)
+    win.after(3000, lambda: win.destroy())
+    win.mainloop()
