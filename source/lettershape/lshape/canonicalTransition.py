@@ -27,10 +27,10 @@ def vector_prod(p1, p2, p3, nodes_data, canonical_order):
     pos_p1 = nodes_data[int(canonical_order[int(p1)])]
     pos_p2 = nodes_data[int(canonical_order[int(p2)])]
     pos_p3 = nodes_data[int(canonical_order[int(p3)])]
-    x1 = pos_p2.pos_x - pos_p1.pos_x
-    y1 = pos_p2.pos_y - pos_p1.pos_y
-    x2 = pos_p3.pos_x - pos_p2.pos_x
-    y2 = pos_p3.pos_y - pos_p2.pos_y
+    x1 = pos_p2[0] - pos_p1[0]
+    y1 = pos_p2[1] - pos_p1[1]
+    x2 = pos_p3[0] - pos_p2[0]
+    y2 = pos_p3[1] - pos_p2[1]
     return x1 * y2 - x2 * y1
 
 

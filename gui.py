@@ -1110,8 +1110,8 @@ class App:
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
-        self.graphs, coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+        self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
         graphs = self.graphs
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
@@ -1123,9 +1123,9 @@ class App:
 
         for i in range(len(self.graphs)):
             graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.graphs_param[i][3])
+                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
 
-            Lshaped.LShapedFloorplan(graph, gclass.app.nodes_data)
+            Lshaped.LShapedFloorplan(graph, self.coord_list)
 
             # All rels are in it. Currently we have only 1.
             graph.rel_matrix_list.append(graph.matrix)
