@@ -106,6 +106,8 @@ class App:
         self.circ_val = 0
         self.floorplan_graphs = []
         self.arr_altered = False
+        self.dimensional_constraints = []
+        self.room_list = []
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -501,7 +503,9 @@ class App:
         max_aspect = []
         plot_width = -1
         plot_height = -1
+        room_list = []
         for _, room in self.input.rooms.items():
+            room_list.append(room)
             if (room == "Living"):
                 min_width.append(9)
                 min_height.append(11)
@@ -574,6 +578,7 @@ class App:
                 max_aspect.append(2)
         self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         self.dimensional_constraints = [min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        self.room_list = room_list
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
@@ -1226,7 +1231,7 @@ class App:
         self.handle_next_btn()
 
     def download_catalogue(self):
-        generate_catalogue_dimensioned(len(self.graph_objs), self.graph_objs, self.dimensional_constraints)
+        generate_catalogue_dimensioned(len(self.graph_objs), self.graph_objs, self.dimensional_constraints, room_name = self.room_list)
     
     # def run_Circ_Button_click(self):
 
