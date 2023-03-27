@@ -654,8 +654,7 @@ class App:
             event, ax, graph_window))
 
         # add a button to close the window
-        button = tk.Button(master=graph_window, text="Close",
-                           command=graph_window.destroy)
+        button = tk.Button(master=graph_window, text="Close", command=graph_window.destroy)
         button.pack(side=tk.BOTTOM)
 
     def changeDimButtonClick(self):
@@ -681,7 +680,7 @@ class App:
             ]
 
             print("\n\ndimgui.fui_fnc() starts: ")
-            min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, self.graphs_param[0][0])
+            min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, self.graphs_param[0][0], self.room_mapping)
             # should I write (above) :
             # self.graphs_param[0][0] or 
             # self.graph_objs[self.curr_rfp]["nodecnt"]
