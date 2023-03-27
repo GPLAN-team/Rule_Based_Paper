@@ -496,7 +496,7 @@ class App:
         max_aspect = []
         plot_width = -1
         plot_height = -1
-        for _, room in self.input.rooms.items():
+        for i, room in self.input.rooms.items():
             if (room == "Living"):
                 min_width.append(9)
                 min_height.append(11)
@@ -561,12 +561,25 @@ class App:
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
             else:
-                min_width.append(0)
-                min_height.append(0)
-                max_width.append(9999)
-                max_height.append(9999)
-                min_aspect.append(0.5)
-                max_aspect.append(2)
+                # when does it enter this condition,
+                # does it enter only when there's such extra node
+                # in that case, we need not use the if condition
+                # because that would mean merged node exists.
+                if(len(self.mergednodes)==0):
+                    min_width.append(0)
+                    min_height.append(0)
+                    max_width.append(9999)
+                    max_height.append(9999)
+                    min_aspect.append(0.5)
+                    max_aspect.append(2)
+                else:
+                    min_width.append(min_width[self.irreg_nodes1[i]])
+                    min_height.append(min_height[self.irreg_nodes1[i]])
+                    max_width.append(max_width[self.irreg_nodes1[i]])
+                    max_height.append(max_height[self.irreg_nodes1[i]])
+                    min_aspect.append(min_aspect[self.irreg_nodes1[i]])
+                    max_aspect.append(max_aspect[self.irreg_nodes1[i]])
+                
         self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
@@ -956,15 +969,14 @@ class App:
         print("[LOG] Irregular Floorplans Button Clicked")
 
         self.graph_objs = []
-
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
+        print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
         self.irreg_check = 1
         self.interior_rooms.sort()
-        print("Exterior rooms: ", self.exterior_rooms,
-              "  Interior rooms: ", self.interior_rooms)
+        print("Exterior rooms: ", self.exterior_rooms,  "  Interior rooms: ", self.interior_rooms)
 
         # self.GraphStore(False)
 
@@ -1002,9 +1014,7 @@ class App:
         #     graphs = self.graphs
 
         self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(
-                self.input.rooms.values()),
-            fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
         graphs = self.graphs
 
         self.input.add_rooms_from(self.room_mapping)
@@ -1015,11 +1025,10 @@ class App:
         self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
-            graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
+            print("Floorplan exists? ", graph.floorplan_exist)
             if (graph.floorplan_exist):
                 graph_data = {
                     'room_x': graph.room_x,

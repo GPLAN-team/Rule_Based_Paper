@@ -18,9 +18,7 @@ def gui_fnc(old_dims, nodes):
     root.geometry(str(1200) + 'x' + str(700))
     Upper_right = tk.Label(root, text="Enter dimensional constraints for each room", font=("Times New Roman", 12))
 
-    Upper_right.place(relx=0.60,
-                      rely=0.1,
-                      anchor='ne')
+    Upper_right.place(relx=0.60, rely=0.1, anchor='ne')
 
     text_head_width = []
     text_head_width1 = []
