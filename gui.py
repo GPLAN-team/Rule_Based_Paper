@@ -829,49 +829,48 @@ class App:
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms, "\nInterior rooms: ", self.interior_rooms)
 
-        # self.GraphStore(True)
+        self.GraphStore(True)
 
-        # # coord_list =[]
-        # if (not (self.arr_altered) and exists(self.filename)):
-        #     print("File exists")
+        # coord_list =[]
+        if (not (self.arr_altered) and exists(self.filename)):
+            print("File exists")
 
-        # # check_file = os.path.exists(self.filename)
-        # # print(check_file)
-        # # if (check_file):
-        #     with open(self.filename, 'rb') as f:
-        #         list_of_dicts = pickle.load(f)
+        # check_file = os.path.exists(self.filename)
+        # print(check_file)
+        # if (check_file):
+            with open(self.filename, 'rb') as f:
+                list_of_dicts = pickle.load(f)
 
-        #     graphs = [nx.Graph(graph) for graph in list_of_dicts]
+            graphs = [nx.Graph(graph) for graph in list_of_dicts]
 
-        #     self.graphs = graphs
-        #     self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     self.graphs_param = []
-        #     for G in graphs:
-        #         self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-        #             G), G.edges])
+            self.graphs = graphs
+            self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            self.graphs_param = []
+            for G in graphs:
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
+                    G), G.edges])
 
-        # elif (not (self.arr_altered) and not (exists(self.filename))):
-        #     self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     graphs = self.graphs
-        #     list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
+        elif (not (self.arr_altered) and not (exists(self.filename))):
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+            list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
 
-        #     with open(self.filename, 'wb') as f:
-        #         pickle.dump(list_of_dicts, f)
-        # else:
-        #     self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     graphs = self.graphs
+            with open(self.filename, 'wb') as f:
+                pickle.dump(list_of_dicts, f)
+        else:
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
 
-        self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
-        graphs = self.graphs
+        # self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+        #     self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+        # graphs = self.graphs
 
-        # print("\nprinting dimension starts")
-        # print(f"numrows graphs_param: {len(self.graphs_param)}, numcols graphs_param: {len(self.graphs_param[0])}")
-        # print(f"numrows coord_list: {len(self.coord_list)}, numcols coord_list: {len(self.coord_list[0])}")
-        # print("printing dimension ends\n")
+        # self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+        #     self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+        # graphs = self.graphs
 
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
@@ -977,46 +976,46 @@ class App:
         print("Exterior rooms: ", self.exterior_rooms,
               "  Interior rooms: ", self.interior_rooms)
 
-        # self.GraphStore(False)
+        self.GraphStore(False)
 
-        # # coord_list =[]
-        # if (not (self.arr_altered) and exists(self.filename)):
-        #     print("File exists")
+        # coord_list =[]
+        if (not (self.arr_altered) and exists(self.filename)):
+            print("File exists")
 
-        # # check_file = os.path.exists(self.filename)
-        # # print(check_file)
-        # # if (check_file):
-        #     with open(self.filename, 'rb') as f:
-        #         list_of_dicts = pickle.load(f)
+        # check_file = os.path.exists(self.filename)
+        # print(check_file)
+        # if (check_file):
+            with open(self.filename, 'rb') as f:
+                list_of_dicts = pickle.load(f)
 
-        #     graphs = [nx.Graph(graph) for graph in list_of_dicts]
+            graphs = [nx.Graph(graph) for graph in list_of_dicts]
 
-        #     self.graphs = graphs
-        #     self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     self.graphs_param = []
-        #     for G in graphs:
-        #         self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-        #             G), G.edges])
+            self.graphs = graphs
+            self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            self.graphs_param = []
+            for G in graphs:
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
+                    G), G.edges])
 
-        # elif (not (self.arr_altered) and not (exists(self.filename))):
-        #     self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     graphs = self.graphs
-        #     list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
+        elif (not (self.arr_altered) and not (exists(self.filename))):
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
+            list_of_dicts = [nx.to_dict_of_dicts(graph) for graph in graphs]
 
-        #     with open(self.filename, 'wb') as f:
-        #         pickle.dump(list_of_dicts, f)
-        # else:
-        #     self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-        #         self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
-        #     graphs = self.graphs
+            with open(self.filename, 'wb') as f:
+                pickle.dump(list_of_dicts, f)
+        else:
+            self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+                self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
+            graphs = self.graphs
 
-        self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
-            self.exterior_rooms, self.interior_rooms, list(
-                self.input.rooms.values()),
-            fileExists=False, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
-        graphs = self.graphs
+        # self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
+        #     self.exterior_rooms, self.interior_rooms, list(
+        #         self.input.rooms.values()),
+        #     fileExists=False, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies, )
+        # graphs = self.graphs
 
         self.input.add_rooms_from(self.room_mapping)
         self.input.add_doors_from(adjacencies_modified)
@@ -1733,6 +1732,7 @@ class App:
     def recall_room_list_frame(self, frame):
 
         head = tk.Label(frame, text="Room List")
+        rem_room_list = ["Dining", "Store", "WC 2"]
         head.grid(row=0, column=0, padx=5, pady=5)
 
         self.room_label_list = []
@@ -1745,14 +1745,17 @@ class App:
             each_room_label = tk.Label(frame, text=each_room)
             each_room_label.grid(row=i+1, column=0, padx=5, pady=5)
             self.room_label_list.append(each_room_label)
-            if (each_room == "Dining" or each_room == "Store"):
-                each_remove_room_btn = tk.Button(frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
+            if (each_room in rem_room_list):
+                each_remove_room_btn = tk.Button(
+                    frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
                 each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
+                if (each_room != "WC 2"):
+                    each_intext_room_btn = tk.Button(
+                        frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
+                    each_intext_room_btn.grid(
+                        row=i+1, column=2, padx=5, pady=5)
 
-                each_intext_room_btn = tk.Button(frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
-                each_intext_room_btn.grid(row=i+1, column=2, padx=5, pady=5)
-
-                self.interior_rooms_btn_list[each_room] = each_intext_room_btn
+                    self.interior_rooms_btn_list[each_room] = each_intext_room_btn
 
                 self.remove_room_btn_list.append(each_remove_room_btn)
 

@@ -4,6 +4,7 @@
         "WC 1",
         "WC 2",
         "Bed 2",
+        "Dining",
         "Kitchen",
         "Living",
         "Store"
@@ -12,6 +13,10 @@
         [
             0,
             1
+        ],
+        [
+            4,
+            5
         ]
     ]
 }
