@@ -1,13 +1,13 @@
 {
     "rooms": ["Bed 1", "WC 1", "WC 2", "Bed 2", "Dining", "Kitchen", "Living", "Store"],
     "adjacency_constraints": [
-        ["0", "1"],
-        ["4", "5"]
+        ["Bed 1", "WC 1"],
+        ["Dining", "Kitchen"]
     ],
     "non_adjacency_constraints": [
-        ["1", "4"],
-        ["2", "4"],
-        ["1", "2"],
-        ["0", "6"]
+        ["WC 1", "Kitchen"],
+        ["WC 2", "Kitchen"],
+        ["WC 1", "WC 2"],
+        ["Bed 1", "Living"]
     ]
 }
