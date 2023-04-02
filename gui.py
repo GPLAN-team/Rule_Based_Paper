@@ -162,11 +162,11 @@ class App:
         self.circ_Button.grid(row=0, column=5, padx=10, pady=10)
 
         self.showGraph_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="Show Current Graph", font=helv15, command=self.showGraph_Button_click)
+            self.custom_rfp_choice_frame, text="Graph", font=helv15, command=self.showGraph_Button_click)
         self.showGraph_Button.grid(row=0, column=6, padx=10, pady=10)
 
         self.changeDimButton = tk.Button(
-            self.custom_rfp_choice_frame, text="Change Room Dimensions", font=helv15, command=self.changeDimButtonClick)
+            self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
         self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
 
     # def properties_section(self):
@@ -216,13 +216,13 @@ class App:
             self.modify_frame, text="Next", font=helv15, command=self.handle_next_btn)
         self.next_btn.grid(row=9, column=0, padx=10, pady=10)
 
-        self.exit_btn = tk.Button(
-            self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
-        self.exit_btn.grid(row=10, column=0, padx=10, pady=10)
+        # self.exit_btn = tk.Button(
+        #     self.modify_frame, text="Exit", font=helv15, command=self.handle_exit_btn)
+        # self.exit_btn.grid(row=10, column=0, padx=10, pady=10)
 
         self.downnload_Button = tk.Button(
             self.modify_frame, text="Download Catalogue", font=helv15, command=self.download_catalogue)
-        self.downnload_Button.grid(row=11, column=0, padx=10, pady=10)
+        self.downnload_Button.grid(row=10, column=0, padx=10, pady=10)
 
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
         #                              command=self.run_Circ_Button_click)
