@@ -1279,7 +1279,7 @@ class App:
 
     def download_catalogue(self):
         generate_catalogue_dimensioned(len(
-            self.graph_objs), self.graph_objs, self.dimensional_constraints, room_name=self.room_list)
+            self.graph_objs), self.graph_objs, self.dimensional_constraints, room_name=self.room_list, is_rb=True)
 
     # def run_Circ_Button_click(self):
 
