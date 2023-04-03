@@ -72,7 +72,7 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
         l = len(W)
         ver_success = True
     else:
-        # print(f"\n\nb_ub : {b_VER.shape[0]}\n\nA_ub : {A_VER.shape[0]}\n\n")
+        # print(f"\n\nb_ub : {b_VER}\n\nA_ub : {A_VER}\n\n")
         value_opti_ver = scipy.optimize.linprog(f_VER, A_ub=A_VER, b_ub=b_VER, A_eq=Aeq_VER, b_eq=Beq_VER, bounds=(
             1, None), method='interior-point', callback=None, options=None, x0=None)
         X1 = value_opti_ver['x']
@@ -136,7 +136,8 @@ def solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR, Aeq_HOR, Beq_HOR,
             H.append([-1])
         hor_success = True
     else:
-        value_opti_hor = scipy.optimize.linprog(f_HOR, A_ub=A_HOR, b_ub=b_HOR, A_eq=Aeq_HOR, b_eq=Beq_HOR, bounds=(1, None), method='interior-point', callback=None, options=None, x0=None)
+        value_opti_hor = scipy.optimize.linprog(f_HOR, A_ub=A_HOR, b_ub=b_HOR, A_eq=Aeq_HOR, b_eq=Beq_HOR, bounds=(
+            1, None), method='interior-point', callback=None, options=None, x0=None)
 
         X2 = value_opti_hor['x']
         X2 = np.array([X2])

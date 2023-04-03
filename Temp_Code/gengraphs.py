@@ -22,7 +22,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     # n = 5   # Outer boundary Convex Hull
     # m = input("Enter Inner Boundary Vertices")
     # m = 3   # Inner nodes
-    
+
     graph_param = []
     print("PARAMS START")
     print("Exterior rooms: ", ext_rooms)
@@ -31,20 +31,29 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     print("Adjacencies: ", adjacencies)
     print("Non-adjacencies: ", non_adjacencies)
     print("PARAMS END")
+    non_adjacencies_int = []
+    adjacencies_int = []
+    for rules in adjacencies:
+        adjacencies_int.append([rooms.index(rules[0]), rooms.index(rules[1])])
+    for rules in non_adjacencies:
+        non_adjacencies_int.append(
+            [rooms.index(rules[0]), rooms.index(rules[1])])
 
     rad = 1
     e = (3*(n+m)-n)-3   # Edges for Triangular faces
 
     def _draw_regular_polygon(center, radius, n, m, angle, **kwargs):
         angle -= (math.pi/n)
-        coord_list = [(center[0] + radius * math.sin((2*math.pi/n) * i - angle), center[1] + radius * math.cos((2*math.pi/n) * i - angle)) for i in range(n)]
+        coord_list = [(center[0] + radius * math.sin((2*math.pi/n) * i - angle),
+                       center[1] + radius * math.cos((2*math.pi/n) * i - angle)) for i in range(n)]
         for i in range(m):
-            coord_list.append((center[0]-radius + (i+1)*(2*radius)/(m+1), center[1]))
+            coord_list.append(
+                (center[0]-radius + (i+1)*(2*radius)/(m+1), center[1]))
         return coord_list
 
     angle = math.pi/n
-    if (n%4==0):
-        angle=0
+    if (n % 4 == 0):
+        angle = 0
 
     coord_list = _draw_regular_polygon((3, 3), rad, n, m, 0)
     # print(coord_list)
@@ -75,14 +84,14 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     constraints_exc = []
 
     # Adding adjacency and non-adjacency constraints
-    for rule in adjacencies:
+    for rule in adjacencies_int:
         a = min(rule[0], rule[1])
         b = max(rule[0], rule[1])
         if a == b:
             continue
         constraints_inc.append((a, b))
 
-    for rule in non_adjacencies:
+    for rule in non_adjacencies_int:
         a = min(rule[0], rule[1])
         b = max(rule[0], rule[1])
         if a == b:
@@ -111,6 +120,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     def map_constraints(perm):
         new_constraints_inc = []
         new_constraints_exc = []
+
         for rule in constraints_inc:
             a = None
             b = None
@@ -179,7 +189,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     valid_perm = []
     perm = permutations(ext_rooms, n)
     for p in perm:
-        new_constraints_inc, new_constraints_exc, valid = check_validity_of_permutation(p)
+        new_constraints_inc, new_constraints_exc, valid = check_validity_of_permutation(
+            p)
         if valid == True:
             print("Found valid permutation ", p)
             valid_perm = list(p)
@@ -204,9 +215,19 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
     new_constraints_inc_unmodified = new_constraints_inc
 
-    new_constraints_inc = list(set(new_constraints_inc).difference(set(constraints_incbdry)))
+    new_constraints_inc = list(
+        set(new_constraints_inc).difference(set(constraints_incbdry)))
     print("Additions in Inclusion constraints: ", new_constraints_inc)
     print("Additions in Exclusion constraints: ", new_constraints_exc)
+
+    new_inc_constraints = []
+    for rules in new_constraints_inc_unmodified:
+        new_inc_constraints.append(
+            [perm_mapping[rules[0]], perm_mapping[rules[1]]])
+    new_exc_constraints = []
+    for rules in new_constraints_exc:
+        new_exc_constraints.append(
+            [perm_mapping[rules[0]], perm_mapping[rules[1]]])
 
     # ----------------------------PERMUTATION END ---------------------------
 
@@ -243,7 +264,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
     # ALL Triangulated Graphs have same no of edges
 
-    comb = combinations(listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
+    comb = combinations(
+        listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
     for i in list(comb):
         H = nx.Graph()
         H.add_nodes_from(G)
@@ -273,7 +295,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
         xcoord = [x for x, _ in positions]
         ycoord = [y for _, y in positions]
 
-        flag = gc.check_intersection(np.array(xcoord), np.array(ycoord), matrix)
+        flag = gc.check_intersection(
+            np.array(xcoord), np.array(ycoord), matrix)
         # print(flag)
 
         if (not flag):
@@ -344,7 +367,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     for P in permgraphs:
         all_cliques = list(nx.enumerate_all_cliques(P))
         all_triangles = [sorted(i) for i in all_cliques if len(i) == 3]
-        all_triangles = [list(triangle) for triangle in np.unique(all_triangles, axis=0)]
+        all_triangles = [list(triangle)
+                         for triangle in np.unique(all_triangles, axis=0)]
 
         origin_pos = positions
 
@@ -362,7 +386,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
                 # Search for node within triangle
                 if (septri.point_in_triangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0], origin_pos[face[1]][1],
-                            origin_pos[face[2]][0], origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
+                                             origin_pos[face[2]][0], origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
                     flag = True
                     break
 
@@ -376,7 +400,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
             else:
                 # Add ST information to separating_triangles, separating_edges and separating_edge_to_triangles
-                separating_triangle = tuple(sorted([face[0], face[1], face[2]]))
+                separating_triangle = tuple(
+                    sorted([face[0], face[1], face[2]]))
                 separating_triangles.append(separating_triangle)
 
                 edges = septri.get_edges(face)
@@ -385,7 +410,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
                 for edge in edges:
                     if (edge not in separating_edge_to_triangles):
                         separating_edge_to_triangles[edge] = []
-                    separating_edge_to_triangles[edge].append(separating_triangle)
+                    separating_edge_to_triangles[edge].append(
+                        separating_triangle)
 
         if (separating_triangles != []):
             septri_info.append(True)
@@ -408,7 +434,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
                 # plt.savefig('RFP_'+str(i))
                 count_non_septri += 1
                 final_graphs.append(permgraphs[i])
-                graph_param.append([nodecnt, nx.number_of_edges(permgraphs[i]), permgraphs[i].edges])
+                graph_param.append([nodecnt, nx.number_of_edges(
+                    permgraphs[i]), permgraphs[i].edges])
         print(count_non_septri, "graphs without separating triangles")
 
     else:
@@ -419,7 +446,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
                 # plt.savefig('OFP_'+str(i))
                 count_non_septri += 1
                 final_graphs.append(permgraphs[i])
-                graph_param.append([nodecnt, nx.number_of_edges(permgraphs[i]), permgraphs[i].edges])
+                graph_param.append([nodecnt, nx.number_of_edges(
+                    permgraphs[i]), permgraphs[i].edges])
         print("#Graphs without separating triangles: ", count_non_septri)
 
     # # DIMENSIONING PART
@@ -485,5 +513,8 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
     # print(graph_data['area'])
     # print("\n\n\n")
 
-    return final_graphs, coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc, graph_param
+    print(" new_inc_constraints - ", new_inc_constraints)
+    print(" new_exc_constraints - ", new_exc_constraints)
+
+    return final_graphs, coord_list, perm_mapping, new_inc_constraints, new_exc_constraints, graph_param
     # %%

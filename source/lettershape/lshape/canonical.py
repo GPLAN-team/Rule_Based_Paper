@@ -47,8 +47,8 @@ class canonical:
     def displayInputGraph(self, noOfNodes, matrix, nodes_data):
         for i in nodes_data:  # To get the Coordinates of the nodes
             temp_node_data = []
-            temp_node_data.append(i.pos_x)
-            temp_node_data.append(i.pos_y)
+            temp_node_data.append(i[0])
+            temp_node_data.append(i[1])
             self.node_coordinate.append(temp_node_data)
 
         self.graph_data = {'iteration': np.zeros(noOfNodes), 'marked': np.zeros(noOfNodes), 'neighbors': [],

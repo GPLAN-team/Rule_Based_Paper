@@ -18,24 +18,19 @@ class Input:
     def add_doors_from(self, adjcancy_list):
         self.adjacencies.clear()
         for each_list in adjcancy_list:
-            int_list = []
+            adj_list = []
 
             for each_ele in each_list:
-                int_list.append(int(each_ele))
+                adj_list.append(each_ele)
 
-            self.adjacencies.append(int_list)
-            
+            self.adjacencies.append(adj_list)
+
     def add_non_adjacencies_from(self, non_adjacency_list):
         self.non_adjacencies.clear()
         for each_list in non_adjacency_list:
-            int_list = []
+            nadj_list = []
 
             for each_ele in each_list:
-                int_list.append(int(each_ele))
+                nadj_list.append(each_ele)
 
-            self.non_adjacencies.append(int_list)
-
-
-        
-        
-
+            self.non_adjacencies.append(nadj_list)
