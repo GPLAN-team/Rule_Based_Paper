@@ -170,7 +170,7 @@ def triangulate(vertices, max_iterations=0):
     """
 
     n, m = vertices.shape
-    indices = np.zeros([n-2, 3], dtype=np.int)
+    indices = np.zeros([n-2, 3], dtype= int)
 
     #print('shape: {}x{}'.format(n,m))
 
@@ -209,7 +209,7 @@ def triangulate(vertices, max_iterations=0):
             is_ear = False
 
         if is_ear:
-            indices[index_counter, :] = np.array([i, j, k], dtype=np.int)
+            indices[index_counter, :] = np.array([i, j, k], dtype= int)
             index_counter += 1
             vertlist.remove(node.data)
         it_counter += 1

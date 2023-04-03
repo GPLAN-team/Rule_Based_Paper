@@ -796,10 +796,47 @@ class App:
             self.floorplan_graphs[self.curr_rfp].remove_edge(*clicked_edge)
             is_triangulate = traingulated(
                 nx.Graph(self.floorplan_graphs[self.curr_rfp]))
+        
+        
             if is_triangulate:
+                
+
+                                 
                 ax.clear()
                 self.draw_graph(ax)
                 ax.set_title("Floor Plan Graph (click an edge to remove it)")
+                ax.figure.canvas.draw()
+                # self.update_floorplan()
+                
+                graph_param = []
+                graph_param.append([len(self.input.rooms),nx.number_of_edges(self.floorplan_graphs[self.curr_rfp]),self.floorplan_graphs[self.curr_rfp].edges])
+                graph = inputgraph.InputGraph(graph_param[0][0], graph_param[0][1], graph_param[0][2], self.coord_list)
+                graph.irreg_multiple_dual() # generates dual for the computed graph and corresponding encoded matrix and rel matrix
+                graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3], self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
+                print("Floorplan exists? ", graph.floorplan_exist)
+                if(graph.floorplan_exist):
+                    # considering only those graphs for which floorplan exists
+                    graph_data = {
+                        'room_x': graph.room_x,
+                        'room_y': graph.room_y,
+                        'room_width': graph.room_width,
+                        'room_height': graph.room_height,
+                        'area': graph.area,
+                        'extranodes': graph.extranodes,
+                        'mergednodes': graph.mergednodes,
+                        'irreg_nodes': graph.irreg_nodes1,
+                        'nodecnt': graph_param[0][0],
+                        'edgecnt': graph_param[0][1],
+                        'edgeset': graph_param[0][2],
+                        'coord': self.coord_list
+                    }
+                    floorplan_window = tk.Toplevel()
+                    floorplan_window.title("New Floorplan")
+                    floorplan_window.config(width=300, height=200)
+                    self.draw_one_rfp(graph_data)
+                
+                
             else:
                 # show an error message if the graph is not triangulated
                 ax.set_title(
@@ -810,6 +847,89 @@ class App:
             pass
 
         ax.figure.canvas.draw()
+        # graph_data = self.graph_objs[self.curr_rfp]
+        # self.draw_one_rfp(graph_data)
+    
+    # def update_floorplan(self):
+    #     # create a new empty dictionary to store the updated floorplan information
+    #     new_floorplan = {}
+
+    #     # iterate over each room in the original floorplan and create a new graph for it based on the modified graph
+    #     for room, graph in self.graph_data.items():
+    #         new_graph = nx.Graph()
+    #         for u, v in graph.edges():
+    #             if self.floorplan_graphs[self.curr_rfp].has_edge(u, v):
+    #                 new_graph.add_edge(u, v)
+    #         new_floorplan[room] = new_graph
+
+    #     # update the graph_data dictionary with the new floorplan information
+    #     self.graph_objs[self.curr_rfp] = new_floorplan
+
+    # def on_edge_click(self, event, ax, graph_window):
+    #     # get the mouse coordinates and the graph layout
+    #     x, y = event.xdata, event.ydata
+    #     pos = nx.kamada_kawai_layout(self.floorplan_graphs[self.curr_rfp])
+
+    #     # find the clicked edge, if any
+    #     clicked_edge = None
+    #     min_dist = float('inf')
+    #     for u, v in self.floorplan_graphs[self.curr_rfp].edges():
+    #         # iterate over each edge segment
+    #         for i in range(len(pos[u])-1):
+    #             p1 = np.array([pos[u][i], pos[u][i+1]])
+    #             p2 = np.array([pos[v][i], pos[v][i+1]])
+
+    #             # calculate the distance from the mouse click to the edge segment
+    #             dist = np.linalg.norm(
+    #                 np.cross(p2-p1, p1-np.array([x, y])))/np.linalg.norm(p2-p1)
+
+    #             if dist < min_dist and dist < 0.05:  # check if the distance is small enough to be considered a click on the edge
+    #                 min_dist = dist
+    #                 clicked_edge = (u, v)
+
+    #     def traingulated(G):
+    #         for cycle in nx.cycle_basis(G):
+    #             if len(cycle) >= 4 and not nx.chordal.is_chordal(nx.Graph(G.subgraph(cycle))):
+    #                 return False
+    #         return True
+
+    #     if clicked_edge is not None:
+    #         # remove the clicked edge and redraw the graph
+    #         modified_graph = nx.Graph(self.floorplan_graphs[self.curr_rfp])
+    #         modified_graph.remove_edge(*clicked_edge)
+
+    #         is_triangulate = traingulated(modified_graph)
+    #         if is_triangulate:
+    #             # create a new floorplan based on the modified graph
+    #             new_floorplan = []
+    #             for i, (x, y) in enumerate(pos.values()):
+    #                 new_floorplan.append({'id': i, 'x': x, 'y': y})
+
+    #             new_graph_data = {
+    #                 'vertices': self.graph_data[self.curr_rfp]['vertices'],
+    #                 'edges': [(u, v) for u, v in modified_graph.edges()]
+    #             }
+
+    #             self.floorplan_graphs[self.curr_rfp] = modified_graph
+    #             self.graph_data[self.curr_rfp] = new_graph_data
+
+    #             # redraw the graph and update the title
+    #             ax.clear()
+    #             self.draw_graph(ax)
+    #             ax.set_title("Floor Plan Graph (click an edge to remove it)")
+    #         else:
+    #             # show an error message if the graph is not triangulated
+    #             ax.set_title(
+    #                 "Floor Plan Graph - Cannot remove edge because graph is not triangulated")
+    #             print("Error: Graph is not triangulated.")
+    #     else:
+    #         # do nothing if the click is on white space
+    #         pass
+
+    #     ax.figure.canvas.draw()
+    #     graph_data = self.graph_objs[self.curr_rfp]
+    #     self.draw_one_rfp(graph_data)
+
 
     def run_Rect_Button_click(self):
 
