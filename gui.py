@@ -114,8 +114,7 @@ class App:
         self.root.title("Rule Based GPLAN")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
-        self.root.geometry(str(str(self.screen_width) +
-                           'x' + str(self.screen_height)))
+        self.root.geometry(str(str(self.screen_width) + 'x' + str(self.screen_height)))
 
     def add_logo(self):
         self.logo_frame = tk.Frame(self.root)
@@ -129,20 +128,16 @@ class App:
         self.custom_rfp_choice_frame.grid(row=0, column=1, padx=10, pady=10)
         # master = self.custom_rfp_choice_frame
 
-        self.oneBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="1 BHK", font=helv15, command=self.oneBHK_Button_click)
+        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15, command=self.oneBHK_Button_click)
         self.oneBHK_Button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.twoBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="2 BHK", font=helv15, command=self.twoBHK_Button_click)
+        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv15, command=self.twoBHK_Button_click)
         self.twoBHK_Button.grid(row=0, column=1, padx=10, pady=10)
 
-        self.threeBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="3 BHK", font=helv15, command=self.threeBHK_Button_click)
+        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv15, command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
 
-        self.reset_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="Reset", font=helv15, command=self.reset_Button_click)
+        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15, command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
         self.dimCheckVar = tk.IntVar(value=1)
@@ -153,20 +148,16 @@ class App:
         # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15, command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
         # self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15,
-                                          command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
+        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15, command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
         self.grid_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15,
-                                          command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
+        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15, command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
         self.circ_Button.grid(row=0, column=5, padx=10, pady=10)
 
-        self.showGraph_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="Graph", font=helv15, command=self.showGraph_Button_click)
+        self.showGraph_Button = tk.Button(self.custom_rfp_choice_frame, text="Graph", font=helv15, command=self.showGraph_Button_click)
         self.showGraph_Button.grid(row=0, column=6, padx=10, pady=10)
 
-        self.changeDimButton = tk.Button(
-            self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
+        self.changeDimButton = tk.Button(self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
         self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
 
     # def properties_section(self):
@@ -867,7 +858,6 @@ class App:
         ax.figure.canvas.draw()
 
     def run_Rect_Button_click(self):
-
         print("[LOG] Rectangular Floorplans Button Clicked")
 
         self.graph_objs = []
@@ -877,8 +867,7 @@ class App:
         self.create_inputgraph_json()
         # graphs = runner(False)
         self.interior_rooms.sort()
-        print("Exterior rooms: ", self.exterior_rooms,
-              "\nInterior rooms: ", self.interior_rooms)
+        print("Exterior rooms: ", self.exterior_rooms, "\nInterior rooms: ", self.interior_rooms)
 
         self.GraphStore(True)
 
@@ -899,8 +888,7 @@ class App:
                 self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
             self.graphs_param = []
             for G in graphs:
-                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-                    G), G.edges])
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(G), G.edges])
 
         elif (not (self.arr_altered) and not (exists(self.filename))):
             self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
@@ -925,17 +913,16 @@ class App:
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
         self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                        symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
-            graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             # above creates a graph with provided data
             # generates dual for the computed graph and corresponding encoded matrix and rel matrix
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
             print("Floorplan exists? ", graph.floorplan_exist)
             if (graph.floorplan_exist):
@@ -1043,8 +1030,7 @@ class App:
                 self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
             self.graphs_param = []
             for G in graphs:
-                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-                    G), G.edges])
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(G), G.edges])
 
         elif (not (self.arr_altered) and not (exists(self.filename))):
             self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
@@ -1071,14 +1057,18 @@ class App:
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
         self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                        symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
+            # representing node count, edge count, edge set, node coordinates as the 4-tuple
             graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            # above creates a graph with provided data
+            # generates dual for the computed graph and corresponding encoded matrix and rel matrix
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
+            print("Floorplan exists? ", graph.floorplan_exist)
             if (graph.floorplan_exist):
                 graph_data = {
                     'room_x': graph.room_x,
@@ -1088,10 +1078,13 @@ class App:
                     'area': graph.area,
                     'extranodes': graph.extranodes,
                     'mergednodes': graph.mergednodes,
-                    'irreg_nodes': graph.irreg_nodes1
+                    'irreg_nodes': graph.irreg_nodes1,
+                    'nodecnt': self.graphs_param[i][0],
+                    'edgecnt': self.graphs_param[i][1],
+                    'edgeset': self.graphs_param[i][2],
+                    'coord': self.coord_list
                 }
-                print(
-                    f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
+                print(f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
 
