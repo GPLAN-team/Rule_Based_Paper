@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from itertools import combinations, permutations
 import math
 import numpy as np
+import time
 from . import graph_crossings as gc
 from . import triangularity as trg
 from . import septri as septri
@@ -41,6 +42,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
     rad = 1
     e = (3*(n+m)-n)-3   # Edges for Triangular faces
+    print("Edges - ", e)
 
     def _draw_regular_polygon(center, radius, n, m, angle, **kwargs):
         angle -= (math.pi/n)
@@ -194,327 +196,532 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
         if valid == True:
             print("Found valid permutation ", p)
             valid_perm = list(p)
+            print("New inclusion constraints: ", new_constraints_inc)
+            print("New exclusion constraints: ", new_constraints_exc)
+            # %%
+            valid_perm.extend(int_rooms)
+
+            # MAPPING BETWEEN ROOM NUMBERS AND ROOM NAMES
+            perm_mapping = [rooms[i] for i in valid_perm]
+            print("Valid permutation mapping rooms: ", perm_mapping)
+            # %%
+            constraints_incbdry = [(i, i+1) for i in range(n-1)]
+            if n >= 4:
+                constraints_incbdry.append((0, n-1))
+            else:
+                raise ValueError('value of n is not in permissible limits!')
+
+            new_constraints_inc_unmodified = new_constraints_inc
+
+            new_constraints_inc = list(
+                set(new_constraints_inc).difference(set(constraints_incbdry)))
+            print("Additions in Inclusion constraints: ", new_constraints_inc)
+            print("Additions in Exclusion constraints: ", new_constraints_exc)
+
+            new_inc_constraints = []
+            for rules in new_constraints_inc_unmodified:
+                new_inc_constraints.append(
+                    [perm_mapping[rules[0]], perm_mapping[rules[1]]])
+            new_exc_constraints = []
+            for rules in new_constraints_exc:
+                new_exc_constraints.append(
+                    [perm_mapping[rules[0]], perm_mapping[rules[1]]])
+
+            if (fileExists):
+                return coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc
+
+            listedges = []
+            for i in range(0, n+m-1):
+                for j in range(i+1, n+m):
+                    if (((i, j) not in constraints_incbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
+                        listedges.append((i, j))
+            print("Listedges: ", listedges)
+
+            listgraphs = []
+
+            # %%
+            # USING COMBINATION OF THOSE EDGES AND ADDING EDGES CORRESPONDING TO THE CONSTRAINTS TO GENERATE GRAPHS AND CHECK PLANARITY AND BI-CONNECTEDNESS
+
+            # ALL Triangulated Graphs have same no of edges
+
+            t1 = time.time()
+            print("e - len(new_constraints_inc) - len(constraints_incbdry) - ",
+                  e - len(new_constraints_inc) - len(constraints_incbdry))
+            comb = combinations(
+                listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
+            # print("len(list(comb)) - ", len(list(comb)))
+            # print("comb : ", comb)
+            # for i in comb:
+            #     print("i: ", i)
+            for i in comb:
+                H = nx.Graph()
+                H.add_nodes_from(G)
+                H.add_edges_from(new_constraints_inc)
+                H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
+                for source, target in i:
+                    H.add_edge(source, target)
+                # pos = nx.planar_layout(H)
+                t = nx.check_planarity(H, counterexample=False)
+                # if (not (t[0])):
+                #     nx.draw(H, with_labels=True, pos=coord_list)
+                #     # nx.draw(H, pos=nx.planar_layout(H))
+                #     plt.show()
+                # print("T[0] : ", t[0])
+                if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+                    listgraphs.append(H)
+                # if (time.time()-t1 > 100):
+                #     break
+
+            print("#Listgraphs: ", len(listgraphs))
+            if (len(listgraphs) == 0):
+                continue
+            # %%
+            # APPLYING SWEEP LINE ALGO FOR ALL GRAPHS
+
+            nodes = G.nodes
+            nodecnt = len(nodes)
+            positions = [y for (_, y) in G.nodes.data("pos")]
+            xcoord = [x for x, _ in positions]
+            ycoord = [y for _, y in positions]
+            permgraphs = []
+            for P in listgraphs:
+                edges = P.edges
+                edgecnt = len(edges)
+                matrix = np.zeros((nodecnt, nodecnt), int)
+                for edge in (edges):
+                    matrix[edge[0]][edge[1]] = 1
+                    matrix[edge[1]][edge[0]] = 1
+
+                flag = gc.check_intersection(
+                    np.array(xcoord), np.array(ycoord), matrix)
+                # print(flag)
+
+                if (not flag):
+                    permgraphs.append(P)
+                # else:
+                #     nx.draw(P, with_labels=True, pos=coord_list)
+                #     plt.show()
+            print("#Permgraphs: ", len(permgraphs))
+            if (len(permgraphs) == 0):
+                continue
+
+            septri_info = []
+            for P in permgraphs:
+                all_cliques = list(nx.enumerate_all_cliques(P))
+                all_triangles = [sorted(i) for i in all_cliques if len(i) == 3]
+                all_triangles = [list(triangle)
+                                 for triangle in np.unique(all_triangles, axis=0)]
+
+                origin_pos = positions
+
+                trianlular_faces = []
+                separating_triangles = []
+                separating_edges = []  # edges of separating triangles
+                separating_edge_to_triangles = dict()
+                edge_to_faces = dict()
+
+                for face in all_triangles:
+                    flag = False
+                    for NodeID in range(n+m):
+                        if NodeID in face:
+                            continue
+
+                        # Search for node within triangle
+                        if (septri.point_in_triangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0], origin_pos[face[1]][1],
+                                                     origin_pos[face[2]][0], origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
+                            flag = True
+                            break
+
+                    if not flag:
+                        # Add face information to edge_to_faces
+                        trianlular_faces.append(face)
+                        for edge in septri.get_edges(face):
+                            if (edge not in edge_to_faces):
+                                edge_to_faces[edge] = []
+                            edge_to_faces[edge].append(face)
+
+                    else:
+                        # Add ST information to separating_triangles, separating_edges and separating_edge_to_triangles
+                        separating_triangle = tuple(
+                            sorted([face[0], face[1], face[2]]))
+                        separating_triangles.append(separating_triangle)
+
+                        edges = septri.get_edges(face)
+                        separating_edges.extend(edges)
+
+                        for edge in edges:
+                            if (edge not in separating_edge_to_triangles):
+                                separating_edge_to_triangles[edge] = []
+                            separating_edge_to_triangles[edge].append(
+                                separating_triangle)
+
+                if (separating_triangles != []):
+                    septri_info.append(True)
+                else:
+                    septri_info.append(False)
+
+            # for i in septri_info:
+            #     print(i)
+
+            # print("Graphs without Separating Triangle: \n")
+            print(f"Septri Info : {septri_info}")
+            final_graphs = []
+            count_non_septri = 0
+
+            if rect_floorplans == True:
+                for i in range(0, len(permgraphs)):
+                    if septri_info[i] == False:
+                        # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                        # plt.show()
+                        # plt.savefig('RFP_'+str(i))
+                        count_non_septri += 1
+                        final_graphs.append(permgraphs[i])
+                        graph_param.append([nodecnt, nx.number_of_edges(
+                            permgraphs[i]), permgraphs[i].edges])
+                print(count_non_septri, "graphs without separating triangles")
+
+            else:
+                for i in range(0, len(permgraphs)):
+                    if septri_info[i] == True:
+                        # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+                        # plt.show()
+                        # plt.savefig('OFP_'+str(i))
+                        count_non_septri += 1
+                        final_graphs.append(permgraphs[i])
+                        graph_param.append([nodecnt, nx.number_of_edges(
+                            permgraphs[i]), permgraphs[i].edges])
+                print("#Graphs with separating triangles: ", count_non_septri)
             break
         else:
             continue
 
-    print("New inclusion constraints: ", new_constraints_inc)
-    print("New exclusion constraints: ", new_constraints_exc)
-    # %%
-    valid_perm.extend(int_rooms)
+    # print("New inclusion constraints: ", new_constraints_inc)
+    # print("New exclusion constraints: ", new_constraints_exc)
+    # # %%
+    # valid_perm.extend(int_rooms)
 
-    # MAPPING BETWEEN ROOM NUMBERS AND ROOM NAMES
-    perm_mapping = [rooms[i] for i in valid_perm]
-    print("Valid permutation mapping rooms: ", perm_mapping)
-    # %%
-    constraints_incbdry = [(i, i+1) for i in range(n-1)]
-    if n >= 4:
-        constraints_incbdry.append((0, n-1))
-    else:
-        raise ValueError('value of n is not in permissible limits!')
+    # # MAPPING BETWEEN ROOM NUMBERS AND ROOM NAMES
+    # perm_mapping = [rooms[i] for i in valid_perm]
+    # print("Valid permutation mapping rooms: ", perm_mapping)
+    # # %%
+    # constraints_incbdry = [(i, i+1) for i in range(n-1)]
+    # if n >= 4:
+    #     constraints_incbdry.append((0, n-1))
+    # else:
+    #     raise ValueError('value of n is not in permissible limits!')
 
-    new_constraints_inc_unmodified = new_constraints_inc
+    # new_constraints_inc_unmodified = new_constraints_inc
 
-    new_constraints_inc = list(
-        set(new_constraints_inc).difference(set(constraints_incbdry)))
-    print("Additions in Inclusion constraints: ", new_constraints_inc)
-    print("Additions in Exclusion constraints: ", new_constraints_exc)
+    # new_constraints_inc = list(
+    #     set(new_constraints_inc).difference(set(constraints_incbdry)))
+    # print("Additions in Inclusion constraints: ", new_constraints_inc)
+    # print("Additions in Exclusion constraints: ", new_constraints_exc)
 
-    new_inc_constraints = []
-    for rules in new_constraints_inc_unmodified:
-        new_inc_constraints.append(
-            [perm_mapping[rules[0]], perm_mapping[rules[1]]])
-    new_exc_constraints = []
-    for rules in new_constraints_exc:
-        new_exc_constraints.append(
-            [perm_mapping[rules[0]], perm_mapping[rules[1]]])
+    # new_inc_constraints = []
+    # for rules in new_constraints_inc_unmodified:
+    #     new_inc_constraints.append(
+    #         [perm_mapping[rules[0]], perm_mapping[rules[1]]])
+    # new_exc_constraints = []
+    # for rules in new_constraints_exc:
+    #     new_exc_constraints.append(
+    #         [perm_mapping[rules[0]], perm_mapping[rules[1]]])
 
-    # ----------------------------PERMUTATION END ---------------------------
+    # # ----------------------------PERMUTATION END ---------------------------
 
-    if (fileExists):
-        return coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc
-    # nx.draw(G, with_labels=True, pos=pos)
-    # plt.show()
-    # plt.savefig('nodes_positioning')
+    # if (fileExists):
+    #     return coord_list, perm_mapping, new_constraints_inc_unmodified, new_constraints_exc
+    # # nx.draw(G, with_labels=True, pos=pos)
+    # # plt.show()
+    # # plt.savefig('nodes_positioning')
 
-    listedges = []
-    for i in range(0, n+m-1):
-        for j in range(i+1, n+m):
-            if (((i, j) not in constraints_incbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
-                listedges.append((i, j))
-    print("Listedges: ", listedges)
+    # listedges = []
+    # for i in range(0, n+m-1):
+    #     for j in range(i+1, n+m):
+    #         if (((i, j) not in constraints_incbdry) and ((i, j) not in new_constraints_exc) and ((i, j) not in new_constraints_inc)):
+    #             listedges.append((i, j))
+    # print("Listedges: ", listedges)
 
-    listgraphs = []
+    # listgraphs = []
 
-    # %%
-    # USING COMBINATION OF THOSE EDGES AND ADDING EDGES CORRESPONDING TO THE CONSTRAINTS TO GENERATE GRAPHS AND CHECK PLANARITY AND BI-CONNECTEDNESS
+    # # %%
+    # # USING COMBINATION OF THOSE EDGES AND ADDING EDGES CORRESPONDING TO THE CONSTRAINTS TO GENERATE GRAPHS AND CHECK PLANARITY AND BI-CONNECTEDNESS
 
-    # for i in range(1, 10):
-    #     comb = combinations(listedges, i+1)
-    #     for i in list(comb):
-    #         H = nx.Graph()
-    #         H.add_nodes_from(G)
-    #         H.add_edges_from(constraints_inc)
-    #         H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
-    #         for source, target in i:
-    #             H.add_edge(source, target)
-    #         t = nx.check_planarity(H, counterexample=False)
-    #         if(t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
-    #             listgraphs.append(H)
+    # # for i in range(1, 10):
+    # #     comb = combinations(listedges, i+1)
+    # #     for i in list(comb):
+    # #         H = nx.Graph()
+    # #         H.add_nodes_from(G)
+    # #         H.add_edges_from(constraints_inc)
+    # #         H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
+    # #         for source, target in i:
+    # #             H.add_edge(source, target)
+    # #         t = nx.check_planarity(H, counterexample=False)
+    # #         if(t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+    # #             listgraphs.append(H)
 
-    # ALL Triangulated Graphs have same no of edges
+    # # ALL Triangulated Graphs have same no of edges
+    # print("e - len(new_constraints_inc) - len(constraints_incbdry) - ",
+    #       e - len(new_constraints_inc) - len(constraints_incbdry))
+    # comb = combinations(
+    #     listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
+    # # print("len(list(comb)) - ", len(list(comb)))
+    # # print("comb : ", comb)
+    # # for i in comb:
+    # #     print("i: ", i)
+    # for i in comb:
+    #     H = nx.Graph()
+    #     H.add_nodes_from(G)
+    #     H.add_edges_from(new_constraints_inc)
+    #     H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
+    #     for source, target in i:
+    #         H.add_edge(source, target)
 
-    comb = combinations(
-        listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
-    for i in list(comb):
-        H = nx.Graph()
-        H.add_nodes_from(G)
-        H.add_edges_from(new_constraints_inc)
-        H.add_edges_from(constraints_incbdry)    # CONSTRAINT EDGES
-        for source, target in i:
-            H.add_edge(source, target)
-        t = nx.check_planarity(H, counterexample=False)
-        if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
-            listgraphs.append(H)
+    #     t = nx.check_planarity(H, counterexample=False)
+    #     if (not (t[0])):
+    #         nx.draw(H, with_labels=True, pos=coord_list)
+    #         plt.show()
+    #         print("T[0] : ", t[0])
+    #     if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+    #         listgraphs.append(H)
 
-    print("#Listgraphs: ", len(listgraphs))
-    # %%
-    # APPLYING SWEEP LINE ALGO FOR ALL GRAPHS
+    # print("#Listgraphs: ", len(listgraphs))
+    # # %%
+    # # APPLYING SWEEP LINE ALGO FOR ALL GRAPHS
 
-    nodes = G.nodes
-    nodecnt = len(nodes)
-    positions = [y for (_, y) in G.nodes.data("pos")]
-    permgraphs = []
-    for P in listgraphs:
-        edges = P.edges
-        edgecnt = len(edges)
-        matrix = np.zeros((nodecnt, nodecnt), int)
-        for edge in (edges):
-            matrix[edge[0]][edge[1]] = 1
-            matrix[edge[1]][edge[0]] = 1
-        xcoord = [x for x, _ in positions]
-        ycoord = [y for _, y in positions]
-
-        flag = gc.check_intersection(
-            np.array(xcoord), np.array(ycoord), matrix)
-        # print(flag)
-
-        if (not flag):
-            permgraphs.append(P)
-
-    print("#Permgraphs: ", len(permgraphs))
-    # %%
-    # nx.draw(permgraphs[2], with_labels=True, pos=pos)
-
-    # plt.show()
-
-    # %%
-    # TRIANGULATION
-    positions = nx.get_node_attributes(G, 'pos')
-    tri_graphs = []  # list of trinagulated graphs - PTGs
-    # flag of triangulated or not for all the permgraphs (just for testing)
-    tri_flag = []
-    i = 1
-    maxi = 0
-    mini = 20
-    for P in permgraphs:
-        non_tri_faces = trg.get_nontriangular_face(positions, P)
-        tri_edges = trg.get_tri_edges(non_tri_faces, positions)
-
-        if tri_edges == []:
-            maxi = max(maxi, len(P.edges()))
-            mini = min(mini, len(P.edges()))
-            tri_graphs.append(P)
-            tri_flag.append(True)
-            # plt.figure(i)
-            i += 1
-            # nx.draw(P, with_labels=True, pos = pos)
-        else:
-            tri_flag.append(False)
-
-    # print(len(tri_graphs))
-    # print(maxi)
-    # print(mini)
-    # for P in tri_graphs:
-    #     nx.draw(P, with_labels=True, pos=pos)
-    #     plt.show()
-
-    # %%
-    print(f"Tri Flag: {tri_flag}")
-    # %%
-    # # ROOM PERMUTATION
-    # permutegraphs = []
-    # # 4 - Dining    5 - Store
-    # G.nodes[4]['name'] = 'Dining'
-    # G.nodes[5]['name'] = 'Store'
-    # for P in tri_graphs:
-    #     graphs = []
+    # nodes = G.nodes
+    # nodecnt = len(nodes)
+    # positions = [y for (_, y) in G.nodes.data("pos")]
+    # permgraphs = []
+    # for P in listgraphs:
     #     edges = P.edges
-    #     P.nodes[4]['name'] = 'Dining'
-    #     P.nodes[5]['name'] = 'Store'
     #     edgecnt = len(edges)
     #     matrix = np.zeros((nodecnt, nodecnt), int)
     #     for edge in (edges):
     #         matrix[edge[0]][edge[1]] = 1
     #         matrix[edge[1]][edge[0]] = 1
-    #     nameattr = nx.get_node_attributes(G, 'name')
-    #     diningnode = list(nameattr.keys())[list(nameattr.values()).index('Dining')]
-    #     # print(diningnode)
-    # %%
-    # SEPARATING TRIANGLES
-    # Get all cycles of length 3
-    septri_info = []
-    for P in permgraphs:
-        all_cliques = list(nx.enumerate_all_cliques(P))
-        all_triangles = [sorted(i) for i in all_cliques if len(i) == 3]
-        all_triangles = [list(triangle)
-                         for triangle in np.unique(all_triangles, axis=0)]
+    #     xcoord = [x for x, _ in positions]
+    #     ycoord = [y for _, y in positions]
 
-        origin_pos = positions
+    #     flag = gc.check_intersection(
+    #         np.array(xcoord), np.array(ycoord), matrix)
+    #     # print(flag)
 
-        trianlular_faces = []
-        separating_triangles = []
-        separating_edges = []  # edges of separating triangles
-        separating_edge_to_triangles = dict()
-        edge_to_faces = dict()
+    #     if (not flag):
+    #         permgraphs.append(P)
 
-        for face in all_triangles:
-            flag = False
-            for NodeID in range(n+m):
-                if NodeID in face:
-                    continue
+    # print("#Permgraphs: ", len(permgraphs))
+    # # %%
+    # # nx.draw(permgraphs[2], with_labels=True, pos=pos)
 
-                # Search for node within triangle
-                if (septri.point_in_triangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0], origin_pos[face[1]][1],
-                                             origin_pos[face[2]][0], origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
-                    flag = True
-                    break
+    # # plt.show()
 
-            if not flag:
-                # Add face information to edge_to_faces
-                trianlular_faces.append(face)
-                for edge in septri.get_edges(face):
-                    if (edge not in edge_to_faces):
-                        edge_to_faces[edge] = []
-                    edge_to_faces[edge].append(face)
+    # # %%
+    # # TRIANGULATION
+    # # positions = nx.get_node_attributes(G, 'pos')
+    # # tri_graphs = []  # list of trinagulated graphs - PTGs
+    # # # flag of triangulated or not for all the permgraphs (just for testing)
+    # # tri_flag = []
+    # # i = 1
+    # # maxi = 0
+    # # mini = 20
+    # # for P in permgraphs:
+    # #     non_tri_faces = trg.get_nontriangular_face(positions, P)
+    # #     tri_edges = trg.get_tri_edges(non_tri_faces, positions)
 
-            else:
-                # Add ST information to separating_triangles, separating_edges and separating_edge_to_triangles
-                separating_triangle = tuple(
-                    sorted([face[0], face[1], face[2]]))
-                separating_triangles.append(separating_triangle)
+    # #     if tri_edges == []:
+    # #         maxi = max(maxi, len(P.edges()))
+    # #         mini = min(mini, len(P.edges()))
+    # #         tri_graphs.append(P)
+    # #         tri_flag.append(True)
+    # #         # plt.figure(i)
+    # #         i += 1
+    # #         # nx.draw(P, with_labels=True, pos = pos)
+    # #     else:
+    # #         tri_flag.append(False)
 
-                edges = septri.get_edges(face)
-                separating_edges.extend(edges)
+    # # print(len(tri_graphs))
+    # # print(maxi)
+    # # print(mini)
+    # # for P in tri_graphs:
+    # #     nx.draw(P, with_labels=True, pos=pos)
+    # #     plt.show()
 
-                for edge in edges:
-                    if (edge not in separating_edge_to_triangles):
-                        separating_edge_to_triangles[edge] = []
-                    separating_edge_to_triangles[edge].append(
-                        separating_triangle)
+    # # %%
+    # # print(f"Tri Flag: {tri_flag}")
+    # # %%
+    # # # ROOM PERMUTATION
+    # # permutegraphs = []
+    # # # 4 - Dining    5 - Store
+    # # G.nodes[4]['name'] = 'Dining'
+    # # G.nodes[5]['name'] = 'Store'
+    # # for P in tri_graphs:
+    # #     graphs = []
+    # #     edges = P.edges
+    # #     P.nodes[4]['name'] = 'Dining'
+    # #     P.nodes[5]['name'] = 'Store'
+    # #     edgecnt = len(edges)
+    # #     matrix = np.zeros((nodecnt, nodecnt), int)
+    # #     for edge in (edges):
+    # #         matrix[edge[0]][edge[1]] = 1
+    # #         matrix[edge[1]][edge[0]] = 1
+    # #     nameattr = nx.get_node_attributes(G, 'name')
+    # #     diningnode = list(nameattr.keys())[list(nameattr.values()).index('Dining')]
+    # #     # print(diningnode)
+    # # %%
+    # # SEPARATING TRIANGLES
+    # # Get all cycles of length 3
+    # septri_info = []
+    # for P in permgraphs:
+    #     all_cliques = list(nx.enumerate_all_cliques(P))
+    #     all_triangles = [sorted(i) for i in all_cliques if len(i) == 3]
+    #     all_triangles = [list(triangle)
+    #                      for triangle in np.unique(all_triangles, axis=0)]
 
-        if (separating_triangles != []):
-            septri_info.append(True)
-        else:
-            septri_info.append(False)
+    #     origin_pos = positions
 
-    # for i in septri_info:
-    #     print(i)
+    #     trianlular_faces = []
+    #     separating_triangles = []
+    #     separating_edges = []  # edges of separating triangles
+    #     separating_edge_to_triangles = dict()
+    #     edge_to_faces = dict()
 
-    # print("Graphs without Separating Triangle: \n")
-    print(f"Septri Info : {septri_info}")
-    final_graphs = []
-    count_non_septri = 0
+    #     for face in all_triangles:
+    #         flag = False
+    #         for NodeID in range(n+m):
+    #             if NodeID in face:
+    #                 continue
 
-    if rect_floorplans == True:
-        for i in range(0, len(permgraphs)):
-            if septri_info[i] == False:
-                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
-                # plt.show()
-                # plt.savefig('RFP_'+str(i))
-                count_non_septri += 1
-                final_graphs.append(permgraphs[i])
-                graph_param.append([nodecnt, nx.number_of_edges(
-                    permgraphs[i]), permgraphs[i].edges])
-        print(count_non_septri, "graphs without separating triangles")
+    #             # Search for node within triangle
+    #             if (septri.point_in_triangle(origin_pos[face[0]][0], origin_pos[face[0]][1], origin_pos[face[1]][0], origin_pos[face[1]][1],
+    #                                          origin_pos[face[2]][0], origin_pos[face[2]][1], origin_pos[NodeID][0], origin_pos[NodeID][1])):
+    #                 flag = True
+    #                 break
 
-    else:
-        for i in range(0, len(permgraphs)):
-            if septri_info[i] == True:
-                # nx.draw(permgraphs[i], with_labels=True, pos=pos)
-                # plt.show()
-                # plt.savefig('OFP_'+str(i))
-                count_non_septri += 1
-                final_graphs.append(permgraphs[i])
-                graph_param.append([nodecnt, nx.number_of_edges(
-                    permgraphs[i]), permgraphs[i].edges])
-        print("#Graphs without separating triangles: ", count_non_septri)
+    #         if not flag:
+    #             # Add face information to edge_to_faces
+    #             trianlular_faces.append(face)
+    #             for edge in septri.get_edges(face):
+    #                 if (edge not in edge_to_faces):
+    #                     edge_to_faces[edge] = []
+    #                 edge_to_faces[edge].append(face)
 
-    # # DIMENSIONING PART
+    #         else:
+    #             # Add ST information to separating_triangles, separating_edges and separating_edge_to_triangles
+    #             separating_triangle = tuple(
+    #                 sorted([face[0], face[1], face[2]]))
+    #             separating_triangles.append(separating_triangle)
 
-    # for P in final_graphs:
-    # P = final_graphs[1]
-    # edgecnt = nx.number_of_edges(P)
-    # edgeset = P.edges
-    # graph = inputgraph.InputGraph(
-    #     nodecnt, edgecnt, edgeset, coord_list, [])
-    # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
-    #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
-    # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-    #     old_dims, nodecnt)
-    # # start = time.time()
-    # # min_width = []
-    # # max_width = []
-    # # min_height = []
-    # # max_height = []
-    # # min_aspect = []
-    # # max_aspect = []
-    # # symmetric_text = []
-    # # for i in range(0, nodecnt):
-    # #     w[i].set(0)
-    # #     w1[i].set(99999)
-    # #     minA[i].set(0)
-    # #     maxA[i].set(99999)
-    # #     min_ar[i].set(0)
-    # #     max_ar[i].set(99999)
-    # graph.multiple_dual()
-    # graph.single_floorplan(min_width, min_height, max_width, max_height,
-    #                        symm_string, min_aspect, max_aspect, plot_width, plot_height)
-    # print(graph.floorplan_exist)
-    # while(graph.floorplan_exist == False):
-    #     old_dims = [min_width, max_width, min_height,
-    #                 max_height, symm_string, min_aspect, max_aspect]
-    #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-    #         old_dims, nodecnt)
-    #     graph.multiple_dual()
-    #     graph.single_floorplan(min_width, min_height, max_width, max_height,
-    #                            symm_string, min_aspect, max_aspect, plot_width, plot_height)
-    # # end = time.time()
-    # # printe("Time taken: " + str((end-start)*1000) + " ms")
-    # graph_data = {
-    #     'room_x': graph.room_x,
-    #     'room_y': graph.room_y,
-    #     'room_width': graph.room_width,
-    #     'room_height': graph.room_height,
-    #     'room_x_bottom_left': graph.room_x_bottom_left,
-    #     'room_x_bottom_right': graph.room_x_bottom_right,
-    #     'room_x_top_left': graph.room_x_top_left,
-    #     'room_x_top_right': graph.room_x_top_right,
-    #     'room_y_left_bottom': graph.room_y_left_bottom,
-    #     'room_y_right_bottom': graph.room_y_right_bottom,
-    #     'room_y_left_top': graph.room_y_left_top,
-    #     'room_y_right_top': graph.room_y_right_top,
-    #     'area': graph.area,
-    #     'extranodes': graph.extranodes,
-    #     'mergednodes': graph.mergednodes,
-    #     'irreg_nodes': graph.irreg_nodes1
-    # }
-    # print("\n\n\n")
-    # print(graph_data['area'])
-    # print("\n\n\n")
+    #             edges = septri.get_edges(face)
+    #             separating_edges.extend(edges)
 
-    print(" new_inc_constraints - ", new_inc_constraints)
-    print(" new_exc_constraints - ", new_exc_constraints)
+    #             for edge in edges:
+    #                 if (edge not in separating_edge_to_triangles):
+    #                     separating_edge_to_triangles[edge] = []
+    #                 separating_edge_to_triangles[edge].append(
+    #                     separating_triangle)
+
+    #     if (separating_triangles != []):
+    #         septri_info.append(True)
+    #     else:
+    #         septri_info.append(False)
+
+    # # for i in septri_info:
+    # #     print(i)
+
+    # # print("Graphs without Separating Triangle: \n")
+    # print(f"Septri Info : {septri_info}")
+    # final_graphs = []
+    # count_non_septri = 0
+
+    # if rect_floorplans == True:
+    #     for i in range(0, len(permgraphs)):
+    #         if septri_info[i] == False:
+    #             # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+    #             # plt.show()
+    #             # plt.savefig('RFP_'+str(i))
+    #             count_non_septri += 1
+    #             final_graphs.append(permgraphs[i])
+    #             graph_param.append([nodecnt, nx.number_of_edges(
+    #                 permgraphs[i]), permgraphs[i].edges])
+    #     print(count_non_septri, "graphs without separating triangles")
+
+    # else:
+    #     for i in range(0, len(permgraphs)):
+    #         if septri_info[i] == True:
+    #             # nx.draw(permgraphs[i], with_labels=True, pos=pos)
+    #             # plt.show()
+    #             # plt.savefig('OFP_'+str(i))
+    #             count_non_septri += 1
+    #             final_graphs.append(permgraphs[i])
+    #             graph_param.append([nodecnt, nx.number_of_edges(
+    #                 permgraphs[i]), permgraphs[i].edges])
+    #     print("#Graphs without separating triangles: ", count_non_septri)
+
+    # # # DIMENSIONING PART
+
+    # # for P in final_graphs:
+    # # P = final_graphs[1]
+    # # edgecnt = nx.number_of_edges(P)
+    # # edgeset = P.edges
+    # # graph = inputgraph.InputGraph(
+    # #     nodecnt, edgecnt, edgeset, coord_list, [])
+    # # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
+    # #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
+    # # min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+    # #     old_dims, nodecnt)
+    # # # start = time.time()
+    # # # min_width = []
+    # # # max_width = []
+    # # # min_height = []
+    # # # max_height = []
+    # # # min_aspect = []
+    # # # max_aspect = []
+    # # # symmetric_text = []
+    # # # for i in range(0, nodecnt):
+    # # #     w[i].set(0)
+    # # #     w1[i].set(99999)
+    # # #     minA[i].set(0)
+    # # #     maxA[i].set(99999)
+    # # #     min_ar[i].set(0)
+    # # #     max_ar[i].set(99999)
+    # # graph.multiple_dual()
+    # # graph.single_floorplan(min_width, min_height, max_width, max_height,
+    # #                        symm_string, min_aspect, max_aspect, plot_width, plot_height)
+    # # print(graph.floorplan_exist)
+    # # while(graph.floorplan_exist == False):
+    # #     old_dims = [min_width, max_width, min_height,
+    # #                 max_height, symm_string, min_aspect, max_aspect]
+    # #     min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+    # #         old_dims, nodecnt)
+    # #     graph.multiple_dual()
+    # #     graph.single_floorplan(min_width, min_height, max_width, max_height,
+    # #                            symm_string, min_aspect, max_aspect, plot_width, plot_height)
+    # # # end = time.time()
+    # # # printe("Time taken: " + str((end-start)*1000) + " ms")
+    # # graph_data = {
+    # #     'room_x': graph.room_x,
+    # #     'room_y': graph.room_y,
+    # #     'room_width': graph.room_width,
+    # #     'room_height': graph.room_height,
+    # #     'room_x_bottom_left': graph.room_x_bottom_left,
+    # #     'room_x_bottom_right': graph.room_x_bottom_right,
+    # #     'room_x_top_left': graph.room_x_top_left,
+    # #     'room_x_top_right': graph.room_x_top_right,
+    # #     'room_y_left_bottom': graph.room_y_left_bottom,
+    # #     'room_y_right_bottom': graph.room_y_right_bottom,
+    # #     'room_y_left_top': graph.room_y_left_top,
+    # #     'room_y_right_top': graph.room_y_right_top,
+    # #     'area': graph.area,
+    # #     'extranodes': graph.extranodes,
+    # #     'mergednodes': graph.mergednodes,
+    # #     'irreg_nodes': graph.irreg_nodes1
+    # # }
+    # # print("\n\n\n")
+    # # print(graph_data['area'])
+    # # print("\n\n\n")
+
+    # print(" new_inc_constraints - ", new_inc_constraints)
+    # print(" new_exc_constraints - ", new_exc_constraints)
 
     return final_graphs, coord_list, perm_mapping, new_inc_constraints, new_exc_constraints, graph_param
     # %%

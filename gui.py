@@ -108,6 +108,7 @@ class App:
         self.arr_altered = False
         self.dimensional_constraints = []
         self.room_list = []
+        self.bhk = ""
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -620,37 +621,47 @@ class App:
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
-        s = ""
-        t = ""
-        if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 2):
-                s = "Dint"
-                t = "Sint"
-            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
-                s = "Dint"
-                t = "S"
-            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
-                s = "D"
-                t = "Sint"
+        val = ""
+        for i, each_room in enumerate(self.input.rooms.values()):
+            if (i in self.interior_rooms):
+                val = val + each_room[0]+"int"
             else:
-                s = "D"
-                t = "S"
-        elif ("Dining" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
-                s = "Dint"
-            else:
-                s = "D"
-        elif ("Store" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
-                t = "Sint"
-            else:
-                t = "S"
-        else:
-            s = "default"
+                val = val + each_room[0]
+        # s = ""
+        # t = ""
+        # if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 2):
+        #         s = "Dint"
+        #         t = "Sint"
+        #     elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+        #         s = "Dint"
+        #         t = "S"
+        #     elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+        #         s = "D"
+        #         t = "Sint"
+        #     else:
+        #         s = "D"
+        #         t = "S"
+        # elif ("Dining" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+        #         s = "Dint"
+        #     else:
+        #         s = "D"
+        # elif ("Store" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+        #         t = "Sint"
+        #     else:
+        #         t = "S"
+        # else:
+        #     s = "default"
+        # if (isRect):
+        #     self.filename = f"graphs/{self.bhk}{s}{t}.pkl"
+        # else:
+        #     self.filename = f"graphs/{self.bhk}{s}{t}Irreg.pkl"
         if (isRect):
-            self.filename = f"graphs/{s}{t}.pkl"
+            self.filename = f"graphs/{self.bhk}{val}.pkl"
         else:
-            self.filename = f"graphs/{s}{t}Irreg.pkl"
+            self.filename = f"graphs/{self.bhk}{val}Irreg.pkl"
 
     # def showGraph_Button_click(self):
     #     print("Showing Graph of current floor plan")
@@ -1716,6 +1727,7 @@ class App:
         print("Input rooms: ", self.input.rooms)
         print("Adjacencies: ", self.input.adjacencies)
         print("Non-Adjacencies: ", self.input.non_adjacencies)
+        self.bhk = "2bhk"
 
     def threeBHK_Button_click(self):
         print("[LOG] three BHK Button Clicked")
@@ -1738,6 +1750,7 @@ class App:
         print("Input rooms: ", self.input.rooms)
         print("Adjacencies: ", self.input.adjacencies)
         print("Non-Adjacencies: ", self.input.non_adjacencies)
+        self.bhk = "3bhk"
 
     def reset_Button_click(self):
         print("[LOG] Reset Button Clicked")
@@ -1787,7 +1800,7 @@ class App:
     def recall_room_list_frame(self, frame):
 
         head = tk.Label(frame, text="Room List")
-        rem_room_list = ["Dining", "Store", "WC 2"]
+        rem_room_list = ["Dining", "Store", "WC 2", "WC 3"]
         head.grid(row=0, column=0, padx=5, pady=5)
 
         self.room_label_list = []
@@ -1804,7 +1817,7 @@ class App:
                 each_remove_room_btn = tk.Button(
                     frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
                 each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
-                if (each_room != "WC 2"):
+                if (each_room != "WC 2" and each_room != "WC 3"):
                     each_intext_room_btn = tk.Button(
                         frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
                     each_intext_room_btn.grid(
@@ -1878,19 +1891,20 @@ class App:
         # for each_rule in self.input.non_adjacencies:
         #     if (self.input.rooms[room_id] in each_rule):
         #         self.input.non_adjacencies.remove(each_rule)
-        i=0
-        while i<len(self.input.adjacencies):
+        i = 0
+        while i < len(self.input.adjacencies):
             if (self.input.rooms[room_id] in self.input.adjacencies[i]):
                 self.input.adjacencies.remove(self.input.adjacencies[i])
                 continue
             i = i+1
-        i=0
-        while i<len(self.input.non_adjacencies):
+        i = 0
+        while i < len(self.input.non_adjacencies):
             if (self.input.rooms[room_id] in self.input.non_adjacencies[i]):
-                self.input.non_adjacencies.remove(self.input.non_adjacencies[i])
+                self.input.non_adjacencies.remove(
+                    self.input.non_adjacencies[i])
                 continue
             i = i+1
-        
+
         print(f"current adjs is {self.input.adjacencies}")
         print(f"current non-adjs is {self.input.non_adjacencies}")
 
