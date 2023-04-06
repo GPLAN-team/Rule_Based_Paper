@@ -2,8 +2,6 @@
     "rooms": [ "Bed 1", "Bed 2", "Bed 3", "Kitchen", "Dining", "Living", "WC 1","WC 2", "WC 3","Store"],
     "adjacency_constraints": [
         ["Bed 1","WC 1"],
-        ["Bed 2","WC 2"],
-        ["Bed 3","WC 3"],
         ["Kitchen","Dining"]
     ],
     "non_adjacency_constraints": [

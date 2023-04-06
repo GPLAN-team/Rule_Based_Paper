@@ -108,14 +108,14 @@ class App:
         self.arr_altered = False
         self.dimensional_constraints = []
         self.room_list = []
+        self.bhk = ""
 
     def initialise_root(self):
         self.root = tk.Tk()
         self.root.title("Rule Based GPLAN")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
-        self.root.geometry(str(str(self.screen_width) +
-                           'x' + str(self.screen_height)))
+        self.root.geometry(str(str(self.screen_width) + 'x' + str(self.screen_height)))
 
     def add_logo(self):
         self.logo_frame = tk.Frame(self.root)
@@ -129,20 +129,16 @@ class App:
         self.custom_rfp_choice_frame.grid(row=0, column=1, padx=10, pady=10)
         # master = self.custom_rfp_choice_frame
 
-        self.oneBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="1 BHK", font=helv15, command=self.oneBHK_Button_click)
+        self.oneBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="1 BHK", font=helv15, command=self.oneBHK_Button_click)
         self.oneBHK_Button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.twoBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="2 BHK", font=helv15, command=self.twoBHK_Button_click)
+        self.twoBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="2 BHK", font=helv15, command=self.twoBHK_Button_click)
         self.twoBHK_Button.grid(row=0, column=1, padx=10, pady=10)
 
-        self.threeBHK_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="3 BHK", font=helv15, command=self.threeBHK_Button_click)
+        self.threeBHK_Button = tk.Button(self.custom_rfp_choice_frame, text="3 BHK", font=helv15, command=self.threeBHK_Button_click)
         self.threeBHK_Button.grid(row=0, column=2, padx=10, pady=10)
 
-        self.reset_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="Reset", font=helv15, command=self.reset_Button_click)
+        self.reset_Button = tk.Button(self.custom_rfp_choice_frame, text="Reset", font=helv15, command=self.reset_Button_click)
         self.reset_Button.grid(row=0, column=3, padx=10, pady=10)
 
         self.dimCheckVar = tk.IntVar(value=1)
@@ -153,20 +149,16 @@ class App:
         # self.dim_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Dimensioned", font=helv15, command=self.dimensioned_checkbox_click, variable=self.dimCheckVar, onvalue=1, offvalue=0)
         # self.dim_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15,
-                                          command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
+        self.grid_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Grid", font=helv15, command=self.grid_checkbox_click, variable=self.gridCheckVar, onvalue=1, offvalue=0)
         self.grid_Button.grid(row=0, column=4, padx=10, pady=10)
 
-        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15,
-                                          command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
+        self.circ_Button = tk.Checkbutton(self.custom_rfp_choice_frame, text="Circulation", font=helv15, command=self.circ_checkbox_click, variable=self.circCheckVar, onvalue=1, offvalue=0)
         self.circ_Button.grid(row=0, column=5, padx=10, pady=10)
 
-        self.showGraph_Button = tk.Button(
-            self.custom_rfp_choice_frame, text="Graph", font=helv15, command=self.showGraph_Button_click)
+        self.showGraph_Button = tk.Button(self.custom_rfp_choice_frame, text="Graph", font=helv15, command=self.showGraph_Button_click)
         self.showGraph_Button.grid(row=0, column=6, padx=10, pady=10)
 
-        self.changeDimButton = tk.Button(
-            self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
+        self.changeDimButton = tk.Button(self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
         self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
 
     # def properties_section(self):
@@ -524,7 +516,7 @@ class App:
         plot_width = -1
         plot_height = -1
         room_list = []
-        for _, room in self.input.rooms.items():
+        for i, room in self.input.rooms.items():
             room_list.append(room)
             if (room == "Living"):
                 min_width.append(9)
@@ -604,51 +596,72 @@ class App:
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
             else:
-                min_width.append(0)
-                min_height.append(0)
-                max_width.append(9999)
-                max_height.append(9999)
-                min_aspect.append(0.5)
-                max_aspect.append(2)
-        self.dim_constraints = [min_width, max_width,
-                                min_height, max_height, min_aspect, max_aspect]
-        self.dimensional_constraints = [min_width, max_width, min_height,
-                                        max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                # when does it enter this condition,
+                # does it enter only when there's such extra node
+                # in that case, we need not use the if condition
+                # because that would mean merged node exists.
+                if(len(self.mergednodes)==0):
+                    min_width.append(0)
+                    min_height.append(0)
+                    max_width.append(9999)
+                    max_height.append(9999)
+                    min_aspect.append(0.5)
+                    max_aspect.append(2)
+                else:
+                    min_width.append(min_width[self.irreg_nodes1[i]])
+                    min_height.append(min_height[self.irreg_nodes1[i]])
+                    max_width.append(max_width[self.irreg_nodes1[i]])
+                    max_height.append(max_height[self.irreg_nodes1[i]])
+                    min_aspect.append(min_aspect[self.irreg_nodes1[i]])
+                    max_aspect.append(max_aspect[self.irreg_nodes1[i]])
+
+        self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+        self.dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
         self.room_list = room_list
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
-        s = ""
-        t = ""
-        if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 2):
-                s = "Dint"
-                t = "Sint"
-            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
-                s = "Dint"
-                t = "S"
-            elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
-                s = "D"
-                t = "Sint"
+        val = ""
+        for i, each_room in enumerate(self.input.rooms.values()):
+            if (i in self.interior_rooms):
+                val = val + each_room[0]+"int"
             else:
-                s = "D"
-                t = "S"
-        elif ("Dining" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
-                s = "Dint"
-            else:
-                s = "D"
-        elif ("Store" in self.input.rooms.values()):
-            if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
-                t = "Sint"
-            else:
-                t = "S"
-        else:
-            s = "default"
+                val = val + each_room[0]
+        # s = ""
+        # t = ""
+        # if ("Dining" in self.input.rooms.values() and "Store" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 2):
+        #         s = "Dint"
+        #         t = "Sint"
+        #     elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+        #         s = "Dint"
+        #         t = "S"
+        #     elif (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+        #         s = "D"
+        #         t = "Sint"
+        #     else:
+        #         s = "D"
+        #         t = "S"
+        # elif ("Dining" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Dining"):
+        #         s = "Dint"
+        #     else:
+        #         s = "D"
+        # elif ("Store" in self.input.rooms.values()):
+        #     if (len(self.interior_rooms) == 1 and self.input.rooms[self.interior_rooms[0]] == "Store"):
+        #         t = "Sint"
+        #     else:
+        #         t = "S"
+        # else:
+        #     s = "default"
+        # if (isRect):
+        #     self.filename = f"graphs/{self.bhk}{s}{t}.pkl"
+        # else:
+        #     self.filename = f"graphs/{self.bhk}{s}{t}Irreg.pkl"
         if (isRect):
-            self.filename = f"graphs/{s}{t}.pkl"
+            self.filename = f"graphs/{self.bhk}{val}.pkl"
         else:
-            self.filename = f"graphs/{s}{t}Irreg.pkl"
+            self.filename = f"graphs/{self.bhk}{val}Irreg.pkl"
 
     # def showGraph_Button_click(self):
     #     print("Showing Graph of current floor plan")
@@ -688,14 +701,12 @@ class App:
             event, ax, graph_window))
 
         # add a button to close the window
-        button = tk.Button(master=graph_window, text="Close",
-                           command=graph_window.destroy)
+        button = tk.Button(master=graph_window, text="Close", command=graph_window.destroy)
         button.pack(side=tk.BOTTOM)
 
     def changeDimButtonClick(self):
         if self.grid_scale == 0:
-            tk.messagebox.showwarning(
-                "The End", "You need to draw the floor plan first")
+            tk.messagebox.showwarning("The End", "You need to draw the floor plan first")
             return
         else:
             print("[LOG] Change Dimensions Button Clicked")
@@ -703,10 +714,8 @@ class App:
             min_width.clear()
             min_height.clear()
             for i in range(len(self.graph_objs[self.curr_rfp]["room_width"])):
-                min_width.append(math.floor(
-                    self.graph_objs[self.curr_rfp]["room_width"][i]))
-                min_height.append(math.floor(
-                    self.graph_objs[self.curr_rfp]["room_height"][i]))
+                min_width.append(math.floor(self.graph_objs[self.curr_rfp]["room_width"][i]))
+                min_height.append(math.floor(self.graph_objs[self.curr_rfp]["room_height"][i]))
                 # min_width=self.graph_objs[self.curr_rfp]["room_width"]
                 # min_height=self.graph_objs[self.curr_rfp]["room_height"]
             old_dims = [
@@ -719,23 +728,22 @@ class App:
 
             print("\n\ndimgui.fui_fnc() starts: ")
             min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
-                old_dims, self.graphs_param[0][0])
+                old_dims, self.graphs_param[0][0], self.room_mapping)
             # should I write (above) :
             # self.graphs_param[0][0] or
             # self.graph_objs[self.curr_rfp]["nodecnt"]
             # for #nodes
             print("dimgui.gui_fnc() ends.\n\n")
-            self.dim_params = [min_width, max_width, min_height, max_height,
-                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+            self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
-            dgraph = inputgraph.InputGraph(self.graph_objs[self.curr_rfp]["nodecnt"], self.graph_objs[self.curr_rfp]
-                                           ["edgecnt"], self.graph_objs[self.curr_rfp]["edgeset"], self.graph_objs[self.curr_rfp]["coord"])
+            dgraph = inputgraph.InputGraph(self.graph_objs[self.curr_rfp]["nodecnt"], self.graph_objs[self.curr_rfp]["edgecnt"], 
+                                        self.graph_objs[self.curr_rfp]["edgeset"], self.graph_objs[self.curr_rfp]["coord"])
             # above creates a graph with provided data
-            # generates dual for the computed graph and corresponding encoded matrix and rel matrix
+            # below generates dual for the computed graph and corresponding encoded matrix and rel matrix
             dgraph.irreg_multiple_dual()
             dgraph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
             print("Floorplan exists? ", dgraph.floorplan_exist)
             if (dgraph.floorplan_exist):
@@ -757,8 +765,7 @@ class App:
                 # self.floorplan_graphs.append(self.graphs[i])
                 # will work only once i.e. the change dimensions will take values of the initial one.
             else:
-                tk.messagebox.showwarning(
-                    "The End", "Floorplan doesn't exists with changed dimensions")
+                tk.messagebox.showwarning("The End", "Floorplan doesn't exists with changed dimensions")
                 print("Floorplan doesn't exists with changed dimensions")
                 return
 
@@ -766,8 +773,7 @@ class App:
 
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
-        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True,
-                             node_color='orange', font_size=10, ax=ax)
+        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
         ax.set_title("Floor Plan Graph")
 
     # def on_edge_click(self, event, ax, graph_window):
@@ -983,7 +989,6 @@ class App:
 
 
     def run_Rect_Button_click(self):
-
         print("[LOG] Rectangular Floorplans Button Clicked")
 
         self.graph_objs = []
@@ -993,8 +998,7 @@ class App:
         self.create_inputgraph_json()
         # graphs = runner(False)
         self.interior_rooms.sort()
-        print("Exterior rooms: ", self.exterior_rooms,
-              "\nInterior rooms: ", self.interior_rooms)
+        print("Exterior rooms: ", self.exterior_rooms, "\nInterior rooms: ", self.interior_rooms)
 
         self.GraphStore(True)
 
@@ -1015,8 +1019,7 @@ class App:
                 self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=True, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
             self.graphs_param = []
             for G in graphs:
-                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-                    G), G.edges])
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(G), G.edges])
 
         elif (not (self.arr_altered) and not (exists(self.filename))):
             self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
@@ -1041,17 +1044,16 @@ class App:
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
         self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                        symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
-            graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             # above creates a graph with provided data
             # generates dual for the computed graph and corresponding encoded matrix and rel matrix
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
             print("Floorplan exists? ", graph.floorplan_exist)
             if (graph.floorplan_exist):
@@ -1131,15 +1133,14 @@ class App:
         print("[LOG] Irregular Floorplans Button Clicked")
 
         self.graph_objs = []
-
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
+        print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
         self.create_inputgraph_json()
         # graphs = runner(False)
         self.irreg_check = 1
         self.interior_rooms.sort()
-        print("Exterior rooms: ", self.exterior_rooms,
-              "  Interior rooms: ", self.interior_rooms)
+        print("Exterior rooms: ", self.exterior_rooms,  "  Interior rooms: ", self.interior_rooms)
 
         self.GraphStore(False)
 
@@ -1160,8 +1161,7 @@ class App:
                 self.exterior_rooms, self.interior_rooms, list(self.input.rooms.values()), fileExists=True, rect_floorplans=False, adjacencies=self.input.adjacencies, non_adjacencies=self.input.non_adjacencies)
             self.graphs_param = []
             for G in graphs:
-                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(
-                    G), G.edges])
+                self.graphs_param.append([len(self.exterior_rooms)+len(self.interior_rooms), nx.number_of_edges(G), G.edges])
 
         elif (not (self.arr_altered) and not (exists(self.filename))):
             self.graphs, self.coord_list, self.room_mapping, adjacencies_modified, non_adjacencies_modified, self.graphs_param = gengraphs.generate_graphs(
@@ -1188,15 +1188,18 @@ class App:
 
         min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = self.default_dim()
         self.dim_params = [min_width, max_width, min_height, max_height,
-                           symm_string, min_aspect, max_aspect, plot_width, plot_height]
+                        symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
         for i in range(len(self.graphs)):
-            graph = inputgraph.InputGraph(
-                self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            # representing node count, edge count, edge set, node coordinates as the 4-tuple
+            graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
+            # above creates a graph with provided data
+            # generates dual for the computed graph and corresponding encoded matrix and rel matrix
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
-            print(graph.floorplan_exist)
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+            # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
+            print("Floorplan exists? ", graph.floorplan_exist)
             if (graph.floorplan_exist):
                 graph_data = {
                     'room_x': graph.room_x,
@@ -1206,10 +1209,13 @@ class App:
                     'area': graph.area,
                     'extranodes': graph.extranodes,
                     'mergednodes': graph.mergednodes,
-                    'irreg_nodes': graph.irreg_nodes1
+                    'irreg_nodes': graph.irreg_nodes1,
+                    'nodecnt': self.graphs_param[i][0],
+                    'edgecnt': self.graphs_param[i][1],
+                    'edgeset': self.graphs_param[i][2],
+                    'coord': self.coord_list
                 }
-                print(
-                    f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
+                print(f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
 
@@ -1841,6 +1847,7 @@ class App:
         print("Input rooms: ", self.input.rooms)
         print("Adjacencies: ", self.input.adjacencies)
         print("Non-Adjacencies: ", self.input.non_adjacencies)
+        self.bhk = "2bhk"
 
     def threeBHK_Button_click(self):
         print("[LOG] three BHK Button Clicked")
@@ -1863,6 +1870,7 @@ class App:
         print("Input rooms: ", self.input.rooms)
         print("Adjacencies: ", self.input.adjacencies)
         print("Non-Adjacencies: ", self.input.non_adjacencies)
+        self.bhk = "3bhk"
 
     def reset_Button_click(self):
         print("[LOG] Reset Button Clicked")
@@ -1912,7 +1920,7 @@ class App:
     def recall_room_list_frame(self, frame):
 
         head = tk.Label(frame, text="Room List")
-        rem_room_list = ["Dining", "Store", "WC 2"]
+        rem_room_list = ["Dining", "Store", "WC 2", "WC 3"]
         head.grid(row=0, column=0, padx=5, pady=5)
 
         self.room_label_list = []
@@ -1929,7 +1937,7 @@ class App:
                 each_remove_room_btn = tk.Button(
                     frame, text="Remove", command=lambda i=i: self.handle_remove_room_btn(i, self.mod_room_win))
                 each_remove_room_btn.grid(row=i+1, column=1, padx=5, pady=5)
-                if (each_room != "WC 2"):
+                if (each_room != "WC 2" and each_room != "WC 3"):
                     each_intext_room_btn = tk.Button(
                         frame, text="Interior", command=lambda i=i: self.handle_intext_room_btn(i))
                     each_intext_room_btn.grid(
@@ -2003,19 +2011,20 @@ class App:
         # for each_rule in self.input.non_adjacencies:
         #     if (self.input.rooms[room_id] in each_rule):
         #         self.input.non_adjacencies.remove(each_rule)
-        i=0
-        while i<len(self.input.adjacencies):
+        i = 0
+        while i < len(self.input.adjacencies):
             if (self.input.rooms[room_id] in self.input.adjacencies[i]):
                 self.input.adjacencies.remove(self.input.adjacencies[i])
                 continue
             i = i+1
-        i=0
-        while i<len(self.input.non_adjacencies):
+        i = 0
+        while i < len(self.input.non_adjacencies):
             if (self.input.rooms[room_id] in self.input.non_adjacencies[i]):
-                self.input.non_adjacencies.remove(self.input.non_adjacencies[i])
+                self.input.non_adjacencies.remove(
+                    self.input.non_adjacencies[i])
                 continue
             i = i+1
-        
+
         print(f"current adjs is {self.input.adjacencies}")
         print(f"current non-adjs is {self.input.non_adjacencies}")
 
