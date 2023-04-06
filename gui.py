@@ -771,9 +771,20 @@ class App:
 
             self.draw_one_rfp(dgraph_data)
 
+    # def draw_graph(self, ax):
+    #     gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
+    #     nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
+    #     ax.set_title("Floor Plan Graph")
+
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
-        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
+        
+        # create a dictionary of node labels where the keys are the node labels and the values are the room names
+        labels = {node: room for node, room in zip(gnx.nodes, self.input.rooms.values())}
+
+        # draw the graph with the node labels
+        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, labels=labels, ax=ax)
+
         ax.set_title("Floor Plan Graph")
 
     # def on_edge_click(self, event, ax, graph_window):
