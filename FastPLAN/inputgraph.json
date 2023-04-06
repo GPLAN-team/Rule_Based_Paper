@@ -4,19 +4,9 @@
         "WC 1",
         "WC 2",
         "Bed 2",
-        "Dining",
         "Kitchen",
         "Living",
         "Store"
     ],
-    "edges": [
-        [
-            0,
-            1
-        ],
-        [
-            4,
-            5
-        ]
-    ]
+    "edges": []
 }

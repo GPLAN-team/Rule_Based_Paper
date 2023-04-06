@@ -713,8 +713,7 @@ class App:
 
     def changeDimButtonClick(self):
         if self.grid_scale == 0:
-            tk.messagebox.showwarning(
-                "The End", "You need to draw the floor plan first")
+            tk.messagebox.showwarning("The End", "You need to draw the floor plan first")
             return
         else:
             print("[LOG] Change Dimensions Button Clicked")
@@ -722,10 +721,8 @@ class App:
             min_width.clear()
             min_height.clear()
             for i in range(len(self.graph_objs[self.curr_rfp]["room_width"])):
-                min_width.append(math.floor(
-                    self.graph_objs[self.curr_rfp]["room_width"][i]))
-                min_height.append(math.floor(
-                    self.graph_objs[self.curr_rfp]["room_height"][i]))
+                min_width.append(math.floor(self.graph_objs[self.curr_rfp]["room_width"][i]))
+                min_height.append(math.floor(self.graph_objs[self.curr_rfp]["room_height"][i]))
                 # min_width=self.graph_objs[self.curr_rfp]["room_width"]
                 # min_height=self.graph_objs[self.curr_rfp]["room_height"]
             old_dims = [
@@ -737,23 +734,23 @@ class App:
             ]
 
             print("\n\ndimgui.fui_fnc() starts: ")
-            min_width,max_width,min_height,max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height  = dimgui.gui_fnc(old_dims, self.graphs_param[0][0], self.room_mapping)
+            min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height = dimgui.gui_fnc(
+                old_dims, self.graphs_param[0][0], self.room_mapping)
             # should I write (above) :
             # self.graphs_param[0][0] or
             # self.graph_objs[self.curr_rfp]["nodecnt"]
             # for #nodes
             print("dimgui.gui_fnc() ends.\n\n")
-            self.dim_params = [min_width, max_width, min_height, max_height,
-                               symm_string, min_aspect, max_aspect, plot_width, plot_height]
+            self.dim_params = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
-            dgraph = inputgraph.InputGraph(self.graph_objs[self.curr_rfp]["nodecnt"], self.graph_objs[self.curr_rfp]
-                                           ["edgecnt"], self.graph_objs[self.curr_rfp]["edgeset"], self.graph_objs[self.curr_rfp]["coord"])
+            dgraph = inputgraph.InputGraph(self.graph_objs[self.curr_rfp]["nodecnt"], self.graph_objs[self.curr_rfp]["edgecnt"], 
+                                        self.graph_objs[self.curr_rfp]["edgeset"], self.graph_objs[self.curr_rfp]["coord"])
             # above creates a graph with provided data
-            # generates dual for the computed graph and corresponding encoded matrix and rel matrix
+            # below generates dual for the computed graph and corresponding encoded matrix and rel matrix
             dgraph.irreg_multiple_dual()
             dgraph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                    self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
             print("Floorplan exists? ", dgraph.floorplan_exist)
             if (dgraph.floorplan_exist):
@@ -775,8 +772,7 @@ class App:
                 # self.floorplan_graphs.append(self.graphs[i])
                 # will work only once i.e. the change dimensions will take values of the initial one.
             else:
-                tk.messagebox.showwarning(
-                    "The End", "Floorplan doesn't exists with changed dimensions")
+                tk.messagebox.showwarning("The End", "Floorplan doesn't exists with changed dimensions")
                 print("Floorplan doesn't exists with changed dimensions")
                 return
 
@@ -784,8 +780,7 @@ class App:
 
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
-        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True,
-                             node_color='orange', font_size=10, ax=ax)
+        nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
         ax.set_title("Floor Plan Graph")
 
     # def on_edge_click(self, event, ax, graph_window):

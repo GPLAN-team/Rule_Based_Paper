@@ -131,7 +131,6 @@ def gui_fnc(old_dims, nodes, room_mapping):
             maxA[i].set(99999)
             min_ar[i].set(0)
             max_ar[i].set(99999)
-
         sym_var.set("()")
 
     button = tk.Button(root, text='Submit', padx=5, command=button_clicked)
@@ -143,8 +142,7 @@ def gui_fnc(old_dims, nodes, room_mapping):
     root.wait_window(root)
     print("dimgui")
     print(min_width, max_width, min_height, max_height, symmetric_text[0], min_aspect, max_aspect)
-    return min_width, max_width, min_height, max_height, symmetric_text[
-        0], min_aspect, max_aspect, plot_width.get(), plot_height.get()
+    return min_width, max_width, min_height, max_height, symmetric_text[0], min_aspect, max_aspect, plot_width.get(), plot_height.get()
 
 
 if __name__ == "__main__":
