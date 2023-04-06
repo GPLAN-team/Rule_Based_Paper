@@ -524,7 +524,7 @@ class App:
         plot_width = -1
         plot_height = -1
         room_list = []
-        for _, room in self.input.rooms.items():
+        for i, room in self.input.rooms.items():
             room_list.append(room)
             if (room == "Living"):
                 min_width.append(9)
@@ -604,37 +604,28 @@ class App:
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
             else:
-                min_width.append(0)
-                min_height.append(0)
-                max_width.append(9999)
-                max_height.append(9999)
-                min_aspect.append(0.5)
-                max_aspect.append(2)
-        self.dim_constraints = [min_width, max_width,
-                                min_height, max_height, min_aspect, max_aspect]
-        self.dimensional_constraints = [min_width, max_width, min_height,
-                                        max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
-        self.room_list = room_list
                 # when does it enter this condition,
                 # does it enter only when there's such extra node
                 # in that case, we need not use the if condition
                 # because that would mean merged node exists.
-        #         if(len(self.mergednodes)==0):
-        #             min_width.append(0)
-        #             min_height.append(0)
-        #             max_width.append(9999)
-        #             max_height.append(9999)
-        #             min_aspect.append(0.5)
-        #             max_aspect.append(2)
-        #         else:
-        #             min_width.append(min_width[self.irreg_nodes1[i]])
-        #             min_height.append(min_height[self.irreg_nodes1[i]])
-        #             max_width.append(max_width[self.irreg_nodes1[i]])
-        #             max_height.append(max_height[self.irreg_nodes1[i]])
-        #             min_aspect.append(min_aspect[self.irreg_nodes1[i]])
-        #             max_aspect.append(max_aspect[self.irreg_nodes1[i]])
-                
-        # self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+                if(len(self.mergednodes)==0):
+                    min_width.append(0)
+                    min_height.append(0)
+                    max_width.append(9999)
+                    max_height.append(9999)
+                    min_aspect.append(0.5)
+                    max_aspect.append(2)
+                else:
+                    min_width.append(min_width[self.irreg_nodes1[i]])
+                    min_height.append(min_height[self.irreg_nodes1[i]])
+                    max_width.append(max_width[self.irreg_nodes1[i]])
+                    max_height.append(max_height[self.irreg_nodes1[i]])
+                    min_aspect.append(min_aspect[self.irreg_nodes1[i]])
+                    max_aspect.append(max_aspect[self.irreg_nodes1[i]])
+
+        self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
+        self.dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
+        self.room_list = room_list
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
 
     def GraphStore(self, isRect=True):
