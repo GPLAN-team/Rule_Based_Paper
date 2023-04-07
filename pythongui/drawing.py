@@ -155,7 +155,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     print("Graph data room x: ", graph_data['room_x'])
     print("Length of graph data area: ", len(graph_data['area']))
     print("Graph data area: ", graph_data['area'])
-    for i in range(graph_data['room_x'].shape[0]):
+    for i in range(len(graph_data['area'])):
         try:
             dat = graph_data['area'][i].split(':')
             area_list.append(float(dat[-1]))
@@ -233,7 +233,7 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
     #     pen.forward((limit+left_grid)*grid_size)
 
     # print("AREA: ", graph_data['area'])
-    for i in range(graph_data['room_x'].shape[0]):
+    for i in range(len(graph_data['area'])):
         try:
             dat = graph_data['area'][i].split(':')
             area = dat[-1]
