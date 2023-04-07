@@ -278,23 +278,15 @@ class InputGraph:
             [boolean, ver_list, hor_list] = bc.block_checker(encoded_matrix_deepcopy, symm_rooms)
             # print([boolean, ver_list, hor_list])
             if boolean:
-                # print(encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
-                try:
-                    [width, height, hor_dgph, status] = fpts.floorplan_to_st(
-                    encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
-                except:
-                    num_frooms=np.amax(encoded_matrix)+1
-                    # print("Using following dimensions instead: ")
-                    # print(encoded_matrix_deepcopy, min_width[:num_frooms], min_height[:num_frooms], max_width[:num_frooms], max_height[:num_frooms], ver_list, hor_list, min_ar[:num_frooms], max_ar[:num_frooms], plot_width, plot_height)
-                    min_width= min_width[:num_frooms]
-                    min_height= min_height[:num_frooms]
-                    max_width= max_width[:num_frooms]
-                    max_height= max_height[:num_frooms]
-                    min_ar= min_ar[:num_frooms]
-                    max_ar= max_ar[:num_frooms]
-                    [width, height, hor_dgph, status] = fpts.floorplan_to_st(
-                    encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
-                    # encoded_matrix_deepcopy, min_width[:num_frooms], min_height[:num_frooms], max_width[:num_frooms], max_height[:num_frooms], ver_list, hor_list, min_ar[:num_frooms], max_ar[:num_frooms], plot_width, plot_height)
+                num_frooms=np.amax(encoded_matrix)+1
+                min_width= min_width[:num_frooms]
+                min_height= min_height[:num_frooms]
+                max_width= max_width[:num_frooms]
+                max_height= max_height[:num_frooms]
+                min_ar= min_ar[:num_frooms]
+                max_ar= max_ar[:num_frooms]
+                [width, height, hor_dgph, status] = fpts.floorplan_to_st(
+                encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
             else:
                 status = False
             if (status == False):
