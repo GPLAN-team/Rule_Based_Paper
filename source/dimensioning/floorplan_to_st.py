@@ -100,13 +100,11 @@ def floorplan_to_st(E, min_width, min_height, max_width, max_height, ver_list, h
 
     HOR = np.insert(HOR, 0, [0], axis=1)
 
-    [f_VER, A_VER, Aeq_VER, Beq_VER] = convert_adj_equ_sym(
-        VER, ver_list, plot_width)
-    [f_HOR, A_HOR, Aeq_HOR, Beq_HOR] = convert_adj_equ_sym(
-        HOR, hor_list, plot_height)
+    [f_VER, A_VER, Aeq_VER, Beq_VER] = convert_adj_equ_sym(VER, ver_list, plot_width)
+    [f_HOR, A_HOR, Aeq_HOR, Beq_HOR] = convert_adj_equ_sym(HOR, hor_list, plot_height)
 
     [width, height, status] = solve_linear(f_VER, A_VER, Aeq_VER, Beq_VER, f_HOR, A_HOR,
-                                           Aeq_HOR, Beq_HOR, min_width, max_width, min_height, max_height, min_ar, max_ar)
+                                        Aeq_HOR, Beq_HOR, min_width, max_width, min_height, max_height, min_ar, max_ar)
 
     width = np.round(width, 3)
     height = np.round(height, 3)
