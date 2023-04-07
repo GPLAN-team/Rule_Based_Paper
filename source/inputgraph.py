@@ -237,12 +237,9 @@ class InputGraph:
         self.matrix = exp.basecase(self.matrix, self.nodecnt)
         while len(cntrs) != 0:
             self.matrix = exp.expand(self.matrix, self.nodecnt, cntrs)
-        [self.room_x, self.room_y, self.room_width, self.room_height] = rdg.construct_dual(self.matrix, self.nodecnt,
-                                                                                           self.mergednodes,
-                                                                                           self.irreg_nodes1)
+        [self.room_x, self.room_y, self.room_width, self.room_height] = rdg.construct_dual(self.matrix, self.nodecnt, self.mergednodes, self.irreg_nodes1)
 
-    def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width,
-                         plot_height):
+    def single_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates a single floorplan for a given input graph.
 
         Args:
@@ -260,7 +257,7 @@ class InputGraph:
             None
         """
         for i in range(0, len(self.mergednodes[0])):
-            min_width.append(0)
+            min_width.append(1)
             min_height.append(0)
             max_width.append(10)
             max_height.append(10)
@@ -275,21 +272,33 @@ class InputGraph:
             max_ar.append(10000)
         for i in range(len(self.rel_matrix_list)):
             rel_matrix = self.rel_matrix_list[i]
-            encoded_matrix = opr.get_encoded_matrix(
-                rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
+            encoded_matrix = opr.get_encoded_matrix(rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
 
-            [boolean, ver_list, hor_list] = bc.block_checker(
-                encoded_matrix_deepcopy, symm_rooms)
+            [boolean, ver_list, hor_list] = bc.block_checker(encoded_matrix_deepcopy, symm_rooms)
             # print([boolean, ver_list, hor_list])
             if boolean:
-                [width, height, hor_dgph, status] = fpts.floorplan_to_st(
-                    encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar,
-                    max_ar, plot_width, plot_height)
-                # print([width, height, hor_dgph, status])
+                # print(encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
+                try:
+                    [width, height, hor_dgph, status] = fpts.floorplan_to_st(
+                    encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
+                except:
+                    num_frooms=np.amax(encoded_matrix)+1
+                    # print("Using following dimensions instead: ")
+                    # print(encoded_matrix_deepcopy, min_width[:num_frooms], min_height[:num_frooms], max_width[:num_frooms], max_height[:num_frooms], ver_list, hor_list, min_ar[:num_frooms], max_ar[:num_frooms], plot_width, plot_height)
+                    min_width= min_width[:num_frooms]
+                    min_height= min_height[:num_frooms]
+                    max_width= max_width[:num_frooms]
+                    max_height= max_height[:num_frooms]
+                    min_ar= min_ar[:num_frooms]
+                    max_ar= max_ar[:num_frooms]
+                    [width, height, hor_dgph, status] = fpts.floorplan_to_st(
+                    encoded_matrix_deepcopy, min_width, min_height, max_width, max_height, ver_list, hor_list, min_ar, max_ar, plot_width, plot_height)
+                    # encoded_matrix_deepcopy, min_width[:num_frooms], min_height[:num_frooms], max_width[:num_frooms], max_height[:num_frooms], ver_list, hor_list, min_ar[:num_frooms], max_ar[:num_frooms], plot_width, plot_height)
             else:
                 status = False
             if (status == False):
+                print("Floorplan doesn't exists")
                 continue
             else:
                 self.floorplan_exist = True
@@ -297,25 +306,20 @@ class InputGraph:
             height = np.transpose(height)
             self.room_width = width.flatten()
             self.room_height = height.flatten()
-            self.extranodes, self.mergednodes, self.irreg_nodes1, self.irreg_nodes2 = self.extranodes[
-                i], self.mergednodes[i], self.irreg_nodes1[i], self.irreg_nodes2[i]
+            self.extranodes, self.mergednodes, self.irreg_nodes1, self.irreg_nodes2 = self.extranodes[i], self.mergednodes[i], self.irreg_nodes1[i], self.irreg_nodes2[i]
             # self.room_x = self.room_x[i]
             # self.room_y = self.room_y[i]
-            self.room_x, self.room_y = dual.get_coordinates(
-                encoded_matrix, self.nodecnt + 4, self.room_width, self.room_height, hor_dgph)
+            self.room_x, self.room_y = dual.get_coordinates(encoded_matrix, self.nodecnt + 4, self.room_width, self.room_height, hor_dgph)
             for j in range(0, len(self.room_x)):
                 self.room_x[j] = round(self.room_x[j], 3)
             for j in range(0, len(self.room_y)):
                 self.room_y[j] = round(self.room_y[j], 3)
-            self.area = opr.calculate_area(
-                self.room_x.shape[0], self.room_width, self.room_height, self.extranodes, self.mergednodes,
-                self.irreg_nodes1)
-
+            self.area = opr.calculate_area(self.room_x.shape[0], self.room_width, self.room_height, self.extranodes, self.mergednodes, self.irreg_nodes1)
             break
 
     def polyonalinput(self, cano, v1, v2, vn, priority_order, edge_set, debug_cano):
         cano.runWithArguments(self.nodecnt, v1, v2, vn,
-                              priority_order, self, edge_set, debug_cano)
+                            priority_order, self, edge_set, debug_cano)
 
     def irreg_multiple_dual(self):
         """Generates multiple irregular duals for a given input graph.
@@ -339,8 +343,7 @@ class InputGraph:
             self.irreg_nodes2 = [[]]
             self.extranodes = [[]]
             self.rel_matrix_list = [np.array(
-                [[0, 3, 2, 0, 0, 0], [0, 0, 2, 3, 0, 0], [0, 0, 0, 1, 0, 1], [0, 0, 1, 0, 1, 0], [2, 2, 0, 1, 0, 1],
-                 [3, 0, 1, 0, 1, 0]])]
+                [[0, 3, 2, 0, 0, 0], [0, 0, 2, 3, 0, 0], [0, 0, 0, 1, 0, 1], [0, 0, 1, 0, 1, 0], [2, 2, 0, 1, 0, 1],[3, 0, 1, 0, 1, 0]])]
             return
         bcn_edges = []
         if (not bcn.is_biconnected(self.matrix)):
@@ -352,8 +355,7 @@ class InputGraph:
         bcn_edges_added = len(bcn_edges) > 0
 
         # Triangulation
-        trng_edges, positions, tri_faces = trng.triangulate(
-            self.matrix, bcn_edges_added, self.coordinates)
+        trng_edges, positions, tri_faces = trng.triangulate(self.matrix, bcn_edges_added, self.coordinates)
         for edge in trng_edges:
             self.matrix[edge[0]][edge[1]] = 1
             self.matrix[edge[1]][edge[0]] = 1
@@ -366,14 +368,12 @@ class InputGraph:
             extranodes = []
             for edge in bcn_edges:
                 extranodes.append(self.nodecnt)
-                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
-                    self.matrix, edge, tri_faces, positions)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(self.matrix, edge, tri_faces, positions)
                 self.nodecnt += 1  # Extra node added
                 self.edgecnt += extra_edges_cnt
             for edge in trng_edges:
                 extranodes.append(self.nodecnt)
-                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(
-                    self.matrix, edge, tri_faces, positions)
+                self.matrix, tri_faces, positions, extra_edges_cnt = transform.transform_edges(self.matrix, edge, tri_faces, positions)
                 self.nodecnt += 1  # Extra node added
                 self.edgecnt += extra_edges_cnt
             ptpg_matrices, extra_nodes = st.handle_STs(
@@ -391,8 +391,7 @@ class InputGraph:
                     irreg_nodes1.append(extra_nodes[cnt][key][0])
                     irreg_nodes2.append(extra_nodes[cnt][key][1])
                 self.matrix, cip_list, self.nodecnt, self.edgecnt, mergednodes, irreg_nodes1, irreg_nodes2 = generate_multiple_bdy(
-                    self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1,
-                    irreg_nodes2)
+                    self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1,irreg_nodes2)
                 for bdys in cip_list:
                     matrix = copy.deepcopy(self.matrix)
                     rel_matrices = generate_multiple_rel(
@@ -443,17 +442,13 @@ class InputGraph:
         self.room_height = []
         self.area = []
         for cnt in range(self.fpcnt):
-            [room_x, room_y, room_width, room_height] = rdg.construct_dual(self.rel_matrix_list[cnt],
-                                                                           self.nodecnt_list[cnt] + 4,
-                                                                           self.mergednodes[cnt],
-                                                                           self.irreg_nodes1[cnt])
+            [room_x, room_y, room_width, room_height] = rdg.construct_dual(self.rel_matrix_list[cnt], self.nodecnt_list[cnt] + 4, self.mergednodes[cnt], self.irreg_nodes1[cnt])
             self.room_x.append(room_x)
             self.room_y.append(room_y)
             self.room_width.append(room_width)
             self.room_height.append(room_height)
 
-    def multiple_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width,
-                           plot_height):
+    def multiple_floorplan(self, min_width, min_height, max_width, max_height, symm_rooms, min_ar, max_ar, plot_width, plot_height):
         """Generates multiple floorplans for a given input graph.
 
         Args:

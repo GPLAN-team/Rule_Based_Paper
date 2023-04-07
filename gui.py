@@ -594,25 +594,33 @@ class App:
                 max_height.append(8)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
-            else:
+            # else:
+            #     min_width.append(0)
+            #     min_height.append(0)
+            #     max_width.append(9999)
+            #     max_height.append(9999)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2)
+                
                 # when does it enter this condition,
                 # does it enter only when there's such extra node
                 # in that case, we need not use the if condition
                 # because that would mean merged node exists.
-                if(len(self.mergednodes)==0):
-                    min_width.append(0)
-                    min_height.append(0)
-                    max_width.append(9999)
-                    max_height.append(9999)
-                    min_aspect.append(0.5)
-                    max_aspect.append(2)
-                else:
-                    min_width.append(min_width[self.irreg_nodes1[i]])
-                    min_height.append(min_height[self.irreg_nodes1[i]])
-                    max_width.append(max_width[self.irreg_nodes1[i]])
-                    max_height.append(max_height[self.irreg_nodes1[i]])
-                    min_aspect.append(min_aspect[self.irreg_nodes1[i]])
-                    max_aspect.append(max_aspect[self.irreg_nodes1[i]])
+                # !uncomment
+                # if(len(self.mergednodes)==0):
+                #     min_width.append(0)
+                #     min_height.append(0)
+                #     max_width.append(9999)
+                #     max_height.append(9999)
+                #     min_aspect.append(0.5)
+                #     max_aspect.append(2)
+                # else:
+                #     min_width.append(min_width[self.irreg_nodes1[i]])
+                #     min_height.append(min_height[self.irreg_nodes1[i]])
+                #     max_width.append(max_width[self.irreg_nodes1[i]])
+                #     max_height.append(max_height[self.irreg_nodes1[i]])
+                #     min_aspect.append(min_aspect[self.irreg_nodes1[i]])
+                #     max_aspect.append(max_aspect[self.irreg_nodes1[i]])
 
         self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         self.dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
@@ -1063,12 +1071,13 @@ class App:
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
             graph = inputgraph.InputGraph(self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
             # above creates a graph with provided data
-            # generates dual for the computed graph and corresponding encoded matrix and rel matrix
+            # below generates dual for the computed graph and corresponding encoded matrix and rel matrix
+            # also populates the mergednodes and extranodes information if any is their self attributes.
             graph.irreg_multiple_dual()
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
                                 self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             # generate floorplan using the computed encoded matrix / rel matrix implementing optimisation techniques on vertical and horizonal st flows
-            print("Floorplan exists? ", graph.floorplan_exist)
+            print("\nFloorplan exists" if graph.floorplan_exist==True else "Floorplan doesn't exists")
             if (graph.floorplan_exist):
                 graph_data = {
                     'room_x': graph.room_x,
@@ -1084,19 +1093,21 @@ class App:
                     'edgeset': self.graphs_param[i][2],
                     'coord': self.coord_list
                 }
-                print(f"\nIrregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}\n")
+                print(f"Irregular nodes1: {graph.irreg_nodes1}\nMerged Nodes : {graph.mergednodes}\nIrregular nodes2: {graph.irreg_nodes2}")
                 self.graph_objs.append(graph_data)
                 self.floorplan_graphs.append(self.graphs[i])
+                print(f"Possible Floorplan added to list, scanning next graph data.\n")
+
 
         # if self.dimCheckVar.get() == 1:
-        print("[LOG] Dimensioned selected")
+        # print("[LOG] Dimensioned selected")
 
         # print(graphs)
         my_plot(graphs)
         plt.show()
 
         # nodecnt = len(graphs[0].nodes)
-        print("[LOG] Now will wait for dimensions input")
+        # print("[LOG] Now will wait for dimensions input")
 
         # old_dims = [[0] * nodecnt, [0] * nodecnt, [0] * nodecnt,
         #             [0] * nodecnt, "", [0] * nodecnt, [0] * nodecnt]
@@ -1104,7 +1115,7 @@ class App:
         #     old_dims, nodecnt)
 
         # dim_graphdata = dimensioning_part(graphs, coord_list)
-        print("[LOG] Dimensioned floorplan object\n")
+        # print("[LOG] Dimensioned floorplan object\n")
         # print(dim_graphdata)
 
         print(f"{len(graphs)} output_graphs = {str(graphs)}")
@@ -1204,7 +1215,7 @@ class App:
             graph.nodecnt -= 4  # Because Lshaped was counting NESW as well
 
             graph.single_floorplan(self.dim_params[0], self.dim_params[2], self.dim_params[1], self.dim_params[3],
-                                   self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
+                                self.dim_params[4], self.dim_params[5], self.dim_params[6], self.dim_params[7], self.dim_params[8])
             print(graph.floorplan_exist)
             if (graph.floorplan_exist):
                 graph_data = {

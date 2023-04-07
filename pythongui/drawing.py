@@ -151,6 +151,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
     # area_sum = (sum(list((graph_data['area']))))
     area_list = []
+    print("Length of graph data room x: ", len(graph_data['room_x']))
+    print("Graph data room x: ", graph_data['room_x'])
+    print("Length of graph data area: ", len(graph_data['area']))
+    print("Graph data area: ", graph_data['area'])
     for i in range(graph_data['room_x'].shape[0]):
         try:
             dat = graph_data['area'][i].split(':')
