@@ -151,10 +151,10 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
     # area_sum = (sum(list((graph_data['area']))))
     area_list = []
-    print("Length of graph data room x: ", len(graph_data['room_x']))
-    print("Graph data room x: ", graph_data['room_x'])
-    print("Length of graph data area: ", len(graph_data['area']))
-    print("Graph data area: ", graph_data['area'])
+    # print("Length of graph data room x: ", len(graph_data['room_x']))
+    # print("Graph data room x: ", graph_data['room_x'])
+    # print("Length of graph data area: ", len(graph_data['area']))
+    # print("Graph data area: ", graph_data['area'])
     for i in range(len(graph_data['area'])):
         try:
             dat = graph_data['area'][i].split(':')
@@ -164,9 +164,9 @@ def draw_rdg(graph_data, count, pen, mode, color_list, room_names, origin):
 
     area_sum = sum(area_list)
     scale = pow((300*400)/area_sum, 1/2)
-    print(f"\nGraph area: {graph_data['area']}")
+    # print(f"\nGraph area: {graph_data['area']}")
     # scale = 150*(math.exp(-0.30*height+math.log(0.8)) + 0.1)
-    print("Scale: ", scale)
+    # print("Scale: ", scale)
     # origin = {'x': graph_data[origin, 'y': -550}
     dim = [0, 0]
     origin = {'x': origin - 400, 'y': -300}
