@@ -595,33 +595,13 @@ class App:
                 max_height.append(8)
                 min_aspect.append(0.7)
                 max_aspect.append(2.2)
-            # else:
-            #     min_width.append(0)
-            #     min_height.append(0)
-            #     max_width.append(9999)
-            #     max_height.append(9999)
-            #     min_aspect.append(0.5)
-            #     max_aspect.append(2)
-                
-                # when does it enter this condition,
-                # does it enter only when there's such extra node
-                # in that case, we need not use the if condition
-                # because that would mean merged node exists.
-                # !uncomment
-                # if(len(self.mergednodes)==0):
-                #     min_width.append(0)
-                #     min_height.append(0)
-                #     max_width.append(9999)
-                #     max_height.append(9999)
-                #     min_aspect.append(0.5)
-                #     max_aspect.append(2)
-                # else:
-                #     min_width.append(min_width[self.irreg_nodes1[i]])
-                #     min_height.append(min_height[self.irreg_nodes1[i]])
-                #     max_width.append(max_width[self.irreg_nodes1[i]])
-                #     max_height.append(max_height[self.irreg_nodes1[i]])
-                #     min_aspect.append(min_aspect[self.irreg_nodes1[i]])
-                #     max_aspect.append(max_aspect[self.irreg_nodes1[i]])
+            else:
+                min_width.append(0)
+                min_height.append(0)
+                max_width.append(9999)
+                max_height.append(9999)
+                min_aspect.append(0.5)
+                max_aspect.append(2)
 
         self.dim_constraints = [min_width, max_width, min_height, max_height, min_aspect, max_aspect]
         self.dimensional_constraints = [min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
