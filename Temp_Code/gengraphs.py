@@ -267,10 +267,11 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
                 #     # nx.draw(H, pos=nx.planar_layout(H))
                 #     plt.show()
                 # print("T[0] : ", t[0])
-                if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+                # if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
+                if (t[0]):
                     listgraphs.append(H)
-                # if (time.time()-t1 > 100):
-                #     break
+                if (time.time()-t1 > 300):
+                    break
 
             print("#Listgraphs: ", len(listgraphs))
             if (len(listgraphs) == 0):
