@@ -12,6 +12,7 @@ import copy
 import numpy as np
 import networkx as nx
 from random import randint
+import matplotlib.pyplot as plt
 # import source.lettershape.ushape.ushape
 # import source.lettershape.zshape.zshape
 # import source.lettershape.tshape.tshape
@@ -283,12 +284,12 @@ class InputGraph:
             encoded_matrix = opr.get_encoded_matrix(
                 rel_matrix.shape[0] - 4, self.room_x[i], self.room_y[i], self.room_width[i], self.room_height[i])
             encoded_matrix_deepcopy = copy.deepcopy(encoded_matrix)
-            print("\n")
-            print(encoded_matrix_deepcopy)
-            print(self.extranodes[0])
-            print(self.mergednodes[0])
-            print(min_width)
-            print("\n")
+            # print("\n")
+            # print(encoded_matrix_deepcopy)
+            # print(self.extranodes[0])
+            # print(self.mergednodes[0])
+            # print(min_width)
+            # print("\n")
 
             [boolean, ver_list, hor_list] = bc.block_checker(
                 encoded_matrix_deepcopy, symm_rooms)
@@ -439,8 +440,17 @@ class InputGraph:
                 self.matrix, self.nodecnt, self.edgecnt, bcn_edges, trng_edges, mergednodes, irreg_nodes1, irreg_nodes2)
             for bdys in cip_list:
                 matrix = copy.deepcopy(self.matrix)
+                # try:
                 rel_matrices = generate_multiple_rel(
                     bdys, matrix, self.nodecnt, self.edgecnt)
+                # except:  # Problem : more than 5 cip is not implemented in multiple bdys
+                #     # graph = nx.from_numpy_array(matrix)
+                #     # print("boundary : ", bdys)
+                #     # nx.draw(graph, node_size=100, with_labels=True,
+                #     #         node_color='orange', font_size=10)
+                #     # plt.show()
+                #     continue
+
                 for i in rel_matrices:
                     self.fpcnt += 1
                     self.rel_matrix_list.append(i)

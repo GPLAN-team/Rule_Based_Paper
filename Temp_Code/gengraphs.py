@@ -12,6 +12,7 @@ from . import triangularity as trg
 from . import septri as septri
 import source.inputgraph as inputgraph
 import pythongui.dimensiongui as dimgui
+import random
 
 
 def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=True, adjacencies=[], non_adjacencies=[]):
@@ -244,15 +245,19 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
 
             # ALL Triangulated Graphs have same no of edges
 
-            t1 = time.time()
             print("e - len(new_constraints_inc) - len(constraints_incbdry) - ",
                   e - len(new_constraints_inc) - len(constraints_incbdry))
             comb = combinations(
                 listedges, e - len(new_constraints_inc) - len(constraints_incbdry))
+
             # print("len(list(comb)) - ", len(list(comb)))
             # print("comb : ", comb)
             # for i in comb:
             #     print("i: ", i)
+            comb = list(comb)
+            random.shuffle(comb)
+            t1 = time.time()
+            # for i in sorted(comb,key=lambda _: random.random()):
             for i in comb:
                 H = nx.Graph()
                 H.add_nodes_from(G)
@@ -270,7 +275,7 @@ def generate_graphs(ext_rooms, int_rooms, rooms, fileExists, rect_floorplans=Tru
                 # if (t[0] and nx.is_biconnected(H)):   # PLANARITY AND BICONNECTEDNESS
                 if (t[0]):
                     listgraphs.append(H)
-                if (time.time()-t1 > 300):
+                if (time.time()-t1 > 180):
                     break
 
             print("#Listgraphs: ", len(listgraphs))

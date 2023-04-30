@@ -7,9 +7,6 @@
     "non_adjacency_constraints": [
         ["Kitchen", "WC 1"],
         ["Kitchen", "WC 2"],
-        ["Kitchen", "WC 3"],
-        ["WC 1", "WC 2"],
-        ["WC 2", "WC 3"],
-        ["WC 1", "WC 3"]
+        ["Kitchen", "WC 3"]
     ]
 }
