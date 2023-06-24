@@ -206,9 +206,9 @@ class App:
             self.modify_frame, text="Irregular floorplan", font=helv15, command=self.run_Irreg_Button_click)
         self.run_button.grid(row=6, column=0, padx=10, pady=10)
 
-        self.run_button = tk.Button(
-            self.modify_frame, text="L-Shaped floorplan", font=helv15, command=self.run_Lshaped_Button_click)
-        self.run_button.grid(row=7, column=0, padx=10, pady=10)
+        # self.run_button = tk.Button(
+        #     self.modify_frame, text="L-Shaped floorplan", font=helv15, command=self.run_Lshaped_Button_click)
+        # self.run_button.grid(row=7, column=0, padx=10, pady=10)
 
         self.prev_btn = tk.Button(
             self.modify_frame, text="Previous", font=helv15, command=self.handle_prev_btn)
