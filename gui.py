@@ -10,6 +10,7 @@ from FastPLAN.FastPLAN import my_plot
 import matplotlib.pyplot as plt
 from api import multigraph_to_rfp, dimensioning_part
 import networkx as nx
+from tkinter import ttk
 import sys
 import turtle
 import numpy as np
@@ -110,6 +111,7 @@ class App:
         self.dimensional_constraints = []
         self.room_list = []
         self.bhk = ""
+        
 
     def initialise_root(self):
         self.root = tk.Tk()
@@ -171,6 +173,10 @@ class App:
             self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
         self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
 
+        # self.changeDimButton = tk.Button(
+        #     self.custom_rfp_choice_frame, text="Default Dimensions", font=helv15, command=self.changeDefaultDimButtonClick)
+        # self.changeDimButton.grid(row=0, column=8, padx=10, pady=10)
+
     # def properties_section(self):
         # self.properties_frame = tk.Frame(self.root)
         # self.properties_frame.grid(row=1, column=11, padx=10, pady=10)
@@ -229,29 +235,43 @@ class App:
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
         #                              command=self.run_Circ_Button_click)
         # self.circ_button.grid(row=10, column=0, padx=10, pady=10)
-
+    
     def rfp_draw_section(self):
+        self.zoom_level = 1.0
         self.rfp_draw_frame = tk.Frame(self.root)
         self.rfp_draw_frame.grid(
             row=1, column=1, padx=10, pady=10, rowspan=10, columnspan=10)
 
-        # self.rfp_canvas = tk.Canvas(
-        #     self.rfp_draw_frame, width=800, height=800, background="red", border=10)
-        # self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
-
+        # Create a turtle canvas in the tkinter frame
         self.rfp_canvas = turtle.ScrolledCanvas(
             self.rfp_draw_frame, width=900, height=550)
-        self.rfp_canvas.bind("<Double-Button-1>", self.zoom)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
-        self.tscreen = turtle.TurtleScreen(self.rfp_canvas)
-        self.tscreen.screensize(50000, 1000)
-        # self.tscreen.bgcolor(col[3])
-        self.pen = turtle.RawTurtle(self.tscreen)
-        self.pen.speed(10000000)
+        
+        self.pen = turtle.RawTurtle(self.rfp_canvas)
+        self.pen.speed(0)  # Set the turtle's speed as needed
 
-    def zoom(self, event):
-        self.canvas.config(width=self.root.winfo_screenwidth(),
-                           height=self.root.winfo_screenheight())
+        # Create buttons for zooming
+        self.zoom_in_button = tk.Button(self.root, text="Zoom In", command=self.zoom_in)
+        self.zoom_out_button = tk.Button(self.root, text="Zoom Out", command=self.zoom_out)
+        
+        self.zoom_in_button.grid(row=11, column=1)
+        self.zoom_out_button.grid(row=11, column=2)
+
+    def zoom_in(self):
+        # Increase the zoom level (e.g., by 10%)
+        self.zoom_level *= 1.1
+        self.adjust_canvas_zoom()
+
+    def zoom_out(self):
+        # Decrease the zoom level (e.g., by 10%)
+        self.zoom_level /= 1.1
+        self.adjust_canvas_zoom()
+
+    def adjust_canvas_zoom(self):
+        # Adjust the canvas's scale factor
+        self.rfp_canvas.scale("all", 0, 0, self.zoom_level, self.zoom_level)
+
+
 
     def handle_prev_btn(self):
 
@@ -529,81 +549,81 @@ class App:
         for i, room in self.input.rooms.items():
             room_list.append(room)
             if (room == "Living"):
-                min_width.append(9)
-                min_height.append(11)
-                max_width.append(14)
-                max_height.append(18)
-                min_aspect.append(0.5)
-                max_aspect.append(2)
-            elif (room == "Kitchen"):
                 min_width.append(6)
                 min_height.append(8)
+                max_width.append(14)
+                max_height.append(18)
+                min_aspect.append(0.35)
+                max_aspect.append(2)
+            elif (room == "Kitchen"):
+                min_width.append(4)
+                min_height.append(6)
                 max_width.append(10)
                 max_height.append(13)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Bed 2"):
-                min_width.append(7)
-                min_height.append(7)
+                min_width.append(5)
+                min_height.append(5)
                 max_width.append(12)
                 max_height.append(11)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Bed 3"):
-                min_width.append(7)
-                min_height.append(7)
+                min_width.append(5)
+                min_height.append(5)
                 max_width.append(12)
                 max_height.append(11)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Bed 1"):
-                min_width.append(8)
-                min_height.append(9)
+                min_width.append(6)
+                min_height.append(6)
                 max_width.append(13)
                 max_height.append(14)
-                min_aspect.append(.7)
+                min_aspect.append(.5)
                 max_aspect.append(2.2)
             elif (room == "WC 1"):
-                min_width.append(3)
-                min_height.append(4)
+                min_width.append(1.5)
+                min_height.append(6)
                 max_width.append(7)
                 max_height.append(8)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "WC 2"):
-                min_width.append(4)
-                min_height.append(3)
+                min_width.append(2)
+                min_height.append(1.5)
                 max_width.append(7)
                 max_height.append(7)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "WC 3"):
-                min_width.append(4)
-                min_height.append(3)
+                min_width.append(2)
+                min_height.append(1.5)
                 max_width.append(7)
                 max_height.append(7)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Store"):
-                min_width.append(4)
-                min_height.append(4)
+                min_width.append(2)
+                min_height.append(2)
                 max_width.append(8)
                 max_height.append(8)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Dining"):
-                min_width.append(5)
-                min_height.append(4)
+                min_width.append(3)
+                min_height.append(2)
                 max_width.append(9)
                 max_height.append(8)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             elif (room == "Office"):
-                min_width.append(5)
-                min_height.append(4)
+                min_width.append(3)
+                min_height.append(2)
                 max_width.append(9)
                 max_height.append(8)
-                min_aspect.append(0.7)
+                min_aspect.append(0.5)
                 max_aspect.append(2.2)
             else:
                 min_width.append(0)
@@ -618,7 +638,10 @@ class App:
         self.dimensional_constraints = [min_width, max_width, min_height,
                                         max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height]
         self.room_list = room_list
+        
         return min_width, max_width, min_height, max_height, symm_string, min_aspect, max_aspect, plot_width, plot_height
+    
+ 
 
     def GraphStore(self, isRect=True):
         val = ""
@@ -673,6 +696,17 @@ class App:
         button = tk.Button(master=graph_window, text="Close",
                            command=graph_window.destroy)
         button.pack(side=tk.BOTTOM)
+    
+    def changeDefaultDimButtonClick(self):
+        if self.grid_scale != 0:
+            tk.messagebox.showwarning(
+                "The End", "Cannot change default dimensions after floorplan is generated")
+            return
+        else:
+            print("[LOG] Change Default Dimensions Button Clicked")
+
+        
+
 
     def changeDimButtonClick(self):
         if self.grid_scale == 0:
@@ -987,7 +1021,14 @@ class App:
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
-
+        # key_tuple = (
+        #     list(self.input.rooms.values()),
+        #     self.input.adjacencies,
+        #     self.input.non_adjacencies,
+        #     self.interior_rooms
+        # )
+        # curr_map = {}
+        
         self.graph_objs = []
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
@@ -1045,6 +1086,7 @@ class App:
         self.dim_params = [min_width, max_width, min_height, max_height,
                            symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
+
         for i in range(len(self.graphs)):
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
             graph = inputgraph.InputGraph(
@@ -1073,8 +1115,35 @@ class App:
                         'edgeset': self.graphs_param[i][2],
                         'coord': self.coord_list
                     }
+                    
                     self.graph_objs.append(graph_data)
                     self.floorplan_graphs.append(self.graphs[i])
+                # Define the file path where you want to save the data
+                # curr_map[key_tuple] = 1
+                # print("hello")
+                # print(len(curr_map))
+                # print("hello")
+                # file_path = 'graph_data.txt'
+
+                # # Open the file in write mode
+                # curr_map[key_tuple] = self.graph_objs
+                # print("hello")
+                # print(len(curr_map))
+                # print("hello")
+                # with open(file_path, 'w') as file:
+                #     # Loop through each graph_data dictionary and write it to the file
+                #     for data in key_tuple:
+                #         data_str = str(data)
+                #         file.write(data_str + '\n')
+                #     for data in self.graph_objs:
+                #         # Convert the dictionary to a string representation (e.g., JSON)
+                #         data_str = str(data)
+                #         # Write the string to the file followed by a newline character
+                #         file.write(data_str + '\n')
+
+                # # Close the file
+                # file.close()
+
                 # else:
                 #     print("Checking next graph data")
             except:  # Problem : more than 5 cip is not implemented in multiple bdys
