@@ -95,7 +95,9 @@ class App:
         self.rfp_draw_section()  # creates canvas where floorplans are displayed
         self.room_check = []
         self.room_checkobj = []
+        self.curr_map = {}
         self.room_freq = []
+        self.curr_adjacencies =[]
         self.value = []
         self.freqbox = []
         self.output_found = False
@@ -173,6 +175,10 @@ class App:
             self.custom_rfp_choice_frame, text="Dimensions", font=helv15, command=self.changeDimButtonClick)
         self.changeDimButton.grid(row=0, column=7, padx=10, pady=10)
 
+        self.changeDimButton = tk.Button(
+            self.custom_rfp_choice_frame, text="Show Adjacencies", font=helv15, command=self.change_adjacencies)
+        self.changeDimButton.grid(row=0, column=8, padx=10, pady=10)
+
         # self.changeDimButton = tk.Button(
         #     self.custom_rfp_choice_frame, text="Default Dimensions", font=helv15, command=self.changeDefaultDimButtonClick)
         # self.changeDimButton.grid(row=0, column=8, padx=10, pady=10)
@@ -237,39 +243,61 @@ class App:
         # self.circ_button.grid(row=10, column=0, padx=10, pady=10)
     
     def rfp_draw_section(self):
+        self.dragging = False
         self.zoom_level = 1.0
         self.rfp_draw_frame = tk.Frame(self.root)
         self.rfp_draw_frame.grid(
             row=1, column=1, padx=10, pady=10, rowspan=10, columnspan=10)
-
+        #scroll bar
+        self.scrollbar = tk.Scrollbar(self.rfp_draw_frame, orient="vertical")
+        self.scrollbar.grid(row=0, column=10, rowspan=10, sticky="ns")
         # Create a turtle canvas in the tkinter frame
         self.rfp_canvas = turtle.ScrolledCanvas(
             self.rfp_draw_frame, width=900, height=550)
         self.rfp_canvas.grid(row=0, column=0, rowspan=10, columnspan=10)
-        
+        self.rfp_canvas.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.rfp_canvas.yview)
+        self.pen = turtle.RawTurtle(self.rfp_canvas)
+        #dragging
+        self.rfp_canvas.bind("<Button-1>", self.on_canvas_click)
+        self.rfp_canvas.bind("<B1-Motion>", self.on_canvas_drag)
+        self.rfp_canvas.bind("<ButtonRelease-1>", self.on_canvas_release)
+
         self.pen = turtle.RawTurtle(self.rfp_canvas)
         self.pen.speed(0)  # Set the turtle's speed as needed
+        #zoom binding
+        self.rfp_canvas.bind("<MouseWheel>", self.on_mouse_wheel)
+    
+    def on_canvas_click(self, event):
+        self.dragging = True
+        self.prev_x = event.x
+        self.prev_y = event.y
 
-        # Create buttons for zooming
-        self.zoom_in_button = tk.Button(self.root, text="Zoom In", command=self.zoom_in)
-        self.zoom_out_button = tk.Button(self.root, text="Zoom Out", command=self.zoom_out)
-        
-        self.zoom_in_button.grid(row=11, column=1)
-        self.zoom_out_button.grid(row=11, column=2)
+    def on_canvas_drag(self, event):
+        if self.dragging:
+            x, y = event.x, event.y
+            self.rfp_canvas.xview_scroll(self.prev_x - x, "units")
+            self.rfp_canvas.yview_scroll(self.prev_y - y, "units")
+            self.prev_x, self.prev_y = x, y
 
-    def zoom_in(self):
-        # Increase the zoom level (e.g., by 10%)
-        self.zoom_level *= 1.1
-        self.adjust_canvas_zoom()
+    def on_canvas_release(self, event):
+        self.dragging = False
+    
 
-    def zoom_out(self):
-        # Decrease the zoom level (e.g., by 10%)
-        self.zoom_level /= 1.1
-        self.adjust_canvas_zoom()
+    def on_mouse_wheel(self, event):
+        zoom_factor = 1.1 if event.delta > 0 else 1/1.1  # Zoom in or out
+        self.zoom_canvas(zoom_factor)
+        self.zoom_turtle(zoom_factor)
 
-    def adjust_canvas_zoom(self):
-        # Adjust the canvas's scale factor
-        self.rfp_canvas.scale("all", 0, 0, self.zoom_level, self.zoom_level)
+    def zoom_canvas(self, zoom_factor):
+        # Scale the canvas to achieve zoom
+        self.rfp_canvas._canvas.scale("all", 0, 0, zoom_factor, zoom_factor)
+
+    def zoom_turtle(self, zoom_factor):
+        # Scale the turtle graphics to match the canvas
+        self.pen.turtlesize(self.pen.turtlesize()[0] * zoom_factor, self.pen.turtlesize()[1] * zoom_factor)
+        self.pen.resizemode("auto")  # Automatically adjust turtle siz
+   
 
 
 
@@ -398,6 +426,7 @@ class App:
 
         self.curr_rfp += 1
         graph_data = self.graph_objs[self.curr_rfp]
+        print(graph_data)
         self.draw_one_rfp(graph_data)
 
         # cir.plot(self.circ_graphs[self.curr_rfp], len(self.circ_graphs[self.curr_rfp]))
@@ -785,6 +814,84 @@ class App:
     #     nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True, node_color='orange', font_size=10, ax=ax)
     #     ax.set_title("Floor Plan Graph")
 
+    def change_adjacencies(self):
+
+        self.adjacency_window = tk.Toplevel(self.root)
+        self.adjacency_window.title("Adjacencies")
+
+        gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
+        labels = {node: room for node, room in zip(
+            gnx.nodes, self.input.rooms.values())}
+
+        # Create a list of adjacent node name tuples
+        adjacent_nodes = []
+        for edge in gnx.edges():
+            adjacent_nodes.append((edge[0], edge[1]))
+
+        # Create labels and buttons for each adjacency
+        for i, adjacency in enumerate(adjacent_nodes):
+            room1 = labels[adjacency[0]]
+            room2 = labels[adjacency[1]]
+            label = tk.Label(self.adjacency_window, text=f"Adjacency {i + 1}: {room1} - {room2}")
+            label.pack()
+
+            remove_button = tk.Button(self.adjacency_window, text="Remove", command=lambda adj=adjacency: self.remove_adjacency(adj, adjacent_nodes))
+            remove_button.pack()
+        
+        submit_button = tk.Button(self.adjacency_window, text="Submit", command=self.submit_action)
+        submit_button.pack()
+    
+
+    def submit_action(self):
+        # Perform the action you want when the Submit button is clicked
+        # This function will be called when the "Submit" button is clicked.
+        # You can add your desired functionality here.
+        print("Submit button clicked")
+        self.adjacency_window.destroy()
+        # new_adj_list  = []
+        # for adj in self.input.adjacencies:
+        #     tup = [self.input.rooms[adj[0]],self.input.rooms[adj[1]]]
+        #     new_adj_list.append(tup)
+        # self.input.adjacencies = new_adj_list
+
+        new_nonadj_list  = []
+        for adj in self.input.non_adjacencies:
+            tup = [self.input.rooms[adj[0]],self.input.rooms[adj[1]]]
+            new_nonadj_list.append(tup)
+        self.input.non_adjacencies = new_nonadj_list
+        
+        self.run_Rect_Button_click()
+    
+
+
+
+    
+    
+
+    def remove_adjacency(self, adjacency, adj_nodes):
+        # Perform the removal of the adjacency in your graph data structure here
+        # You may need to update your graph data structure
+        adj_nodes = [t for t in adj_nodes if t!=adjacency]
+        adj_nodes = list(adj_nodes)
+
+        new_adj_list  = []
+        for adj in adj_nodes:
+            tup = [self.input.rooms[adj[0]],self.input.rooms[adj[1]]]
+            new_adj_list.append(tup)
+        self.input.adjacencies = new_adj_list
+
+        adjacency_list = list(adjacency)
+        print("Data type of adjacency:", type(adjacency_list))
+
+        # Assuming self.input.non_adjacencies is a list
+        print("Data type of self.input.non_adjacencies:", type(self.input.non_adjacencies))
+        print(self.input.non_adjacencies)
+        self.input.non_adjacencies.append(adjacency_list)
+        # self.run_Rect_Button_click()
+
+        
+
+
     def draw_graph(self, ax):
         gnx = nx.Graph(self.floorplan_graphs[self.curr_rfp])
 
@@ -795,6 +902,14 @@ class App:
         # draw the graph with the node labels
         nx.draw_kamada_kawai(gnx, node_size=100, with_labels=True,
                              node_color='orange', font_size=10, labels=labels, ax=ax)
+
+        adjacent_nodes = []
+        for edge in gnx.edges():
+            adjacent_nodes.append((labels[edge[0]], labels[edge[1]]))
+        
+        print(adjacent_nodes)
+        self.curr_adjacencies = adjacent_nodes
+
 
         ax.set_title("Floor Plan Graph")
 
@@ -1021,20 +1136,45 @@ class App:
 
     def run_Rect_Button_click(self):
         print("[LOG] Rectangular Floorplans Button Clicked")
-        # key_tuple = (
-        #     list(self.input.rooms.values()),
-        #     self.input.adjacencies,
-        #     self.input.non_adjacencies,
-        #     self.interior_rooms
-        # )
-        # curr_map = {}
+        if os.path.exists("CONSTRAINTS_DUMP.pk1"):
+            with open("CONSTRAINTS_DUMP.pk1", 'rb') as file:
+                # Load the dictionary from the pickle file
+                self.curr_map = pickle.load(file)
+                
+        
+        hashvalue = ""
+        for room in self.input.rooms.values():
+            hashvalue += room
+        hashvalue+="exterior"
+        for room in self.exterior_rooms:
+            hashvalue+=str(room)
+        hashvalue+="interior"
+        for room in self.interior_rooms:
+            hashvalue+=str(room)
+        for k in self.input.adjacencies:
+            for room in k:
+                print(room)
+                hashvalue+=str(room)
+        
+        for k in self.input.non_adjacencies:
+            for room in k:
+                hashvalue+=str(room)
+        print(hashvalue)
+        
+
+        
+        
         
         self.graph_objs = []
         print(f"Room List is {list(self.input.rooms.values())}")
         print(f"Doors List is {self.input.adjacencies}")
         print(f"Non-Adjacencies List is {self.input.non_adjacencies}")
+        print(self.exterior_rooms)
+        
         self.create_inputgraph_json()
-        # graphs = runner(False)
+        
+        
+        print(self.input.rooms)
         self.interior_rooms.sort()
         print("Exterior rooms: ", self.exterior_rooms,
               "\nInterior rooms: ", self.interior_rooms)
@@ -1086,7 +1226,13 @@ class App:
         self.dim_params = [min_width, max_width, min_height, max_height,
                            symm_string, min_aspect, max_aspect, plot_width, plot_height]
 
-
+        if hashvalue in self.curr_map:
+            self.graph_objs = self.curr_map[hashvalue][0]
+            self.floorplan_graphs = self.curr_map[hashvalue][1]
+            my_plot(graphs)
+            plt.show()
+            self.handle_next_btn()
+            return 
         for i in range(len(self.graphs)):
             # representing node count, edge count, edge set, node coordinates as the 4-tuple
             graph = inputgraph.InputGraph(
@@ -1118,41 +1264,17 @@ class App:
                     
                     self.graph_objs.append(graph_data)
                     self.floorplan_graphs.append(self.graphs[i])
-                # Define the file path where you want to save the data
-                # curr_map[key_tuple] = 1
-                # print("hello")
-                # print(len(curr_map))
-                # print("hello")
-                # file_path = 'graph_data.txt'
-
-                # # Open the file in write mode
-                # curr_map[key_tuple] = self.graph_objs
-                # print("hello")
-                # print(len(curr_map))
-                # print("hello")
-                # with open(file_path, 'w') as file:
-                #     # Loop through each graph_data dictionary and write it to the file
-                #     for data in key_tuple:
-                #         data_str = str(data)
-                #         file.write(data_str + '\n')
-                #     for data in self.graph_objs:
-                #         # Convert the dictionary to a string representation (e.g., JSON)
-                #         data_str = str(data)
-                #         # Write the string to the file followed by a newline character
-                #         file.write(data_str + '\n')
-
-                # # Close the file
-                # file.close()
-
-                # else:
-                #     print("Checking next graph data")
+                    break
             except:  # Problem : more than 5 cip is not implemented in multiple bdys
                 continue
             #     # nx.draw_kamada_kawai(
             #     #     self.graphs[i], node_size=100, with_labels=True, node_color='orange', font_size=10)
             #     my_plot([self.graphs[i]])
             #     plt.show()
-
+        self.curr_map[hashvalue] = [self.graph_objs,self.floorplan_graphs]
+        with open("CONSTRAINTS_DUMP.pk1", 'wb') as file:
+            # Pickle the curr_map dictionary and write it to the file
+            pickle.dump(self.curr_map, file)
         print("[LOG] Dimensioned selected")
 
         # print(graphs)
@@ -2131,6 +2253,10 @@ class App:
         print("Exterior Rooms: ")
         print(self.exterior_rooms)
         # print(f"current room list = {self.input.rooms}")
+    
+    #ROOM MANAGEMENT GUI START
+    
+    #ROOM MANAGEMENT GUI END 
 
     def modify_adjacencies_Button_click(self):
         print("[LOG] Adjacencies Button Clicked")
