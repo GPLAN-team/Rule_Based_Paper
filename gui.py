@@ -583,90 +583,90 @@ class App:
         room_list = []
         for i, room in self.input.rooms.items():
             room_list.append(room)
-            if (room == "Living"):
-                min_width.append(6)
-                min_height.append(8)
-                max_width.append(14)
-                max_height.append(18)
-                min_aspect.append(0.35)
-                max_aspect.append(2)
-            elif (room == "Kitchen"):
-                min_width.append(4)
-                min_height.append(6)
-                max_width.append(10)
-                max_height.append(13)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Bed 2"):
-                min_width.append(5)
-                min_height.append(5)
-                max_width.append(12)
-                max_height.append(11)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Bed 3"):
-                min_width.append(5)
-                min_height.append(5)
-                max_width.append(12)
-                max_height.append(11)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Bed 1"):
-                min_width.append(6)
-                min_height.append(6)
-                max_width.append(13)
-                max_height.append(14)
-                min_aspect.append(.5)
-                max_aspect.append(2.2)
-            elif (room == "WC 1"):
-                min_width.append(1.5)
-                min_height.append(6)
-                max_width.append(7)
-                max_height.append(8)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "WC 2"):
-                min_width.append(2)
-                min_height.append(1.5)
-                max_width.append(7)
-                max_height.append(7)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "WC 3"):
-                min_width.append(2)
-                min_height.append(1.5)
-                max_width.append(7)
-                max_height.append(7)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Store"):
-                min_width.append(2)
-                min_height.append(2)
-                max_width.append(8)
-                max_height.append(8)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Dining"):
-                min_width.append(3)
-                min_height.append(2)
-                max_width.append(9)
-                max_height.append(8)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            elif (room == "Office"):
-                min_width.append(3)
-                min_height.append(2)
-                max_width.append(9)
-                max_height.append(8)
-                min_aspect.append(0.5)
-                max_aspect.append(2.2)
-            else:
-                min_width.append(0)
-                min_height.append(0)
-                max_width.append(9999)
-                max_height.append(9999)
-                min_aspect.append(0.1)
-                max_aspect.append(100)
+            # if (room == "Living"):
+            #     min_width.append(6)
+            #     min_height.append(8)
+            #     max_width.append(14)
+            #     max_height.append(18)
+            #     min_aspect.append(0.35)
+            #     max_aspect.append(2)
+            # elif (room == "Kitchen"):
+            #     min_width.append(4)
+            #     min_height.append(6)
+            #     max_width.append(10)
+            #     max_height.append(13)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Bed 2"):
+            #     min_width.append(5)
+            #     min_height.append(5)
+            #     max_width.append(12)
+            #     max_height.append(11)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Bed 3"):
+            #     min_width.append(5)
+            #     min_height.append(5)
+            #     max_width.append(12)
+            #     max_height.append(11)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Bed 1"):
+            #     min_width.append(6)
+            #     min_height.append(6)
+            #     max_width.append(13)
+            #     max_height.append(14)
+            #     min_aspect.append(.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "WC 1"):
+            #     min_width.append(1.5)
+            #     min_height.append(6)
+            #     max_width.append(7)
+            #     max_height.append(8)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "WC 2"):
+            #     min_width.append(2)
+            #     min_height.append(1.5)
+            #     max_width.append(7)
+            #     max_height.append(7)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "WC 3"):
+            #     min_width.append(2)
+            #     min_height.append(1.5)
+            #     max_width.append(7)
+            #     max_height.append(7)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Store"):
+            #     min_width.append(2)
+            #     min_height.append(2)
+            #     max_width.append(8)
+            #     max_height.append(8)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Dining"):
+            #     min_width.append(3)
+            #     min_height.append(2)
+            #     max_width.append(9)
+            #     max_height.append(8)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # elif (room == "Office"):
+            #     min_width.append(3)
+            #     min_height.append(2)
+            #     max_width.append(9)
+            #     max_height.append(8)
+            #     min_aspect.append(0.5)
+            #     max_aspect.append(2.2)
+            # else:
+            min_width.append(0)
+            min_height.append(0)
+            max_width.append(9999)
+            max_height.append(9999)
+            min_aspect.append(0.1)
+            max_aspect.append(100)
 
         self.dim_constraints = [min_width, max_width,
                                 min_height, max_height, min_aspect, max_aspect]
@@ -1271,7 +1271,6 @@ class App:
                     
                     self.graph_objs.append(graph_data)
                     self.floorplan_graphs.append(self.graphs[i])
-                    break
             except:  # Problem : more than 5 cip is not implemented in multiple bdys
                 continue
             #     # nx.draw_kamada_kawai(
@@ -1515,34 +1514,39 @@ class App:
             graph = inputgraph.InputGraph(
                 self.graphs_param[i][0], self.graphs_param[i][1], self.graphs_param[i][2], self.coord_list)
 
-            Lshaped.LShapedFloorplan(graph, self.coord_list)
+            # Lshaped.LShapedFloorplan(graph, self.coord_list)
+            Lshaped.multipleLshapedFloorplans(graph, self.coord_list)
+            if(graph.fpcnt ==0):
+                continue
+            
+            
             # All rels are in it. Currently we have only 1.
-            graph.rel_matrix_list.append(graph.matrix)
+            # graph.rel_matrix_list.append(graph.matrix)
 
 
             # Since multiple rfp are generated before calling single_floorplan, all the parameters need to be
             # converted list of lists
             # temp_lst = np.array([])
             # np.append(temp_lst,graph.extranodes)
-            graph.extranodes = np.array(graph.extranodes, ndmin=2)
+            # graph.extranodes = np.array(graph.extranodes, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.mergednodes)
-            graph.mergednodes = np.array(graph.mergednodes, ndmin=2)
+            # graph.mergednodes = np.array(graph.mergednodes, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.irreg_nodes1)
-            graph.irreg_nodes1 = np.array(graph.irreg_nodes1, ndmin=2)
+            # graph.irreg_nodes1 = np.array(graph.irreg_nodes1, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.room_x)
-            graph.room_x = np.array(graph.room_x, ndmin=2)
+            # graph.room_x = np.array(graph.room_x, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.room_y)
-            graph.room_y = np.array(graph.room_y, ndmin=2)
+            # graph.room_y = np.array(graph.room_y, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.room_width)
             graph.room_width = np.array(graph.room_width, ndmin=2)
             # temp_lst =np.array([])
             # np.append(temp_lst,graph.room_height)
-            graph.room_height = np.array(graph.room_height, ndmin=2)
+            # graph.room_height = np.array(graph.room_height, ndmin=2)
 
             graph.nodecnt -= 4  # Because Lshaped was counting NESW as well
 

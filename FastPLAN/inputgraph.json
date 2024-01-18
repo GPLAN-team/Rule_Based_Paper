@@ -1,22 +1,9 @@
 {
     "nodes": [
-        "Bed 1",
-        "WC 1",
-        "WC 2",
-        "Bed 2",
-        "Dining",
-        "Kitchen",
         "Living",
-        "Store"
+        "Bed 1",
+        "Kitchen",
+        "WC 1"
     ],
-    "edges": [
-        [
-            "Bed 1",
-            "WC 1"
-        ],
-        [
-            "Dining",
-            "Kitchen"
-        ]
-    ]
+    "edges": []
 }
