@@ -217,9 +217,9 @@ def runner(is_biconnected):
 
 ###Testing Functions ahead###
 
-def my_plot(graphs, figsize = 14 , dotsize = 20):
+def my_plot(graphs, figsize = 28 , dotsize = 20):
     num = len(graphs)
-    fig = plt.figure()
+    fig = plt.figure(figsize = (10,10))
 
     k = int(np.sqrt(num)) #for sub-plotting
     i = 1                 #for sub-plotting
@@ -228,7 +228,10 @@ def my_plot(graphs, figsize = 14 , dotsize = 20):
         # print("The Graph is planar: " + str(nx.check_planarity(g)[0]))
         plt.subplot(k+1,k+1,i+1)
         gnx = nx.Graph(g)
-        nx.draw_kamada_kawai(gnx, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10)
+        embedding = nx.check_planarity(gnx)[1]
+        layout = nx.planar_layout(gnx)
+        nx.draw(gnx, pos=layout, node_size=100, with_labels=True, node_color='orange', font_size=10)
+        # nx.draw_kamada_kawai(gnx, node_size = 100, with_labels = True, node_color = 'orange', font_size = 10)
         print('.', end='')
         i+=1
 

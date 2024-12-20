@@ -240,9 +240,9 @@ class App:
             self.modify_frame, text="Download Catalogue", font=helv15, command=self.download_catalogue)
         self.downnload_Button.grid(row=10, column=0, padx=10, pady=10)
 
-        self.downnload_Button = tk.Button(
-            self.modify_frame, text="L-Shaped Floorplan", font=helv15, command=self.run_Lshaped_Button_click)
-        self.downnload_Button.grid(row=11, column=0, padx=10, pady=10)
+        # self.downnload_Button = tk.Button(
+        #     self.modify_frame, text="L-Shaped Floorplan", font=helv15, command=self.run_Lshaped_Button_click)
+        # self.downnload_Button.grid(row=11, column=0, padx=10, pady=10)
 
         # self.circ_button = tk.Button(self.modify_frame, text="Circulation floorplan", font=helv15,
         #                              command=self.run_Circ_Button_click)
